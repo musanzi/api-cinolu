@@ -1,6 +1,8 @@
 # Implementation Guidelines
 
 - For every new feature, add or update tests in the root `test` folder.
+- Use try / catch block to handle exceptions
+- Simply throw the exception with short error message in french
 - Do not generate migrations unless explicitly requested.
 - Do not use one module’s repository inside another module.
 - When data or behavior from another module is needed, import and use that module’s service instead.
