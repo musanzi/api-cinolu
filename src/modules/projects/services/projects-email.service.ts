@@ -20,7 +20,6 @@ export class ProjectsEmailService {
     const html = `
       <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">
         <p><strong>Projet:</strong> ${notification.project?.name}</p>
-        <p><strong>Titre:</strong> ${notification.title}</p>
         <hr />
         ${notification.body ?? ''}
       </div>
