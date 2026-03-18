@@ -19,6 +19,11 @@ import { MentorsModule } from '../mentors/mentors.module';
 import { PROJECTS_RBAC_POLICY } from './projects-rbac';
 import { GalleriesModule } from '@/shared/galleries/galleries.module';
 import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
+import { Resource } from './resources/entities/resource.entity';
+import { ResourcesController } from './resources/resources.controller';
+import { ResourceMediaService } from './resources/services/resource-media.service';
+import { ResourcesService } from './resources/services/resources.service';
+import { RESOURCES_RBAC_POLICY } from './resources/resources-rbac';
 
 @Module({
   imports: [
@@ -29,8 +34,8 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     ProjectCategoriesModule,
     UsersModule,
     VenturesModule,
-    TypeOrmModule.forFeature([Project, ProjectParticipation, ProjectParticipationUpvote]),
-    SessionAuthModule.forFeature([PROJECTS_RBAC_POLICY])
+    TypeOrmModule.forFeature([Project, ProjectParticipation, ProjectParticipationUpvote, Resource]),
+    SessionAuthModule.forFeature([PROJECTS_RBAC_POLICY, RESOURCES_RBAC_POLICY])
   ],
   providers: [
     ProjectsService,
@@ -38,9 +43,11 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     ProjectNotificationService,
     ProjectMediaService,
     ProjectsEmailService,
-    ProjectSubscriber
+    ProjectSubscriber,
+    ResourcesService,
+    ResourceMediaService
   ],
-  controllers: [ProjectsController],
+  controllers: [ProjectsController, ResourcesController],
   exports: [ProjectsService]
 })
 export class ProjectsModule {}

@@ -6,6 +6,7 @@ import { ProjectCategory } from '../categories/entities/category.entity';
 import { Phase } from '../phases/entities/phase.entity';
 import { ProjectParticipation } from './project-participation.entity';
 import { Gallery } from '@/shared/galleries/entities/gallery.entity';
+import { Resource } from '../resources/entities/resource.entity';
 
 @Entity()
 export class Project extends AbstractEntity {
@@ -65,4 +66,7 @@ export class Project extends AbstractEntity {
 
   @OneToMany(() => Phase, (phase) => phase.project)
   phases: Phase[];
+
+  @OneToMany(() => Resource, (resource) => resource.project)
+  resources: Resource[];
 }
