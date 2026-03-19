@@ -47,9 +47,10 @@ describe('ResourcesService', () => {
     ).resolves.toEqual({ id: 'r1' });
     expect(resourceRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        project_id: 'project-1',
         file: 'guide.pdf',
         project: { id: 'project-1' },
-        phase: null
+        phase: { id: undefined }
       })
     );
   });
@@ -78,11 +79,8 @@ describe('ResourcesService', () => {
     projectsService.findOne.mockResolvedValue({ id: 'project-1' });
 
     await expect(service.findByProject('project-1', { page: 2, category: ResourceCategory.GUIDE } as any)).resolves.toEqual([[{ id: 'r1' }], 1]);
-    expect(queryBuilder.where).toHaveBeenCalledWith('resource.projectId = :scopeId', { scopeId: 'project-1' });
-    expect(queryBuilder.andWhere).toHaveBeenNthCalledWith(1, 'resource.is_published = :isPublished', {
-      isPublished: true
-    });
-    expect(queryBuilder.andWhere).toHaveBeenNthCalledWith(2, 'resource.category = :category', {
+    expect(queryBuilder.where).toHaveBeenCalledWith('r.projectId = :scopeId', { scopeId: 'project-1' });
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith('r.category = :category', {
       category: ResourceCategory.GUIDE
     });
     expect(queryBuilder.skip).toHaveBeenCalledWith(20);
@@ -93,10 +91,8 @@ describe('ResourcesService', () => {
     phasesService.findOne.mockResolvedValue({ id: 'phase-1' });
 
     await expect(service.findByPhase('phase-1', {} as any)).resolves.toEqual([[{ id: 'r1' }], 1]);
-    expect(queryBuilder.where).toHaveBeenCalledWith('resource.phaseId = :scopeId', { scopeId: 'phase-1' });
-    expect(queryBuilder.andWhere).toHaveBeenCalledWith('resource.is_published = :isPublished', {
-      isPublished: true
-    });
+    expect(queryBuilder.where).toHaveBeenCalledWith('r.phaseId = :scopeId', { scopeId: 'phase-1' });
+    expect(queryBuilder.andWhere).not.toHaveBeenCalled();
   });
 
   it('finds one resource', async () => {
