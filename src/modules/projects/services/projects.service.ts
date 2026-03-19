@@ -71,12 +71,14 @@ export class ProjectsService {
   async findMentorProjects(userId: string): Promise<Project[]> {
     try {
       return await this.projectRepository
-        .createQueryBuilder('project')
-        .leftJoinAndSelect('project.categories', 'categories')
-        .leftJoinAndSelect('project.phases', 'phases')
-        .loadRelationCountAndMap('project.participantsCount', 'project.participations')
+        .createQueryBuilder('p')
+        .leftJoinAndSelect('p.categories', 'categories')
+        .leftJoinAndSelect('p.phases', 'phases')
+        .leftJoinAndSelect('phases.mentors', 'mentors')
+        .leftJoinAndSelect('mentors.owner', 'owner')
+        .loadRelationCountAndMap('p.participantsCount', 'p.participations')
         .where('owner.id = :userId', { userId })
-        .orderBy('project.updated_at', 'DESC')
+        .orderBy('p.updated_at', 'DESC')
         .addOrderBy('phases.started_at', 'ASC')
         .getMany();
     } catch {
