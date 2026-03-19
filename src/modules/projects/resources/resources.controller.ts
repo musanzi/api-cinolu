@@ -41,18 +41,18 @@ export class ResourcesController {
     return this.resourcesService.findByPhase(phaseId, query);
   }
 
-  @Post()
-  @Rbac({ resource: 'resources', action: 'create' })
-  @UseInterceptors(FileInterceptor('file', createDiskUploadOptions('./uploads/resources')))
-  create(@Body() dto: CreateResourceDto, @UploadedFile() file: Express.Multer.File): Promise<Resource> {
-    return this.resourcesService.create(dto, file);
-  }
-
   @Patch('file/:id')
   @Rbac({ resource: 'resources', action: 'update' })
   @UseInterceptors(FileInterceptor('file', createDiskUploadOptions('./uploads/resources')))
   updateFile(@Param('id') id: string, @UploadedFile() file: Express.Multer.File): Promise<Resource> {
     return this.resourceMediaService.updateFile(id, file);
+  }
+
+  @Post()
+  @Rbac({ resource: 'resources', action: 'create' })
+  @UseInterceptors(FileInterceptor('file', createDiskUploadOptions('./uploads/resources')))
+  create(@Body() dto: CreateResourceDto, @UploadedFile() file: Express.Multer.File): Promise<Resource> {
+    return this.resourcesService.create(dto, file);
   }
 
   @Patch(':id')
