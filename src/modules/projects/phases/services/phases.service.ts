@@ -25,7 +25,7 @@ export class PhasesService {
       await this.deliverablesService.create(phase.id, deliverables);
       return await this.findOne(phase.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création de phase impossible');
     }
   }
 
@@ -36,7 +36,7 @@ export class PhasesService {
         relations: ['participations', 'participations.user', 'deliverables', 'mentors', 'mentors.owner']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Phase introuvable');
     }
   }
 
@@ -52,7 +52,7 @@ export class PhasesService {
       await this.deliverablesService.sync(phaseId, deliverables);
       return await this.findOne(phaseId);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -67,7 +67,7 @@ export class PhasesService {
         .loadRelationCountAndMap('phase.participationsCount', 'phase.participations')
         .getMany();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Phases introuvables');
     }
   }
 
@@ -76,7 +76,7 @@ export class PhasesService {
       await this.findOne(id);
       await this.phaseRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

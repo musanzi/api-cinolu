@@ -33,7 +33,7 @@ export class ProjectParticipationService {
         relations: ['project', 'project.phases', 'phases', 'venture']
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Participations introuvables');
     }
   }
 
@@ -51,7 +51,7 @@ export class ProjectParticipationService {
         await this.participationRepository.save(participation);
       }
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Déplacement impossible');
     }
   }
 
@@ -66,7 +66,7 @@ export class ProjectParticipationService {
         await this.participationRepository.save(participation);
       }
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Retrait impossible');
     }
   }
 
@@ -90,7 +90,7 @@ export class ProjectParticipationService {
       if (phaseId) query.andWhere('phases.id = :phaseId', { phaseId });
       return await query.skip(skip).take(20).getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Participations introuvables');
     }
   }
 
@@ -103,7 +103,7 @@ export class ProjectParticipationService {
       });
       return this.mapUniqueUsers(participations);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Participants introuvables');
     }
   }
 
@@ -115,7 +115,7 @@ export class ProjectParticipationService {
       });
       return this.mapUniqueUsers(participations);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Participants introuvables');
     }
   }
 
@@ -133,7 +133,7 @@ export class ProjectParticipationService {
         .where('pp.id = :participationId', { participationId })
         .getOneOrFail();
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Participation introuvable');
     }
   }
 
@@ -160,7 +160,7 @@ export class ProjectParticipationService {
         }))
       );
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Import des participants impossible');
     }
   }
 
@@ -185,7 +185,7 @@ export class ProjectParticipationService {
         venture: venture ? { id: venture.id } : null
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Participation impossible');
     }
   }
 
@@ -196,7 +196,7 @@ export class ProjectParticipationService {
         user: { id: userId }
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Vote impossible');
     }
   }
 
@@ -207,7 +207,7 @@ export class ProjectParticipationService {
       });
       await this.upvoteRepository.remove(upvote);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Retrait du vote impossible');
     }
   }
 }

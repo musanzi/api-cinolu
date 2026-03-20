@@ -17,7 +17,7 @@ export class AuthEmailService {
         text: [`Bonjour ${user.name},`, '', 'Bienvenue sur CINOLU.', '', "L'equipe CINOLU"].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 
@@ -40,7 +40,7 @@ export class AuthEmailService {
         ].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 
@@ -63,7 +63,7 @@ export class AuthEmailService {
         ].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 }

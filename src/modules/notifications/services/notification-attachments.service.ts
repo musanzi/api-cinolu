@@ -23,7 +23,7 @@ export class NotificationAttachmentsService {
       }));
       return await this.attachmentsRepository.save(attachments);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout des pièces jointes impossible");
     }
   }
 
@@ -33,7 +33,7 @@ export class NotificationAttachmentsService {
         where: { id }
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Pièce jointe introuvable');
     }
   }
 
@@ -45,7 +45,7 @@ export class NotificationAttachmentsService {
       }
       await this.attachmentsRepository.delete(attachment);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

@@ -29,7 +29,7 @@ export class SubmissionsService {
         file: file.filename
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Soumission impossible');
     }
   }
 

@@ -17,7 +17,7 @@ export class RolesService {
     try {
       return await this.roleRepository.save(dto);
     } catch {
-      throw new ConflictException('Erreur lors de la création du rôle');
+      throw new ConflictException('Création du rôle impossible');
     }
   }
 
@@ -27,7 +27,7 @@ export class RolesService {
         where: { name: Not(In(['admin', 'staff'])) }
       });
     } catch {
-      throw new BadRequestException('Erreur lors de la récupération des rôles');
+      throw new BadRequestException('Rôles introuvables');
     }
   }
 
@@ -51,7 +51,7 @@ export class RolesService {
     try {
       return await this.roleRepository.findOneOrFail({ where: { name } });
     } catch {
-      throw new BadRequestException('Erreur lors de la récupération du rôle');
+      throw new BadRequestException('Rôle introuvable');
     }
   }
 
@@ -59,7 +59,7 @@ export class RolesService {
     try {
       return await this.roleRepository.findOneOrFail({ where: { id } });
     } catch {
-      throw new BadRequestException('Erreur lors de la récupération du rôle');
+      throw new BadRequestException('Rôle introuvable');
     }
   }
 
@@ -69,7 +69,7 @@ export class RolesService {
       const updatedRole: Role & UpdateRoleDto = Object.assign(role, dto);
       return await this.roleRepository.save(updatedRole);
     } catch {
-      throw new BadRequestException('Erreur lors de la mise à jour du rôle');
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -78,7 +78,7 @@ export class RolesService {
       await this.findOne(id);
       await this.roleRepository.delete(id);
     } catch {
-      throw new BadRequestException('Erreur lors de la suppression du rôle');
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

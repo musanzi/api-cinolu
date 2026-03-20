@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NotificationsController } from './notifications.controller';
+import { NotificationAttachmentsController } from './controllers/notification-attachments.controller';
+import { NotificationsController } from './controllers/notifications.controller';
 import { NotificationsService } from './services/notifications.service';
 import { Notification } from './entities/notification.entity';
 import { NotificationAttachment } from './entities/attachment.entity';
@@ -15,7 +16,7 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     UsersModule,
     SessionAuthModule.forFeature([NOTIFICATIONS_RBAC_POLICY])
   ],
-  controllers: [NotificationsController],
+  controllers: [NotificationsController, NotificationAttachmentsController],
   providers: [NotificationsService, NotificationAttachmentsService],
   exports: [NotificationsService]
 })

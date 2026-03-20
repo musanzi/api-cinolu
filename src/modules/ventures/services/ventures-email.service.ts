@@ -22,7 +22,7 @@ export class VenturesEmailService {
         ].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 
@@ -41,7 +41,7 @@ export class VenturesEmailService {
         ].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 
@@ -60,7 +60,7 @@ export class VenturesEmailService {
         ].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 }

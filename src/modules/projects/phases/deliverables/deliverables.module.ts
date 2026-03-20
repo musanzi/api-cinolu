@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectParticipation } from '@/modules/projects/entities/project-participation.entity';
-import { DeliverablesController } from './deliverables.controller';
+import { SubmissionsController } from './controllers/submissions.controller';
 import { Deliverable } from './entities/deliverable.entity';
 import { DeliverableSubmission } from './entities/submission.entity';
 import { SubmissionsService } from './services/submissions.service';
@@ -11,6 +11,6 @@ import { DeliverablesService } from './services/deliverables.service';
   imports: [TypeOrmModule.forFeature([Deliverable, DeliverableSubmission, ProjectParticipation])],
   providers: [DeliverablesService, SubmissionsService],
   exports: [DeliverablesService, SubmissionsService],
-  controllers: [DeliverablesController]
+  controllers: [SubmissionsController]
 })
 export class ProjectDeliverablesModule {}

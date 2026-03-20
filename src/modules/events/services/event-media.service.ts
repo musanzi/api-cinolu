@@ -18,7 +18,7 @@ export class EventMediaService {
       const galleryDto = { image: file.filename, event: { id: eventId } };
       await this.galleriesService.create(galleryDto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 
@@ -26,7 +26,7 @@ export class EventMediaService {
     try {
       await this.galleriesService.remove(galleryId);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
@@ -34,7 +34,7 @@ export class EventMediaService {
     try {
       return await this.galleriesService.findGallery('event', slug);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Galerie introuvable');
     }
   }
 
@@ -46,7 +46,7 @@ export class EventMediaService {
       }
       return await this.eventsService.setCover(eventId, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 }

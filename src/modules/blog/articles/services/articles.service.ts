@@ -23,7 +23,7 @@ export class ArticlesService {
         author: user
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Création de l'article impossible");
     }
   }
 
@@ -35,7 +35,7 @@ export class ArticlesService {
         is_highlighted: !article.is_highlighted
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise en avant impossible');
     }
   }
 
@@ -47,7 +47,7 @@ export class ArticlesService {
         relations: ['tags', 'author']
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Articles introuvables');
     }
   }
 
@@ -64,7 +64,7 @@ export class ArticlesService {
         .take(20)
         .getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Articles introuvables');
     }
   }
 
@@ -78,7 +78,7 @@ export class ArticlesService {
       if (page) query.skip((+page - 1) * 12).take(12);
       return await query.orderBy('a.published_at', 'DESC').getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Articles introuvables');
     }
   }
 
@@ -89,7 +89,7 @@ export class ArticlesService {
         relations: ['tags', 'author', 'gallery']
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Article introuvable');
     }
   }
 
@@ -99,7 +99,7 @@ export class ArticlesService {
       article.published_at = article.published_at ? null : new Date();
       return await this.articlesRepository.save(article);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Publication impossible');
     }
   }
 
@@ -110,7 +110,7 @@ export class ArticlesService {
         relations: ['tags', 'author', 'gallery']
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Article introuvable');
     }
   }
 
@@ -123,7 +123,7 @@ export class ArticlesService {
       });
       return await this.articlesRepository.save(article);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -132,7 +132,7 @@ export class ArticlesService {
       await this.findOne(id);
       await this.articlesRepository.delete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 
@@ -141,7 +141,7 @@ export class ArticlesService {
       const article = await this.findOne(id);
       return await this.articlesRepository.save({ ...article, image });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 }

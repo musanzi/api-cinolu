@@ -27,7 +27,7 @@ export class NotificationsService {
         phase: dto.phase_id ? { id: dto.phase_id } : null
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création de notification impossible');
     }
   }
 
@@ -36,7 +36,7 @@ export class NotificationsService {
       await this.notificationsRepository.update(id, { status: NotificationStatus.SENT });
       return await this.findOne(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Envoi de notification impossible');
     }
   }
 
@@ -59,7 +59,7 @@ export class NotificationsService {
         .getManyAndCount();
     } catch (e) {
       console.log(e);
-      throw new BadRequestException();
+      throw new BadRequestException('Notifications introuvables');
     }
   }
 
@@ -70,7 +70,7 @@ export class NotificationsService {
         relations: ['phase', 'sender', 'attachments', 'project']
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Notification introuvable');
     }
   }
 
@@ -81,7 +81,7 @@ export class NotificationsService {
       const savedNotification = await this.notificationsRepository.save(notification);
       return await this.findOne(savedNotification.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -90,7 +90,7 @@ export class NotificationsService {
       await this.findOne(id);
       await this.notificationsRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

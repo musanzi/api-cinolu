@@ -26,7 +26,7 @@ export class VenturesService {
       this.eventEmitter.emit('venture.created', venture);
       return venture;
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Création de l'entreprise impossible");
     }
   }
 
@@ -37,7 +37,7 @@ export class VenturesService {
         relations: ['gallery', 'products', 'owner']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Entreprises introuvables');
     }
   }
 
@@ -48,7 +48,7 @@ export class VenturesService {
         relations: ['gallery', 'products', 'products.gallery', 'owner', 'documents']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Entreprise introuvable');
     }
   }
 
@@ -60,7 +60,7 @@ export class VenturesService {
       if (!updatedVenture.is_published) this.eventEmitter.emit('venture.rejected', updatedVenture);
       return updatedVenture;
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Publication impossible');
     }
   }
 
@@ -74,7 +74,7 @@ export class VenturesService {
         order: { created_at: 'DESC' }
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Entreprises introuvables');
     }
   }
 
@@ -85,7 +85,7 @@ export class VenturesService {
         order: { created_at: 'DESC' }
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Entreprises introuvables');
     }
   }
 
@@ -98,7 +98,7 @@ export class VenturesService {
       if (q) query.where('venture.name LIKE :q OR venture.description LIKE :q', { q: `%${q}%` });
       return await query.orderBy('venture.created_at', 'DESC').skip(skip).take(take).getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Entreprises introuvables');
     }
   }
 
@@ -109,7 +109,7 @@ export class VenturesService {
         relations: ['gallery', 'owner']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Entreprise introuvable');
     }
   }
 
@@ -119,7 +119,7 @@ export class VenturesService {
       Object.assign(venture, dto);
       return await this.ventureRepository.save(venture);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -129,7 +129,7 @@ export class VenturesService {
       venture.logo = logo;
       return await this.ventureRepository.save(venture);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du logo impossible');
     }
   }
 
@@ -139,7 +139,7 @@ export class VenturesService {
       venture.cover = cover;
       return await this.ventureRepository.save(venture);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 
@@ -148,7 +148,7 @@ export class VenturesService {
       const venture = await this.findOne(id);
       await this.ventureRepository.softDelete(venture.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

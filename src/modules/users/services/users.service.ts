@@ -26,7 +26,7 @@ export class UsersService {
         where: { id: In(ids) }
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Utilisateurs introuvables');
     }
   }
 
@@ -38,7 +38,7 @@ export class UsersService {
         relations: ['roles']
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Personnel introuvable');
     }
   }
 
@@ -49,7 +49,7 @@ export class UsersService {
       user.roles = [role];
       return await this.userRepository.save(user);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Attribution du rôle impossible");
     }
   }
 
@@ -62,7 +62,7 @@ export class UsersService {
         roles: dto.roles?.map((id) => ({ id }))
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Création de l'utilisateur impossible");
     }
   }
 
@@ -74,7 +74,7 @@ export class UsersService {
         .where('ventures.id IS NOT NULL');
       return await query.getMany();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Entrepreneurs introuvables');
     }
   }
 
@@ -93,7 +93,7 @@ export class UsersService {
       if (q) query.where('u.name LIKE :q OR u.email LIKE :q', { q: `%${q}%` });
       return await query.skip(skip).take(take).getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Utilisateurs introuvables');
     }
   }
 
@@ -106,7 +106,7 @@ export class UsersService {
         .take(20)
         .getMany();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Recherche impossible');
     }
   }
 
@@ -116,7 +116,7 @@ export class UsersService {
         where: { referral_code }
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Parrain introuvable');
     }
   }
 
@@ -149,7 +149,7 @@ export class UsersService {
       const roles = user.roles.map((role) => role.name);
       return { ...user, roles } as unknown as User;
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Utilisateur introuvable');
     }
   }
 
@@ -176,7 +176,7 @@ export class UsersService {
         relations: ['roles']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException("Cet utilisateur n'existe pas");
     }
   }
 
@@ -195,7 +195,7 @@ export class UsersService {
       });
       return await this.findOne(newUser.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Création de l'utilisateur impossible");
     }
   }
 
@@ -206,7 +206,7 @@ export class UsersService {
         await this.findOrCreate(row);
       }
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Import des utilisateurs impossible");
     }
   }
 
@@ -224,7 +224,7 @@ export class UsersService {
       });
       return this.findOne(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -233,7 +233,7 @@ export class UsersService {
       await this.findOne(id);
       await this.userRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 
@@ -249,7 +249,7 @@ export class UsersService {
       await this.userRepository.delete(idsToDelete);
       return idsToDelete.length;
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Nettoyage impossible');
     }
   }
 

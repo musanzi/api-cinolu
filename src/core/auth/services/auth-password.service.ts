@@ -22,7 +22,7 @@ export class AuthPasswordService {
       await this.usersService.update(currentUser.id, { password: dto.password });
       return await this.usersService.findByEmail(currentUser.email);
     } catch {
-      throw new BadRequestException('Requete invalide');
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -34,7 +34,7 @@ export class AuthPasswordService {
       const link = `${frontendUri}/reset-password?token=${token}`;
       this.eventEmitter.emit('user.reset-password', { user, link });
     } catch {
-      throw new BadRequestException('Requete invalide');
+      throw new BadRequestException('Demande invalide');
     }
   }
 

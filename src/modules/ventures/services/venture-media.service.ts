@@ -21,7 +21,7 @@ export class VentureMediaService {
       };
       await this.galleriesService.create(galleryDto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 
@@ -29,7 +29,7 @@ export class VentureMediaService {
     try {
       await this.galleriesService.remove(galleryId);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
@@ -37,7 +37,7 @@ export class VentureMediaService {
     try {
       return await this.galleriesService.findGallery('venture', slug);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Galerie introuvable');
     }
   }
 
@@ -49,7 +49,7 @@ export class VentureMediaService {
       }
       return await this.venturesService.setLogo(ventureId, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du logo impossible');
     }
   }
 
@@ -61,7 +61,7 @@ export class VentureMediaService {
       }
       return await this.venturesService.setCover(ventureId, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 }

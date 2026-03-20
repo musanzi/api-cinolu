@@ -15,7 +15,7 @@ export class ProgramMediaService {
       }
       return await this.programsService.setLogo(id, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du logo impossible');
     }
   }
 }

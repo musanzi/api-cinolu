@@ -13,7 +13,7 @@ export class UserMediaService {
       await this.usersService.update(currentUser.id, { profile: file.filename });
       return this.usersService.findByEmail(currentUser.email);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 }

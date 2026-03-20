@@ -1,8 +1,4 @@
-import { UsersController } from '@/modules/users/users.controller';
-
-jest.mock('@/core/helpers/upload.helper', () => ({
-  createDiskUploadOptions: jest.fn().mockReturnValue({})
-}));
+import { UsersController } from '@/modules/users/controllers/users.controller';
 
 jest.mock('@/core/helpers/csv-upload.helper', () => ({
   createCsvUploadOptions: jest.fn().mockReturnValue({})
@@ -11,14 +7,19 @@ jest.mock('@/core/helpers/csv-upload.helper', () => ({
 describe('UsersController', () => {
   const setup = () => {
     const usersService = {
+      findStaff: jest.fn(),
+      create: jest.fn(),
+      search: jest.fn(),
+      importCsv: jest.fn(),
+      findAll: jest.fn(),
+      findEntrepreneurs: jest.fn(),
+      findOneByEmail: jest.fn(),
+      update: jest.fn(),
       clear: jest.fn(),
       remove: jest.fn()
     } as any;
-    const usersReferralService = {} as any;
-    const usersExportService = {} as any;
-    const userMediaService = {} as any;
 
-    const controller = new UsersController(usersService, usersReferralService, usersExportService, userMediaService);
+    const controller = new UsersController(usersService);
     return { controller, usersService };
   };
 

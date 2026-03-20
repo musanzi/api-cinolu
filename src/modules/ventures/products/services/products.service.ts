@@ -24,7 +24,7 @@ export class ProductsService {
         skip: (+page - 1) * 10
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Produits introuvables');
     }
   }
 
@@ -35,7 +35,7 @@ export class ProductsService {
         venture: { id: dto.ventureId }
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du produit impossible');
     }
   }
 
@@ -46,7 +46,7 @@ export class ProductsService {
         relations: ['venture', 'gallery']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Produit introuvable');
     }
   }
 
@@ -57,7 +57,7 @@ export class ProductsService {
         relations: ['gallery']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Produit introuvable');
     }
   }
 
@@ -67,7 +67,7 @@ export class ProductsService {
       const updated = Object.assign(product, dto);
       return await this.productsRepository.save(updated);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -76,7 +76,7 @@ export class ProductsService {
       await this.findOne(id);
       await this.productsRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

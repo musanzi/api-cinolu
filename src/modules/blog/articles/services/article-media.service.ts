@@ -18,7 +18,7 @@ export class ArticleMediaService {
       const dto = { image: file.filename, article: { id } };
       await this.galleriesService.create(dto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 
@@ -26,7 +26,7 @@ export class ArticleMediaService {
     try {
       await this.galleriesService.remove(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
@@ -34,7 +34,7 @@ export class ArticleMediaService {
     try {
       return await this.galleriesService.findGallery('article', slug);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Galerie introuvable');
     }
   }
 
@@ -44,7 +44,7 @@ export class ArticleMediaService {
       if (article.image) await fs.unlink(`./uploads/articles/${article.image}`);
       return await this.articlesService.setImage(id, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 }

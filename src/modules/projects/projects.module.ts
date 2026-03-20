@@ -1,4 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ProjectMediaController } from './controllers/project-media.controller';
+import { ProjectNotificationsController } from './controllers/project-notifications.controller';
+import { ProjectParticipationsController } from './controllers/project-participations.controller';
+import { ProjectsController } from './controllers/projects.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsModule } from '@/modules/notifications/notifications.module';
 import { UsersModule } from '@/modules/users/users.module';
@@ -6,7 +10,6 @@ import { VenturesModule } from '@/modules/ventures/ventures.module';
 import { Project } from './entities/project.entity';
 import { ProjectParticipation } from './entities/project-participation.entity';
 import { ProjectParticipationUpvote } from './entities/participation-upvote.entity';
-import { ProjectsController } from './projects.controller';
 import { ProjectCategoriesModule } from './categories/categories.module';
 import { PhasesModule } from './phases/phases.module';
 import { ProjectMediaService } from './services/project-media.service';
@@ -40,7 +43,7 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     ProjectsEmailService,
     ProjectSubscriber
   ],
-  controllers: [ProjectsController],
+  controllers: [ProjectsController, ProjectParticipationsController, ProjectNotificationsController, ProjectMediaController],
   exports: [ProjectsService]
 })
 export class ProjectsModule {}

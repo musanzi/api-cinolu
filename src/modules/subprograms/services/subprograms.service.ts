@@ -20,7 +20,7 @@ export class SubprogramsService {
       });
       return await this.subprogramRepository.save(subprogram);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du sous-programme impossible');
     }
   }
 
@@ -32,7 +32,7 @@ export class SubprogramsService {
         order: { updated_at: 'DESC' }
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Sous-programmes introuvables');
     }
   }
 
@@ -50,7 +50,7 @@ export class SubprogramsService {
         relations: ['projects', 'events']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Sous-programme introuvable');
     }
   }
 
@@ -60,7 +60,7 @@ export class SubprogramsService {
       subprogram.is_highlighted = !subprogram.is_highlighted;
       return await this.subprogramRepository.save(subprogram);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise en avant impossible');
     }
   }
 
@@ -70,7 +70,7 @@ export class SubprogramsService {
       subprogram.is_published = !subprogram.is_published;
       return await this.subprogramRepository.save(subprogram);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Publication impossible');
     }
   }
 
@@ -80,7 +80,7 @@ export class SubprogramsService {
       subprogram.logo = logo;
       return await this.subprogramRepository.save(subprogram);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du logo impossible');
     }
   }
 
@@ -90,7 +90,7 @@ export class SubprogramsService {
         where: { id }
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Sous-programme introuvable');
     }
   }
 
@@ -103,7 +103,7 @@ export class SubprogramsService {
         program: dto.programId ? { id: dto.programId } : subprogram.program
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -112,7 +112,7 @@ export class SubprogramsService {
       const subprogram = await this.findOne(id);
       await this.subprogramRepository.softDelete(subprogram.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

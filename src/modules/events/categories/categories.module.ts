@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EventCategoriesService } from './categories.service';
-import { EventCategoriesController } from './categories.controller';
+import { EventCategoriesController } from './controllers/event-categories.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventCategory } from './entities/category.entity';
 

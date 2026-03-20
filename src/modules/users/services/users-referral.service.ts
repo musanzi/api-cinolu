@@ -20,7 +20,7 @@ export class UsersReferralService {
       });
       return await this.usersService.findByEmail(user.email);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Code de parrainage invalide');
     }
   }
 
@@ -37,7 +37,7 @@ export class UsersReferralService {
         .take(take)
         .getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Filleuls introuvables');
     }
   }
 
@@ -62,7 +62,7 @@ export class UsersReferralService {
         .where('user.email = :email', { email })
         .getOneOrFail();
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Ambassadeur introuvable');
     }
   }
 

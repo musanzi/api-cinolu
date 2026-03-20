@@ -30,7 +30,7 @@ export class MentorExperiencesService {
       await this.deleteRemovedExperiences(existingExperiences, processedIds);
       return result;
     } catch {
-      throw new BadRequestException('Erreur lors de la sauvegarde des expériences');
+      throw new BadRequestException('Sauvegarde des expériences impossible');
     }
   }
 

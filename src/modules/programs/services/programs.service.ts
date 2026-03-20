@@ -21,7 +21,7 @@ export class ProgramsService {
       });
       return await this.programRepository.save(program);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du programme impossible');
     }
   }
 
@@ -33,7 +33,7 @@ export class ProgramsService {
         relations: ['category', 'subprograms']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Programmes introuvables');
     }
   }
 
@@ -45,7 +45,7 @@ export class ProgramsService {
         relations: ['category']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Programmes introuvables');
     }
   }
 
@@ -56,7 +56,7 @@ export class ProgramsService {
         relations: ['category', 'subprograms']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Programme introuvable');
     }
   }
 
@@ -66,7 +66,7 @@ export class ProgramsService {
       program.is_highlighted = !program.is_highlighted;
       return await this.programRepository.save(program);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise en avant impossible');
     }
   }
 
@@ -76,7 +76,7 @@ export class ProgramsService {
       program.is_published = !program.is_published;
       return await this.programRepository.save(program);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Publication impossible');
     }
   }
 
@@ -94,7 +94,7 @@ export class ProgramsService {
       const skip = (+page - 1) * 10;
       return await query.skip(skip).take(10).getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Programmes introuvables');
     }
   }
 
@@ -104,7 +104,7 @@ export class ProgramsService {
       program.logo = logo;
       return await this.programRepository.save(program);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du logo impossible');
     }
   }
 
@@ -115,7 +115,7 @@ export class ProgramsService {
         relations: ['category']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Programme introuvable');
     }
   }
 
@@ -128,7 +128,7 @@ export class ProgramsService {
         category: dto.category ? { id: dto.category } : program.category
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -137,7 +137,7 @@ export class ProgramsService {
       const program = await this.findOne(id);
       await this.programRepository.softDelete(program.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

@@ -21,7 +21,7 @@ export class EventParticipationService {
       where: { event: { id: eventId }, user: { id: user.id } }
     });
     if (existing) {
-      throw new BadRequestException('You are already participating in this event');
+      throw new BadRequestException('Participation déjà enregistrée');
     }
 
     await this.eventsService.findOne(eventId);

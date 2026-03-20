@@ -12,7 +12,7 @@ export abstract class BaseCategoryService<T extends AbstractEntity & { name: str
     try {
       return await this.categoryRepository.save(dto as T);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création impossible');
     }
   }
 
@@ -34,7 +34,7 @@ export abstract class BaseCategoryService<T extends AbstractEntity & { name: str
     try {
       return await this.categoryRepository.createQueryBuilder('c').where('c.id = :id', { id }).getOneOrFail();
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Catégorie introuvable');
     }
   }
 
@@ -43,7 +43,7 @@ export abstract class BaseCategoryService<T extends AbstractEntity & { name: str
       const category = await this.findOne(id);
       return await this.categoryRepository.save({ ...category, ...dto });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -52,7 +52,7 @@ export abstract class BaseCategoryService<T extends AbstractEntity & { name: str
       await this.findOne(id);
       await this.categoryRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

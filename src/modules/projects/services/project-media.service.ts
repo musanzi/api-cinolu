@@ -21,7 +21,7 @@ export class ProjectMediaService {
       };
       await this.galleriesService.create(galleryDto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 
@@ -29,7 +29,7 @@ export class ProjectMediaService {
     try {
       await this.galleriesService.remove(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
@@ -37,7 +37,7 @@ export class ProjectMediaService {
     try {
       return await this.galleriesService.findGallery('project', slug);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Galerie introuvable');
     }
   }
 
@@ -49,7 +49,7 @@ export class ProjectMediaService {
       }
       return await this.projectsService.addCover(projectId, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 }

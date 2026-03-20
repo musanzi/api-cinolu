@@ -92,7 +92,7 @@ export class AuthService {
     try {
       this.eventEmitter.emit('contact.support', dto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Envoi du message impossible');
     }
   }
 }

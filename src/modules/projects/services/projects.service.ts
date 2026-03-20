@@ -23,7 +23,7 @@ export class ProjectsService {
       });
       return await this.projectRepository.save(project);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du projet impossible');
     }
   }
 
@@ -44,7 +44,7 @@ export class ProjectsService {
       if (categoryIds.length) query.andWhere('categories.id IN (:...categoryIds)', { categoryIds });
       return await query.skip(skip).take(20).getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Projets introuvables');
     }
   }
 
@@ -64,7 +64,7 @@ export class ProjectsService {
       if (status === 'future') query.andWhere('p.started_at > NOW()');
       return await query.skip(skip).take(40).orderBy('p.started_at', 'DESC').getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Projets publiés introuvables');
     }
   }
 
@@ -82,7 +82,7 @@ export class ProjectsService {
         .addOrderBy('phases.started_at', 'ASC')
         .getMany();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Projets mentorés introuvables');
     }
   }
 
@@ -94,7 +94,7 @@ export class ProjectsService {
         take: 6
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Projets récents introuvables');
     }
   }
 
@@ -115,7 +115,7 @@ export class ProjectsService {
         .orderBy('phases.started_at', 'ASC')
         .getOneOrFail();
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Projet introuvable');
     }
   }
 
@@ -126,7 +126,7 @@ export class ProjectsService {
         relations: ['categories', 'project_manager', 'gallery']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Projet introuvable');
     }
   }
 
@@ -137,7 +137,7 @@ export class ProjectsService {
         relations: ['participations', 'participations.user']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Projet introuvable');
     }
   }
 
@@ -147,7 +147,7 @@ export class ProjectsService {
       project.is_highlighted = !project.is_highlighted;
       return await this.projectRepository.save(project);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise en avant impossible');
     }
   }
 
@@ -159,7 +159,7 @@ export class ProjectsService {
         is_published: !project.is_published
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Publication impossible');
     }
   }
 
@@ -171,7 +171,7 @@ export class ProjectsService {
         cover
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 
@@ -186,7 +186,7 @@ export class ProjectsService {
         categories: dto.categories?.map((type) => ({ id: type })) || project.categories
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -195,7 +195,7 @@ export class ProjectsService {
       const project = await this.findOne(id);
       await this.projectRepository.softDelete(project.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
+import { MentorMediaController } from './controllers/mentor-media.controller';
+import { MentorsController } from './controllers/mentors.controller';
 import { MentorsService } from './services/mentors.service';
-import { MentorsController } from './mentors.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MentorProfile } from './entities/mentor.entity';
 import { Experience } from './entities/experience.entity';
@@ -19,7 +20,7 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     UsersModule,
     SessionAuthModule.forFeature([MENTORS_RBAC_POLICY])
   ],
-  controllers: [MentorsController],
+  controllers: [MentorsController, MentorMediaController],
   providers: [MentorsService, MentorMediaService, MentorExperiencesService, MentorsEmailService],
   exports: [MentorsService]
 })

@@ -30,7 +30,7 @@ export class MentorsService {
       this.eventEmitter.emit('mentor.application', savedProfile);
       return savedProfile;
     } catch {
-      throw new BadRequestException('Erreur lors de la création du profil de mentor');
+      throw new BadRequestException('Création du profil impossible');
     }
   }
 
@@ -47,7 +47,7 @@ export class MentorsService {
       });
       return await this.findOne(mentorId);
     } catch {
-      throw new BadRequestException('Erreur lors de la mise a jour');
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -79,7 +79,7 @@ export class MentorsService {
       await this.usersService.assignRole(user.id, Role.MENTOR);
       return await this.createProfile(user.id, dto.mentor, MentorStatus.APPROVED);
     } catch {
-      throw new BadRequestException('Erreur lors de la création du profil mentor approuvé');
+      throw new BadRequestException('Création du profil impossible');
     }
   }
 
@@ -95,7 +95,7 @@ export class MentorsService {
       });
       return await this.findOne(mentorId);
     } catch {
-      throw new BadRequestException('Erreur lors de la mise à jour du mentor');
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -111,7 +111,7 @@ export class MentorsService {
       if (page) query.skip((+page - 1) * 10).take(10);
       return await query.getManyAndCount();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mentors introuvables');
     }
   }
 
@@ -122,7 +122,7 @@ export class MentorsService {
         relations: ['owner', 'experiences', 'expertises']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Mentors introuvables');
     }
   }
 
@@ -134,7 +134,7 @@ export class MentorsService {
       this.eventEmitter.emit('mentor.approved', mentorProfile);
       return await this.findOne(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Approbation impossible");
     }
   }
 
@@ -147,7 +147,7 @@ export class MentorsService {
       this.eventEmitter.emit('mentor.rejected', updatedProfile);
       return updatedProfile;
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Rejet impossible');
     }
   }
 
@@ -158,7 +158,7 @@ export class MentorsService {
         relations: ['experiences', 'expertises']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Mentors introuvables');
     }
   }
 
@@ -169,7 +169,7 @@ export class MentorsService {
         relations: ['experiences', 'expertises', 'owner']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Mentor introuvable');
     }
   }
 
@@ -185,7 +185,7 @@ export class MentorsService {
         expertises: dto?.expertises?.map((id) => ({ id })) || mentorProfile.expertises
       });
     } catch {
-      throw new BadRequestException('Erreur lors de la mise à jour du profil de mentor');
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -194,7 +194,7 @@ export class MentorsService {
       await this.findOne(id);
       await this.mentorRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 
@@ -204,7 +204,7 @@ export class MentorsService {
       mentor.cv = cv;
       return await this.mentorRepository.save(mentor);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du CV impossible');
     }
   }
 
@@ -221,7 +221,7 @@ export class MentorsService {
       }
       return await this.findOne(mentorProfile.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du profil impossible');
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ProgramMediaController } from './controllers/program-media.controller';
+import { ProgramsController } from './controllers/programs.controller';
 import { ProgramsService } from './services/programs.service';
-import { ProgramsController } from './programs.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Program } from './entities/program.entity';
 import { ProgramSubscriber } from './subscribers/program.subscriber';
@@ -11,7 +12,7 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
 
 @Module({
   imports: [ProgramCategoriesModule, TypeOrmModule.forFeature([Program]), SessionAuthModule.forFeature([PROGRAMS_RBAC_POLICY])],
-  controllers: [ProgramsController],
+  controllers: [ProgramsController, ProgramMediaController],
   providers: [ProgramsService, ProgramMediaService, ProgramSubscriber],
   exports: [ProgramsService]
 })

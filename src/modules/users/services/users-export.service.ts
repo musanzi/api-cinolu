@@ -31,7 +31,7 @@ export class UsersExportService {
       });
       csvStream.end();
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Export des utilisateurs impossible");
     }
   }
 }

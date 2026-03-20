@@ -13,7 +13,7 @@ export class ResourceMediaService {
       if (resource.file) await fs.unlink(`./uploads/resources/${resource.file}`);
       return await this.resourcesService.setFile(id, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour du fichier impossible');
     }
   }
 }

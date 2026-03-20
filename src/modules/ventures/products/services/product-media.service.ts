@@ -19,7 +19,7 @@ export class ProductMediaService {
       };
       await this.galleriesService.create(dto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 
@@ -27,7 +27,7 @@ export class ProductMediaService {
     try {
       await this.galleriesService.remove(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
@@ -35,7 +35,7 @@ export class ProductMediaService {
     try {
       return await this.galleriesService.findGallery('product', slug);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Galerie introuvable');
     }
   }
 }

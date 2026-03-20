@@ -21,7 +21,7 @@ export class DeliverablesService {
       }));
       return await this.deliverableRepository.save(payload);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création des livrables impossible');
     }
   }
 
@@ -36,7 +36,7 @@ export class DeliverablesService {
       await this.remove(current, incomingWithId);
       await this.addNew(phaseId, dto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Synchronisation impossible');
     }
   }
 
@@ -56,7 +56,7 @@ export class DeliverablesService {
 
   private ensureIdsExist(dto: DeliverableDto[], currentById: Map<string, Deliverable>): void {
     const hasInvalidId = dto.some((dto) => !currentById.has(dto.id as string));
-    if (hasInvalidId) throw new BadRequestException();
+    if (hasInvalidId) throw new BadRequestException('Livrable introuvable');
   }
 
   private async update(dto: DeliverableDto[], currentById: Map<string, Deliverable>): Promise<void> {

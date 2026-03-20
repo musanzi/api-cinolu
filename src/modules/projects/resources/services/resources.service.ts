@@ -27,7 +27,7 @@ export class ResourcesService {
       });
       return await this.resourceRepository.save(resource);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création de ressource impossible');
     }
   }
 
@@ -36,7 +36,7 @@ export class ResourcesService {
       await this.projectsService.findOne(projectId);
       return await this.buildScopedQuery('r.projectId = :scopeId', projectId, queryParams).getManyAndCount();
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Ressources introuvables');
     }
   }
 
@@ -45,7 +45,7 @@ export class ResourcesService {
       await this.phasesService.findOne(phaseId);
       return await this.buildScopedQuery('r.phaseId = :scopeId', phaseId, queryParams).getManyAndCount();
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Ressources introuvables');
     }
   }
 
@@ -56,7 +56,7 @@ export class ResourcesService {
         relations: ['project', 'phase']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Ressource introuvable');
     }
   }
 
@@ -65,7 +65,7 @@ export class ResourcesService {
       const resource = await this.findOne(id);
       return await this.resourceRepository.save({ ...resource, ...dto });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -74,7 +74,7 @@ export class ResourcesService {
       const resource = await this.findOne(id);
       return await this.resourceRepository.save({ ...resource, file });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour du fichier impossible');
     }
   }
 
@@ -83,7 +83,7 @@ export class ResourcesService {
       await this.findOne(id);
       await this.resourceRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 

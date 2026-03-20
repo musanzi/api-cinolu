@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { EventMediaController } from './controllers/event-media.controller';
+import { EventParticipationController } from './controllers/event-participation.controller';
+import { EventsController } from './controllers/events.controller';
 import { EventsService } from './services/events.service';
-import { EventsController } from './events.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Event } from './entities/event.entity';
 import { EventParticipation } from './entities/event-participation.entity';
@@ -19,7 +21,7 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     GalleriesModule,
     SessionAuthModule.forFeature([EVENTS_RBAC_POLICY])
   ],
-  controllers: [EventsController],
+  controllers: [EventsController, EventMediaController, EventParticipationController],
   providers: [EventsService, EventMediaService, EventParticipationService, EventSubscriber],
   exports: [EventsService]
 })

@@ -26,7 +26,7 @@ export class ProjectNotificationService {
       const notification = await this.notificationsService.create(projectId, user.id, dto);
       return this.notificationsService.findOne(notification.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création de notification impossible');
     }
   }
 
@@ -46,7 +46,7 @@ export class ProjectNotificationService {
       this.eventEmitter.emit('notify.participants', recipients, notification);
       return await this.notificationsService.send(notificationId);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi de notification impossible");
     }
   }
 }

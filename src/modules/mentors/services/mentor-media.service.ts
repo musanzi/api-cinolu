@@ -15,7 +15,7 @@ export class MentorMediaService {
       }
       return await this.mentorsService.addCv(id, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du CV impossible');
     }
   }
 }

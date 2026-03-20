@@ -17,7 +17,7 @@ export class ExpertisesService {
     try {
       return await this.expertiseRepository.save(dto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Création de l'expertise impossible");
     }
   }
 
@@ -37,7 +37,7 @@ export class ExpertisesService {
     try {
       return await this.expertiseRepository.findOneOrFail({ where: { id } });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Expertise introuvable');
     }
   }
 
@@ -46,7 +46,7 @@ export class ExpertisesService {
       await this.expertiseRepository.update(id, dto);
       return await this.findOne(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -55,7 +55,7 @@ export class ExpertisesService {
       await this.findOne(id);
       await this.expertiseRepository.softDelete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

@@ -23,7 +23,7 @@ export class EventsService {
       });
       return await this.eventRepository.save(event);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Création de l'événement impossible");
     }
   }
 
@@ -62,7 +62,7 @@ export class EventsService {
       event.is_highlighted = !event.is_highlighted;
       return await this.eventRepository.save(event);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise en avant impossible');
     }
   }
 
@@ -72,7 +72,7 @@ export class EventsService {
       event.is_published = !event.is_published;
       return await this.eventRepository.save(event);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Publication impossible');
     }
   }
 
@@ -84,7 +84,7 @@ export class EventsService {
         cover
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout de couverture impossible');
     }
   }
 
@@ -97,7 +97,7 @@ export class EventsService {
         take: 6
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Événements introuvables');
     }
   }
 
@@ -115,7 +115,7 @@ export class EventsService {
         ]
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Événement introuvable');
     }
   }
 
@@ -126,7 +126,7 @@ export class EventsService {
         relations: ['categories', 'event_manager', 'program', 'gallery', 'participations', 'participations.user']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Événement introuvable');
     }
   }
 
@@ -141,7 +141,7 @@ export class EventsService {
         categories: dto.categories?.map((type) => ({ id: type })) || event.categories
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -150,7 +150,7 @@ export class EventsService {
       const event = await this.findOne(id);
       await this.eventRepository.softDelete(event.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

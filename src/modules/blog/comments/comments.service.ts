@@ -23,7 +23,7 @@ export class CommentsService {
       });
       return await this.findOne(comment.id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du commentaire impossible');
     }
   }
 
@@ -42,7 +42,7 @@ export class CommentsService {
         take: 20
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Commentaires introuvables');
     }
   }
 
@@ -53,7 +53,7 @@ export class CommentsService {
         relations: ['author']
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Commentaire introuvable');
     }
   }
 
@@ -66,7 +66,7 @@ export class CommentsService {
       });
       return await this.commentsRepository.save(newComment);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Mise à jour impossible');
     }
   }
 
@@ -75,7 +75,7 @@ export class CommentsService {
       await this.findOne(id);
       await this.commentsRepository.delete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Suppression impossible');
     }
   }
 }

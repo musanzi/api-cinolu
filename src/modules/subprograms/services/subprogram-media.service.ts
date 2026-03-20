@@ -15,7 +15,7 @@ export class SubprogramMediaService {
       }
       return await this.subprogramsService.setLogo(id, file.filename);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Ajout du logo impossible');
     }
   }
 }

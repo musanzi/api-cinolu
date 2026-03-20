@@ -18,7 +18,7 @@ export class TagsService {
       const tag = this.tagRepository.create(dto);
       return await this.tagRepository.save(tag);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException('Création du tag impossible');
     }
   }
 
@@ -40,7 +40,7 @@ export class TagsService {
         where: { id }
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Tag introuvable');
     }
   }
 
@@ -49,7 +49,7 @@ export class TagsService {
       await this.tagRepository.update(id, dto);
       return await this.tagRepository.findOne({ where: { id } });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Tag introuvable');
     }
   }
 
@@ -58,7 +58,7 @@ export class TagsService {
       await this.findOne(id);
       await this.tagRepository.delete(id);
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Tag introuvable');
     }
   }
 }

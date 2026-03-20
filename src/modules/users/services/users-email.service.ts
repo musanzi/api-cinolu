@@ -23,7 +23,7 @@ export class UsersEmailService {
         ].join('\n')
       });
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 }

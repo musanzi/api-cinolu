@@ -16,7 +16,7 @@ export class GalleriesService {
     try {
       return await this.galleryRepository.save(dto);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Ajout d'image impossible");
     }
   }
 
@@ -26,7 +26,7 @@ export class GalleriesService {
         where: { id }
       });
     } catch {
-      throw new NotFoundException();
+      throw new NotFoundException('Image introuvable');
     }
   }
 
@@ -36,7 +36,7 @@ export class GalleriesService {
       await this.removeImageFile(gallery.image);
       await this.galleryRepository.delete(id);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
@@ -56,7 +56,7 @@ export class GalleriesService {
     try {
       await fs.unlink(`./uploads/galleries/${filename}`);
     } catch {
-      throw new BadRequestException();
+      throw new BadRequestException("Suppression du fichier impossible");
     }
   }
 }
