@@ -7,7 +7,12 @@ export const PROJECTS_RBAC_POLICY: ModuleRbacPolicy = {
     {
       roles: [Role.STAFF],
       actions: ['manage'],
-      resources: ['projects', 'projectCategories', 'phases', 'indicators']
+      resources: ['projects', 'projectCategories', 'phases']
+    },
+    {
+      roles: [Role.MENTOR],
+      actions: ['update'],
+      resources: ['projects']
     }
   ]
 };
