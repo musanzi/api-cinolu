@@ -6,6 +6,7 @@ import { Venture } from '@/modules/ventures/entities/venture.entity';
 import { Phase } from '@/modules/projects/phases/entities/phase.entity';
 import { DeliverableSubmission } from '@/modules/projects/phases/deliverables/entities/submission.entity';
 import { ProjectParticipationUpvote } from '@/modules/projects/entities/participation-upvote.entity';
+import { ProjectParticipationReview } from '@/modules/projects/entities/project-participation-review.entity';
 
 @Entity()
 @Unique(['user.id', 'project.id'])
@@ -31,4 +32,7 @@ export class ProjectParticipation extends AbstractEntity {
 
   @OneToMany(() => ProjectParticipationUpvote, (upvote) => upvote.participation)
   upvotes: ProjectParticipationUpvote[];
+
+  @OneToMany(() => ProjectParticipationReview, (review) => review.participation)
+  reviews: ProjectParticipationReview[];
 }

@@ -1,7 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { parseUsersCsv } from '@/core/helpers/user-csv.helper';
 import { ProjectParticipationService } from '@/modules/projects/services/project-participations.service';
-import { ProjectParticipationStatus } from '@/modules/projects/types/project-participation-status.enum';
 
 jest.mock('@/core/helpers/user-csv.helper', () => ({
   parseUsersCsv: jest.fn()
@@ -24,11 +23,10 @@ describe('ProjectParticipationService', () => {
   const setup = () => {
     const queryBuilder = makeQueryBuilder([[{ id: 'pp1' }], 1], {
       id: 'pp1',
-      status: ProjectParticipationStatus.QUALIFIED,
-      review_message: 'Documents recus',
       user: { id: 'participant-1', email: 'participant@example.com', name: 'Participant' },
       project: { id: 'project-1', name: 'Project 1' },
-      phases: [{ id: 'phase-1' }, { id: 'phase-2' }]
+      phases: [{ id: 'phase-1' }, { id: 'phase-2' }],
+      reviews: [{ id: 'r1', score: 80, phase: { id: 'phase-1' } }]
     });
     const participationRepository = {
       find: jest.fn(),
@@ -42,6 +40,9 @@ describe('ProjectParticipationService', () => {
       findOneOrFail: jest.fn(),
       remove: jest.fn()
     } as any;
+    const reviewRepository = {
+      delete: jest.fn()
+    } as any;
     const usersService = { findOrCreate: jest.fn() } as any;
     const phasesService = { findOne: jest.fn() } as any;
     const venturesService = { findOne: jest.fn() } as any;
@@ -53,6 +54,7 @@ describe('ProjectParticipationService', () => {
     const service = new ProjectParticipationService(
       participationRepository,
       upvoteRepository,
+      reviewRepository,
       usersService,
       phasesService,
       venturesService,
@@ -63,6 +65,7 @@ describe('ProjectParticipationService', () => {
       queryBuilder,
       participationRepository,
       upvoteRepository,
+      reviewRepository,
       usersService,
       phasesService,
       venturesService,
@@ -74,27 +77,6 @@ describe('ProjectParticipationService', () => {
     const { service, participationRepository } = setup();
     participationRepository.find.mockResolvedValue([{ id: 'pp1' }]);
     await expect(service.findUserParticipations('u1')).resolves.toEqual([{ id: 'pp1' }]);
-  });
-
-  it('finds one participation for review', async () => {
-    const { service, participationRepository } = setup();
-    participationRepository.findOneOrFail.mockResolvedValue({ id: 'pp1' });
-
-    await expect(service.findOneForReview('pp1')).resolves.toEqual({ id: 'pp1' });
-    expect(participationRepository.findOneOrFail).toHaveBeenCalledWith({
-      where: { id: 'pp1' },
-      relations: [
-        'user',
-        'project',
-        'project.project_manager',
-        'project.phases',
-        'project.phases.mentors',
-        'project.phases.mentors.owner',
-        'phases',
-        'phases.mentors',
-        'phases.mentors.owner'
-      ]
-    });
   });
 
   it('ensures a participation exists', async () => {
@@ -128,9 +110,10 @@ describe('ProjectParticipationService', () => {
   });
 
   it('removes participants from a phase', async () => {
-    const { service, participationRepository } = setup();
+    const { service, participationRepository, reviewRepository } = setup();
     participationRepository.find.mockResolvedValue([{ id: 'pp1', phases: [{ id: 'phase-1' }, { id: 'phase-2' }] }]);
     participationRepository.save.mockResolvedValue(undefined);
+    reviewRepository.delete.mockResolvedValue(undefined);
 
     await expect(
       service.removeParticipantsFromPhase({ ids: ['pp1'], phaseId: 'phase-1' } as any)
@@ -138,6 +121,7 @@ describe('ProjectParticipationService', () => {
     expect(participationRepository.save).toHaveBeenCalledWith([
       expect.objectContaining({ phases: [{ id: 'phase-2' }] })
     ]);
+    expect(reviewRepository.delete).toHaveBeenCalledTimes(1);
   });
 
   it('finds participations by project', async () => {
@@ -145,6 +129,7 @@ describe('ProjectParticipationService', () => {
     await expect(service.findParticipations('project-1', {} as any)).resolves.toEqual([[{ id: 'pp1' }], 1]);
     expect(queryBuilder.where).toHaveBeenCalledWith('pp.projectId = :projectId', { projectId: 'project-1' });
     expect(queryBuilder.loadRelationCountAndMap).toHaveBeenCalledWith('pp.upvotesCount', 'pp.upvotes');
+    expect(queryBuilder.distinct).toHaveBeenCalledWith(true);
     expect(queryBuilder.skip).toHaveBeenCalledWith(0);
     expect(queryBuilder.take).toHaveBeenCalledWith(20);
   });
@@ -184,16 +169,6 @@ describe('ProjectParticipationService', () => {
       1
     ]);
     expect(queryBuilder.andWhere).toHaveBeenCalledWith('phases.id = :phaseId', { phaseId: 'phase-1' });
-  });
-
-  it('applies status filter when status is provided', async () => {
-    const { service, queryBuilder } = setup();
-    await expect(
-      service.findParticipations('project-1', { status: ProjectParticipationStatus.PENDING } as any)
-    ).resolves.toEqual([[{ id: 'pp1' }], 1]);
-    expect(queryBuilder.andWhere).toHaveBeenCalledWith('pp.status = :status', {
-      status: ProjectParticipationStatus.PENDING
-    });
   });
 
   it('does not apply phase filter when phaseId is an empty string', async () => {
@@ -243,7 +218,6 @@ describe('ProjectParticipationService', () => {
     ).resolves.toBeUndefined();
     expect(participationRepository.save).toHaveBeenCalledWith([
       expect.objectContaining({
-        status: ProjectParticipationStatus.PENDING,
         user: { id: 'u-new' },
         project: { id: 'project-1' }
       })
@@ -277,7 +251,6 @@ describe('ProjectParticipationService', () => {
     ).resolves.toBeUndefined();
     expect(participationRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: ProjectParticipationStatus.PENDING,
         user: { id: 'u1' },
         project: { id: 'project-1' },
         venture: { id: 'venture-1' }

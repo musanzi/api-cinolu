@@ -87,4 +87,27 @@ describe('ProjectsEmailService', () => {
     expect(mailerService.sendMail).toHaveBeenNthCalledWith(1, expect.objectContaining({ to: 'a@example.com' }));
     expect(mailerService.sendMail).toHaveBeenNthCalledWith(2, expect.objectContaining({ to: 'b@example.com' }));
   });
+
+  it('sends a participation review email with reviewer message', async () => {
+    const { service, mailerService } = setup();
+    mailerService.sendMail.mockResolvedValue(undefined);
+
+    await expect(
+      service.sendParticipationReview({
+        user: { email: 'participant@example.com', name: 'Alice' } as any,
+        project: { name: 'Project X' } as any,
+        phase: { name: 'Phase 1' } as any,
+        score: 82,
+        message: 'Bravo pour cette étape',
+        nextPhase: { name: 'Phase 2' } as any
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'participant@example.com',
+        subject: 'Project X - Mise à jour de participation'
+      })
+    );
+  });
 });

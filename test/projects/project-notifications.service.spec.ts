@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { ProjectNotificationService } from '@/modules/projects/services/project-notifications.service';
+import { ProjectNotificationService } from '../../dist/modules/projects/services/project-notifications.service';
 
 describe('ProjectNotificationService', () => {
   const setup = () => {

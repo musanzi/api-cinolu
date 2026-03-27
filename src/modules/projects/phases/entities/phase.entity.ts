@@ -5,6 +5,7 @@ import { ProjectParticipation } from '@/modules/projects/entities/project-partic
 import { Deliverable } from '@/modules/projects/phases/deliverables/entities/deliverable.entity';
 import { MentorProfile } from '@/modules/mentors/entities/mentor.entity';
 import { Resource } from '@/modules/projects/resources/entities/resource.entity';
+import { ProjectParticipationReview } from '@/modules/projects/entities/project-participation-review.entity';
 
 @Entity()
 export class Phase extends AbstractEntity {
@@ -36,4 +37,7 @@ export class Phase extends AbstractEntity {
 
   @OneToMany(() => Resource, (resource) => resource.phase)
   resources: Resource[];
+
+  @OneToMany(() => ProjectParticipationReview, (review) => review.phase)
+  reviews: ProjectParticipationReview[];
 }
