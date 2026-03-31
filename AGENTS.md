@@ -9,3 +9,5 @@
 - Do not use one module’s repository inside another module.
 - When data or behavior from another module is needed, import and use that module’s service instead.
 - If the service does not yet expose the required method, add the method to that service rather than accessing its repository directly.
+- Services must be in the services folder
+- Contollers must be in the controllers folder

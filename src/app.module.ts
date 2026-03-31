@@ -22,6 +22,7 @@ import { JwtModule } from './shared/jwt/jwt.module';
 import { StaticModule } from './shared/static/static.module';
 import { ConfigModule } from './shared/config/config.module';
 import { ResourcesModule } from './modules/projects/resources/resources.module';
+import { CoachAiModule } from './modules/coach-ai/coach-ai.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ResourcesModule } from './modules/projects/resources/resources.module';
     AuthModule,
     UsersModule,
     VenturesModule,
+    CoachAiModule,
     BlogModule,
     StatsModule,
     HighlightsModule,
