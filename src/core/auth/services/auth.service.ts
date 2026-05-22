@@ -57,7 +57,7 @@ export class AuthService {
       if (isNew) this.eventEmitter.emit('user.welcome', user);
       return user;
     } catch (error) {
-      throw new BadRequestException(error?.message);
+      throw new BadRequestException(error['message']);
     }
   }
 

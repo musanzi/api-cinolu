@@ -50,7 +50,7 @@ export class UsersService {
       user.roles = [role];
       return await this.userRepository.save(user);
     } catch {
-      throw new BadRequestException("Attribution du rôle impossible");
+      throw new BadRequestException('Attribution du rôle impossible');
     }
   }
 
@@ -130,7 +130,8 @@ export class UsersService {
       }
       const user = await this.createSignUpUser(dto);
       return { user, isNew: true };
-    } catch {
+    } catch (e) {
+      console.log(e);
       throw new BadRequestException('Cet utilisateur existe déjà');
     }
   }
@@ -217,7 +218,7 @@ export class UsersService {
         await this.findOrCreate(row);
       }
     } catch {
-      throw new BadRequestException("Import des utilisateurs impossible");
+      throw new BadRequestException('Import des utilisateurs impossible');
     }
   }
 
