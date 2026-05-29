@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { promises as fs } from 'fs';
-import { ProjectMediaService } from '@/features/projects/services/project-media.service';
+import { ProjectMediaService } from '../../src/modules/projects/projects/services/project-media.service';
 
 describe('ProjectMediaService', () => {
   afterEach(() => {

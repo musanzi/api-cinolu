@@ -1,5 +1,5 @@
 import { existsSync, PathLike } from 'fs';
-import { ProjectsEmailService } from '@/features/projects/services/projects-email.service';
+import { ProjectsEmailService } from '../../src/modules/projects/projects/services/projects-email.service';
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),

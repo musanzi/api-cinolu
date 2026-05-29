@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { promises as fs } from 'fs';
-import { ResourceMediaService } from '@/features/projects/resources/services/resource-media.service';
+import { ResourceMediaService } from '../../src/modules/projects/resources/services/resource-media.service';
 
 describe('ResourceMediaService', () => {
   afterEach(() => {

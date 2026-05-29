@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { ProjectParticipationReviewService } from '@/features/projects/services/project-participation-review.service';
+import { ProjectParticipationReviewService } from '../../src/modules/projects/projects/services/project-participation-review.service';
 
 describe('ProjectParticipationReviewService', () => {
   const setup = () => {

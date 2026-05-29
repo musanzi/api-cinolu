@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "module": "NodeNext",
+    "types": ["node", "jest"],
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": false,
+    "strictPropertyInitialization": false,
     "esModuleInterop": true,
     "isolatedModules": false,
     "declaration": true,
@@ -21,9 +23,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/shared/*": ["./src/shared/*"],
-      "@/core/*": ["./src/core/*"],
-      "@/features/*": ["./src/features/*"]
+      "@/modules/*": ["./src/modules/*"],
+      "@/shared/*": ["./src/shared/*"]
     }
   }
 }

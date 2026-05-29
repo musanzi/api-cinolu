@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "module": "commonjs",
-    "types": ["jest", "node"],
-    "sourceMap": true
-  },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
-}

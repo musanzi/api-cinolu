@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { RolesService } from '@/features/users/roles/roles.service';
+import { RolesService } from '../../src/modules/identity/roles/roles.service';
 
 function createQueryBuilder(result: [any[], number]) {
   return {

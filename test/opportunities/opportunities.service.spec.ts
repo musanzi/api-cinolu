@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { OpportunitiesService } from '@/features/opportunities/services/opportunities.service';
-import { OpportunityLanguage } from '@/features/opportunities/entities/opportunity.entity';
+import { OpportunitiesService } from '../../src/modules/opportunities/services/opportunities.service';
+import { OpportunityLanguage } from '../../src/modules/opportunities/entities/opportunity.entity';
 
 describe('OpportunitiesService', () => {
   const setup = () => {

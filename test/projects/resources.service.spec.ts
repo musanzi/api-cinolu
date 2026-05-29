@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ResourceCategory, Resource } from '@/features/projects/resources/entities/resource.entity';
-import { ResourcesService } from '@/features/projects/resources/services/resources.service';
+import { ResourceCategory, Resource } from '../../src/modules/projects/resources/entities/resource.entity';
+import { ResourcesService } from '../../src/modules/projects/resources/services/resources.service';
 
 const makeQueryBuilder = (result: [Resource[], number] = [[{ id: 'r1' } as Resource], 1]) => ({
   leftJoinAndSelect: jest.fn().mockReturnThis(),

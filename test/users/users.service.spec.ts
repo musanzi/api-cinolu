@@ -1,9 +1,9 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { UsersService } from '@/features/users/services/users.service';
-import { parseUsersCsv } from '@/core/helpers/user-csv.helper';
-import { UserStatus } from '@/features/users/types/user-status.enum';
+import { UsersService } from '../../src/modules/identity/users/services/users.service';
+import { parseUsersCsv } from '@/shared/helpers/user-csv.helper';
+import { UserStatus } from '../../src/modules/identity/users/types/user-status.enum';
 
-jest.mock('@/core/helpers/user-csv.helper', () => ({
+jest.mock('@/shared/helpers/user-csv.helper', () => ({
   parseUsersCsv: jest.fn()
 }));
 

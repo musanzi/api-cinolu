@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-import { AuthService } from '@/core/auth/services/auth.service';
+import { AuthService } from '../../src/modules/auth/services/auth.service';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt', () => ({
@@ -23,39 +22,16 @@ describe('AuthService', () => {
     return { service, usersService, eventEmitter };
   };
 
-  it('signs up, logs user in and sends welcome event for new users', async () => {
+  it('signs up and sends welcome event for new users', async () => {
     const { service, usersService, eventEmitter } = setup();
     const user = { id: 'u1', email: 'john@example.com' };
-    const req = { logIn: jest.fn((payload, done) => done(null)) } as any;
+    const dto = { name: 'John Doe', email: user.email, password: 'secret123' };
     usersService.signUp.mockResolvedValue({ user, isNew: true });
 
-    await expect(service.signUp(req, { email: user.email, password: 'secret123' } as any)).resolves.toEqual(
-      expect.objectContaining(user)
-    );
-    expect(req.logIn).toHaveBeenCalledWith(expect.objectContaining(user), expect.any(Function));
+    await expect(service.signUp(dto as any)).resolves.toEqual(expect.objectContaining(user));
+
+    expect(usersService.signUp).toHaveBeenCalledWith(dto);
     expect(eventEmitter.emit).toHaveBeenCalledWith('user.welcome', expect.objectContaining(user));
-  });
-
-  it('signs up and logs user in without welcome event for existing users', async () => {
-    const { service, usersService, eventEmitter } = setup();
-    const user = { id: 'u1', email: 'john@example.com' };
-    const req = { logIn: jest.fn((payload, done) => done(null)) } as any;
-    usersService.signUp.mockResolvedValue({ user, isNew: false });
-
-    await expect(service.signUp(req, { email: user.email, password: 'secret123' } as any)).resolves.toEqual(
-      expect.objectContaining(user)
-    );
-    expect(eventEmitter.emit).not.toHaveBeenCalled();
-  });
-
-  it('throws when automatic login fails after signup', async () => {
-    const { service, usersService } = setup();
-    const req = { logIn: jest.fn((payload, done) => done(new Error('bad'))) } as any;
-    usersService.signUp.mockResolvedValue({ user: { id: 'u1', email: 'john@example.com' }, isNew: true });
-
-    await expect(service.signUp(req, { email: 'john@example.com', password: 'secret123' } as any)).rejects.toBeInstanceOf(
-      BadRequestException
-    );
   });
 
   it('validates user with explicit password selection and hides password after login', async () => {

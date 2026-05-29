@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { ProductMediaService } from '@/features/ventures/products/services/product-media.service';
+import { ProductMediaService } from '../../src/modules/ventures/products/services/product-media.service';
 
 describe('ProductMediaService', () => {
   const setup = () => {

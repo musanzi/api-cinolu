@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { MentorStatus } from '@/features/mentors/enums/mentor.enum';
-import { MentorsService } from '@/features/mentors/services/mentors.service';
+import { MentorStatus } from '../../src/modules/mentors/mentors/enums/mentor.enum';
+import { MentorsService } from '../../src/modules/mentors/mentors/services/mentors.service';
 
 describe('MentorsService', () => {
   const makeQueryBuilder = (result: [any[], number] = [[], 0]) => ({

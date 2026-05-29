@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { ArticlesService } from '@/features/blog/articles/services/articles.service';
+import { ArticlesService } from '../../src/modules/content/blog/articles/services/articles.service';
 
 const makeQueryBuilder = (result: [any[], number] = [[], 0]) => ({
   leftJoinAndSelect: jest.fn().mockReturnThis(),

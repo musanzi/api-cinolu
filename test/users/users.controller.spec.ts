@@ -1,6 +1,6 @@
-import { UsersController } from '@/features/users/controllers/users.controller';
+import { UsersController } from '../../src/modules/identity/users/controllers/users.controller';
 
-jest.mock('@/core/helpers/csv-upload.helper', () => ({
+jest.mock('@/shared/helpers/csv-upload.helper', () => ({
   createCsvUploadOptions: jest.fn().mockReturnValue({})
 }));
 
