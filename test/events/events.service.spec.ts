@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { EventsService } from '../../src/modules/events/events/services/events.service';
+import { EventsService } from '@/modules/events/events/services/events.service';
 
 const makeQueryBuilder = (result: [any[], number] = [[], 0]) => ({
   leftJoinAndSelect: jest.fn().mockReturnThis(),

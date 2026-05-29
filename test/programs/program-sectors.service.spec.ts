@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ProgramSectorsService } from '../../src/modules/programs/sectors/services/sectors.service';
+import { ProgramSectorsService } from '@/modules/programs/sectors/services/sectors.service';
 
 const makeQueryBuilder = (result: [any[], number] = [[], 0]) => ({
   orderBy: jest.fn().mockReturnThis(),

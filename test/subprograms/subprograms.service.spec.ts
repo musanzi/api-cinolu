@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { SubprogramsService } from '../../src/modules/programs/subprograms/services/subprograms.service';
+import { SubprogramsService } from '@/modules/programs/subprograms/services/subprograms.service';
 
 describe('SubprogramsService', () => {
   const setup = () => {

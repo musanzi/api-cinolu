@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { promises as fs } from 'fs';
-import { OpportunityMediaService } from '../../src/modules/opportunities/services/opportunity-media.service';
+import { OpportunityMediaService } from '@/modules/opportunities/services/opportunity-media.service';
 
 describe('OpportunityMediaService', () => {
   let unlinkSpy: jest.SpiedFunction<typeof fs.unlink>;

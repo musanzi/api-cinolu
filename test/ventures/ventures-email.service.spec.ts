@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { VenturesEmailService } from '../../src/modules/ventures/ventures/services/ventures-email.service';
+import { VenturesEmailService } from '@/modules/ventures/ventures/services/ventures-email.service';
 
 describe('VenturesEmailService', () => {
   const setup = () => {

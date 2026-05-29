@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { MentorExperiencesService } from '../../src/modules/mentors/mentors/services/mentor-experiences.service';
+import { MentorExperiencesService } from '@/modules/mentors/mentors/services/mentor-experiences.service';
 
 describe('MentorExperiencesService', () => {
   const setup = () => {

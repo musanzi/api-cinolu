@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { PhasesService } from '../../src/modules/projects/phases/services/phases.service';
+import { PhasesService } from '@/modules/projects/phases/services/phases.service';
 
 describe('PhasesService', () => {
   const setup = () => {

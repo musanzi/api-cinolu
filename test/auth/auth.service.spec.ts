@@ -1,4 +1,4 @@
-import { AuthService } from '../../src/modules/auth/services/auth.service';
+import { AuthService } from '@/modules/auth/services/auth.service';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt', () => ({

@@ -1,11 +1,11 @@
-import { StatsService } from '../../src/modules/stats/services/stats.service';
-import { EventParticipation } from '../../src/modules/events/events/entities/event-participation.entity';
-import { Event } from '../../src/modules/events/events/entities/event.entity';
-import { Program } from '../../src/modules/programs/programs/entities/program.entity';
-import { ProjectParticipation } from '../../src/modules/projects/projects/entities/project-participation.entity';
-import { Project } from '../../src/modules/projects/projects/entities/project.entity';
-import { User } from '../../src/modules/identity/users/entities/user.entity';
-import { Venture } from '../../src/modules/ventures/ventures/entities/venture.entity';
+import { StatsService } from '@/modules/stats/services/stats.service';
+import { EventParticipation } from '@/modules/events/events/entities/event-participation.entity';
+import { Event } from '@/modules/events/events/entities/event.entity';
+import { Program } from '@/modules/programs/programs/entities/program.entity';
+import { ProjectParticipation } from '@/modules/projects/projects/entities/project-participation.entity';
+import { Project } from '@/modules/projects/projects/entities/project.entity';
+import { User } from '@/modules/identity/users/entities/user.entity';
+import { Venture } from '@/modules/ventures/ventures/entities/venture.entity';
 
 const makeCountQb = (count: number) => ({
   where: jest.fn().mockReturnThis(),

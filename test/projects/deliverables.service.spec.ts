@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { DeliverablesService } from '../../src/modules/projects/phases/deliverables/services/deliverables.service';
+import { DeliverablesService } from '@/modules/projects/phases/deliverables/services/deliverables.service';
 
 describe('DeliverablesService', () => {
   const setup = () => {

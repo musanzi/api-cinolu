@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
-import { NotificationsService } from '../../src/modules/notifications/services/notifications.service';
-import { NotificationStatus } from '../../src/modules/notifications/types/notification-status.enum';
+import { NotificationsService } from '@/modules/notifications/services/notifications.service';
+import { NotificationStatus } from '@/modules/notifications/types/notification-status.enum';
 
 const makeQueryBuilder = (result: [any[], number] = [[], 0]) => ({
   leftJoinAndSelect: jest.fn().mockReturnThis(),

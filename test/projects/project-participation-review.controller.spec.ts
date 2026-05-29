@@ -1,4 +1,4 @@
-import { ProjectParticipationReviewController } from '../../src/modules/projects/projects/controllers/project-participation-review.controller';
+import { ProjectParticipationReviewController } from '@/modules/projects/projects/controllers/project-participation-review.controller';
 
 describe('ProjectParticipationReviewController', () => {
   const setup = () => {

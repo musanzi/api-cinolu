@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { promises as fs } from 'fs';
-import { GalleriesService } from '../../src/modules/galleries/galleries.service';
+import { GalleriesService } from '@/modules/galleries/galleries.service';
 
 describe('GalleriesService', () => {
   afterEach(() => {

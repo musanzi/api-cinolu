@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { CommentsService } from '../../src/modules/content/blog/comments/comments.service';
+import { CommentsService } from '@/modules/content/blog/comments/comments.service';
 
 describe('CommentsService', () => {
   const setup = () => {

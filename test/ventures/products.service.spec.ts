@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ProductsService } from '../../src/modules/ventures/products/services/products.service';
+import { ProductsService } from '@/modules/ventures/products/services/products.service';
 
 describe('ProductsService', () => {
   const setup = () => {

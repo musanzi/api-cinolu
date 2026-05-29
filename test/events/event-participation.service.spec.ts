@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { EventParticipationService } from '../../src/modules/events/events/services/event-participation.service';
+import { EventParticipationService } from '@/modules/events/events/services/event-participation.service';
 
 describe('EventParticipationService', () => {
   const setup = () => {
