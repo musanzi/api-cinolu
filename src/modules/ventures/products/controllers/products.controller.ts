@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { CurrentUser, Public, Rbac } from '@musanzi/nestjs-session-auth';
-import { User } from '../../../identity/users/entities/user.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { FilterProductsDto } from '../dto/filter-products.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../entities/product.entity';
 import { ProductsService } from '../services/products.service';
+import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { User } from '@/modules/identity/users/entities/user.entity';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('products')
 export class ProductsController {
@@ -18,7 +19,7 @@ export class ProductsController {
 
   @Get('me')
   findMine(@CurrentUser() user: User, @Query() query: FilterProductsDto): Promise<[Product[], number]> {
-    return this.productsService.findAll(user, query);
+    return this.productsService.findAll(user.id, query);
   }
 
   @Get('by-slug/:slug')
@@ -28,13 +29,12 @@ export class ProductsController {
   }
 
   @Patch('by-slug/:slug')
-  @Rbac({ resource: 'products', action: 'update' })
   update(@Param('slug') slug: string, @Body() dto: UpdateProductDto): Promise<Product> {
     return this.productsService.update(slug, dto);
   }
 
   @Delete('id/:id')
-  @Rbac({ resource: 'products', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.productsService.remove(id);
   }

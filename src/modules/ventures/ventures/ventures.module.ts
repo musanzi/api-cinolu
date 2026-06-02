@@ -9,17 +9,10 @@ import { ProductsModule } from '../../ventures/products/products.module';
 import { VentureDocument } from './entities/document.entity';
 import { VenturesEmailService } from './services/ventures-email.service';
 import { VentureMediaService } from './services/venture-media.service';
-import { VENTURES_RBAC_POLICY } from './ventures-rbac';
 import { GalleriesModule } from '../../galleries/galleries.module';
-import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Venture, VentureDocument]),
-    ProductsModule,
-    GalleriesModule,
-    SessionAuthModule.forFeature([VENTURES_RBAC_POLICY])
-  ],
+  imports: [TypeOrmModule.forFeature([Venture, VentureDocument]), ProductsModule, GalleriesModule],
   controllers: [VenturesController, VentureMediaController],
   providers: [VenturesService, VentureMediaService, VenturesEmailService, VentureSubscriber],
   exports: [VenturesService]

@@ -1,5 +1,5 @@
 import { User } from '../../../identity/users/entities/user.entity';
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Product } from '../../../ventures/products/entities/product.entity';
 import { VentureDocument } from './document.entity';

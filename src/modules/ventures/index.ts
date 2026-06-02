@@ -1,2 +1,2 @@
-export * from './ventures/ventures.module'
-export * from './products/products.module'
+export * from './ventures/ventures.module';
+export * from './products/products.module';

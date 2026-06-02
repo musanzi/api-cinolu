@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Venture } from '../entities/venture.entity';
-import { User } from '../../../identity/users/entities/user.entity';
 import { CreateVentureDto } from '../dto/create-venture.dto';
 import { UpdateVentureDto } from '../dto/update-venture.dto';
 import { FilterVenturesDto } from '../dto/filter-ventures.dto';
@@ -16,11 +15,11 @@ export class VenturesService {
     private eventEmitter: EventEmitter2
   ) {}
 
-  async create(user: User, dto: CreateVentureDto): Promise<Venture> {
+  async create(userId: string, dto: CreateVentureDto): Promise<Venture> {
     try {
       const savedVenture = await this.ventureRepository.save({
         ...dto,
-        owner: { id: user.id }
+        owner: { id: userId }
       });
       const venture = await this.findOne(savedVenture.id);
       this.eventEmitter.emit('venture.created', venture);
@@ -64,11 +63,11 @@ export class VenturesService {
     }
   }
 
-  async findByUser(page: string, user: User): Promise<[Venture[], number]> {
+  async findByUser(page: string, userId: string): Promise<[Venture[], number]> {
     const skip = (+(page || 1) - 1) * 40;
     try {
       return await this.ventureRepository.findAndCount({
-        where: { owner: { id: user.id } },
+        where: { owner: { id: userId } },
         skip,
         take: 40,
         order: { created_at: 'DESC' }
@@ -78,10 +77,10 @@ export class VenturesService {
     }
   }
 
-  async findByUserUnpaginated(user: User): Promise<Venture[]> {
+  async findByUserUnpaginated(userId: string): Promise<Venture[]> {
     try {
       return await this.ventureRepository.find({
-        where: { owner: { id: user.id } },
+        where: { owner: { id: userId } },
         order: { created_at: 'DESC' }
       });
     } catch {

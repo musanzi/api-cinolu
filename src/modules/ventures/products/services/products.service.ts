@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
 import { FilterProductsDto } from '../dto/filter-products.dto';
-import { User } from '../../../identity/users/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -14,11 +13,11 @@ export class ProductsService {
     private productsRepository: Repository<Product>
   ) {}
 
-  async findAll(user: User, query: FilterProductsDto): Promise<[Product[], number]> {
+  async findAll(userId: string, query: FilterProductsDto): Promise<[Product[], number]> {
     try {
       const { page = 1 } = query;
       return await this.productsRepository.findAndCount({
-        where: { venture: { owner: { id: user.id } } },
+        where: { venture: { owner: { id: userId } } },
         order: { created_at: 'DESC' },
         take: 10,
         skip: (+page - 1) * 10
