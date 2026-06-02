@@ -4,44 +4,45 @@ import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
 import { Role } from '../entities/role.entity';
 import { FilterRolesDto } from '../dto/filter-roles.dto';
-import { Rbac } from '@musanzi/nestjs-session-auth';
+import { Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post()
-  @Rbac({ resource: 'roles', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@Body() dto: CreateRoleDto): Promise<Role> {
     return this.rolesService.create(dto);
   }
 
   @Get('paginated')
-  @Rbac({ resource: 'roles', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findPaginated(@Query() query: FilterRolesDto): Promise<[Role[], number]> {
     return this.rolesService.findAllPaginated(query);
   }
 
   @Get()
-  @Rbac({ resource: 'roles', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findAll(): Promise<Role[]> {
     return this.rolesService.findAll();
   }
 
   @Get('id/:id')
-  @Rbac({ resource: 'roles', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findOne(@Param('id') id: string): Promise<Role> {
     return this.rolesService.findOne(id);
   }
 
   @Patch('id/:id')
-  @Rbac({ resource: 'roles', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto): Promise<Role> {
     return this.rolesService.update(id, updateRoleDto);
   }
 
   @Delete('id/:id')
-  @Rbac({ resource: 'roles', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.rolesService.remove(id);
   }

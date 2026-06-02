@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { In, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FilterRolesDto } from './dto/filter-roles.dto';
@@ -18,16 +18,6 @@ export class RolesService {
       return await this.roleRepository.save(dto);
     } catch {
       throw new ConflictException('Création du rôle impossible');
-    }
-  }
-
-  async signUpRoles(): Promise<Role[]> {
-    try {
-      return await this.roleRepository.find({
-        where: { name: Not(In(['admin', 'staff'])) }
-      });
-    } catch {
-      throw new BadRequestException('Rôles introuvables');
     }
   }
 
