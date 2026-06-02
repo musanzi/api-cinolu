@@ -4,20 +4,23 @@ import { Repository } from 'typeorm';
 import { Venture } from '../entities/venture.entity';
 import { CreateVentureDto } from '../dto/create-venture.dto';
 import { UpdateVentureDto } from '../dto/update-venture.dto';
-import { FilterVenturesDto } from '../dto/filter-ventures.dto';
+import { FilterVenturesInterface } from '../interfaces/filter-ventures.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class VenturesService {
+export class VenturesService extends AbstractRepository<Venture> {
   constructor(
     @InjectRepository(Venture)
-    private ventureRepository: Repository<Venture>,
+    repository: Repository<Venture>,
     private eventEmitter: EventEmitter2
-  ) {}
+  ) {
+    super(repository);
+  }
 
   async create(userId: string, dto: CreateVentureDto): Promise<Venture> {
     try {
-      const savedVenture = await this.ventureRepository.save({
+      const savedVenture = await this.createEntity({
         ...dto,
         owner: { id: userId }
       });
@@ -30,31 +33,20 @@ export class VenturesService {
   }
 
   async findPublished(): Promise<Venture[]> {
-    try {
-      return await this.ventureRepository.find({
-        where: { is_published: true },
-        relations: ['gallery', 'products', 'owner']
-      });
-    } catch {
-      throw new NotFoundException('Entreprises introuvables');
-    }
+    return await this.findEntities({ where: { is_published: true }, relations: ['gallery', 'products', 'owner'] });
   }
 
   async findBySlug(slug: string): Promise<Venture> {
-    try {
-      return await this.ventureRepository.findOneOrFail({
-        where: { slug },
-        relations: ['gallery', 'products', 'products.gallery', 'owner', 'documents']
-      });
-    } catch {
-      throw new NotFoundException('Entreprise introuvable');
-    }
+    return await this.findEntity({
+      where: { slug },
+      relations: ['gallery', 'products', 'products.gallery', 'owner', 'documents']
+    });
   }
 
   async togglePublish(slug: string): Promise<Venture> {
     try {
       const venture = await this.findBySlug(slug);
-      const updatedVenture = await this.ventureRepository.save({ ...venture, is_published: !venture.is_published });
+      const updatedVenture = await this.updateEntity(venture.id, { is_published: !venture.is_published });
       if (updatedVenture.is_published) this.eventEmitter.emit('venture.approved', updatedVenture);
       if (!updatedVenture.is_published) this.eventEmitter.emit('venture.rejected', updatedVenture);
       return updatedVenture;
@@ -66,7 +58,7 @@ export class VenturesService {
   async findByUser(page: string, userId: string): Promise<[Venture[], number]> {
     const skip = (+(page || 1) - 1) * 40;
     try {
-      return await this.ventureRepository.findAndCount({
+      return await this.repository.findAndCount({
         where: { owner: { id: userId } },
         skip,
         take: 40,
@@ -78,76 +70,38 @@ export class VenturesService {
   }
 
   async findByUserUnpaginated(userId: string): Promise<Venture[]> {
-    try {
-      return await this.ventureRepository.find({
-        where: { owner: { id: userId } },
-        order: { created_at: 'DESC' }
-      });
-    } catch {
-      throw new NotFoundException('Entreprises introuvables');
-    }
+    return await this.findEntities({ where: { owner: { id: userId } }, order: { created_at: 'DESC' } });
   }
 
-  async findAll(queryParams: FilterVenturesDto): Promise<[Venture[], number]> {
-    try {
-      const { page = 1, q } = queryParams;
-      const take = 40;
-      const skip = (+page - 1) * take;
-      const query = this.ventureRepository.createQueryBuilder('venture').leftJoinAndSelect('venture.owner', 'owner');
-      if (q) query.where('venture.name LIKE :q OR venture.description LIKE :q', { q: `%${q}%` });
-      return await query.orderBy('venture.created_at', 'DESC').skip(skip).take(take).getManyAndCount();
-    } catch {
-      throw new BadRequestException('Entreprises introuvables');
-    }
+  async findAll(queryParams: FilterVenturesInterface): Promise<[Venture[], number]> {
+    const { page, q } = queryParams;
+    const query = this.repository.createQueryBuilder('venture').leftJoinAndSelect('venture.owner', 'owner');
+    if (q) query.where('venture.name LIKE :q OR venture.description LIKE :q', { q: `%${q}%` });
+    return await this.findPaginatedEntities(query.orderBy('venture.created_at', 'DESC'), { page, take: 40 });
   }
 
   async findOne(id: string): Promise<Venture> {
-    try {
-      return await this.ventureRepository.findOneOrFail({
-        where: { id },
-        relations: ['gallery', 'owner']
-      });
-    } catch {
-      throw new NotFoundException('Entreprise introuvable');
-    }
+    return await this.findEntity({ where: { id }, relations: ['gallery', 'owner'] });
   }
 
   async update(slug: string, dto: UpdateVentureDto): Promise<Venture> {
     try {
       const venture = await this.findBySlug(slug);
-      Object.assign(venture, dto);
-      return await this.ventureRepository.save(venture);
+      return await this.updateEntity(venture.id, dto);
     } catch {
       throw new BadRequestException('Mise à jour impossible');
     }
   }
 
   async setLogo(id: string, logo: string): Promise<Venture> {
-    try {
-      const venture = await this.findOne(id);
-      venture.logo = logo;
-      return await this.ventureRepository.save(venture);
-    } catch {
-      throw new BadRequestException('Ajout du logo impossible');
-    }
+    return await this.updateEntity(id, { logo });
   }
 
   async setCover(id: string, cover: string): Promise<Venture> {
-    try {
-      const venture = await this.findOne(id);
-      venture.cover = cover;
-      return await this.ventureRepository.save(venture);
-    } catch {
-      throw new BadRequestException('Ajout de couverture impossible');
-    }
+    return await this.updateEntity(id, { cover });
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      const venture = await this.findOne(id);
-      await this.ventureRepository.softDelete(venture.id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 }

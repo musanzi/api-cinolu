@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateMentorDto } from '../dto/create-mentor.dto';
-import { FilterMentorsDto } from '../dto/filter-mentors.dto';
+import { FilterMentorsInterface } from '../interfaces/filter-mentors.interface';
 import { MentorRequestDto } from '../dto/mentor-request.dto';
 import { UpdateMentorDto } from '../dto/update-mentor.dto';
 import { UpdateMentorRequestDto } from '../dto/update-mentor-request.dto';
@@ -37,7 +37,7 @@ export class MentorsController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: FilterMentorsDto): Promise<[MentorProfile[], number]> {
+  findPaginated(@Query() query: FilterMentorsInterface): Promise<[MentorProfile[], number]> {
     return this.mentorsService.findFiltered(query);
   }
 

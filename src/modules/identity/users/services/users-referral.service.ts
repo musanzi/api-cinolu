@@ -4,18 +4,21 @@ import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class UsersReferralService {
+export class UsersReferralService extends AbstractRepository<User> {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    repository: Repository<User>,
     private readonly usersService: UsersService
-  ) {}
+  ) {
+    super(repository);
+  }
 
   async saveReferralCode(user: User): Promise<User> {
     try {
-      await this.userRepository.update(user.id, {
+      await this.repository.update(user.id, {
         referral_code: this.generateReferralCode()
       });
       return await this.usersService.findByEmail(user.email);
@@ -28,7 +31,7 @@ export class UsersReferralService {
     try {
       const take = 20;
       const skip = (+page - 1) * take;
-      return await this.userRepository
+      return await this.repository
         .createQueryBuilder('u')
         .loadRelationCountAndMap('u.referralsCount', 'u.referrals')
         .where('u.referred_by.id = :id', { id: user.id })
@@ -42,7 +45,7 @@ export class UsersReferralService {
   }
 
   async findAmbassadors(): Promise<[User[], number]> {
-    const query = this.userRepository
+    const query = this.repository
       .createQueryBuilder('u')
       .loadRelationCountAndMap('u.referralsCount', 'u.referrals');
     const users = await query.getMany();
@@ -52,7 +55,7 @@ export class UsersReferralService {
 
   async findAmbassadorByEmail(email: string): Promise<User> {
     try {
-      return await this.userRepository
+      return await this.repository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.ventures', 'ventures')
         .loadRelationCountAndMap('user.referralsCount', 'user.referrals')

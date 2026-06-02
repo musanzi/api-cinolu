@@ -4,19 +4,22 @@ import { Repository } from 'typeorm';
 import { format } from 'fast-csv';
 import { Response } from 'express';
 import { User } from '../entities/user.entity';
-import { FilterUsersDto } from '../dto/filter-users.dto';
+import { FilterUsersInterface } from '../interfaces/filter-users.interface';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class UsersExportService {
+export class UsersExportService extends AbstractRepository<User> {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
-  ) {}
+    repository: Repository<User>
+  ) {
+    super(repository);
+  }
 
-  async exportCSV(queryParams: FilterUsersDto, res: Response): Promise<void> {
+  async exportCSV(queryParams: FilterUsersInterface, res: Response): Promise<void> {
     try {
       const { q } = queryParams;
-      const query = this.userRepository
+      const query = this.repository
         .createQueryBuilder('user')
         .select(['user.name', 'user.email', 'user.phone_number'])
         .orderBy('user.updated_at', 'DESC');

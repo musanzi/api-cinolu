@@ -5,36 +5,33 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { RolesService } from '../../../identity/roles/roles.service';
-import { FilterUsersDto } from '../dto/filter-users.dto';
+import { FilterUsersInterface } from '../interfaces/filter-users.interface';
 import { SignUpDto } from '../../../auth/dto/sign-up.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomBytes } from 'crypto';
 import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
 import { SignUpResult } from '../types/sign-up-result.type';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class UsersService {
+export class UsersService extends AbstractRepository<User> {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    repository: Repository<User>,
     private rolesService: RolesService,
     private eventEmitter: EventEmitter2
-  ) {}
+  ) {
+    super(repository);
+  }
 
   async findByIds(ids: string[]): Promise<User[]> {
-    try {
-      return await this.userRepository.find({
-        where: { id: In(ids) }
-      });
-    } catch {
-      throw new BadRequestException('Utilisateurs introuvables');
-    }
+    return await this.findEntities({ where: { id: In(ids) } });
   }
 
   async findStaff(): Promise<User[]> {
     try {
       const role = await this.rolesService.findByName('staff');
-      return await this.userRepository.find({
+      return await this.findEntities({
         where: { roles: { id: role.id } },
         relations: ['roles']
       });
@@ -48,7 +45,7 @@ export class UsersService {
       const role = await this.rolesService.findByName(roleName);
       const user = await this.findOne(userId);
       user.roles = [role];
-      return await this.userRepository.save(user);
+      return await this.updateEntity(user.id, { roles: [role] });
     } catch {
       throw new BadRequestException('Attribution du rôle impossible');
     }
@@ -56,7 +53,7 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     try {
-      return await this.userRepository.save({
+      return await this.createEntity({
         ...dto,
         password: 'user1234',
         referral_code: this.generateReferralCode(),
@@ -69,7 +66,7 @@ export class UsersService {
 
   async findEntrepreneurs(): Promise<User[]> {
     try {
-      const query = this.userRepository
+      const query = this.repository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.ventures', 'ventures')
         .where('ventures.id IS NOT NULL');
@@ -83,16 +80,12 @@ export class UsersService {
     return randomBytes(9).toString('base64url');
   }
 
-  async findAll(queryParams: FilterUsersDto): Promise<[User[], number]> {
+  async findAll(queryParams: FilterUsersInterface): Promise<[User[], number]> {
     try {
-      const { page = 1, q } = queryParams;
-      const take = 50;
-      const skip = (+page - 1) * take;
-      const query = this.userRepository
-        .createQueryBuilder('u')
-        .loadRelationCountAndMap('u.referralsCount', 'u.referrals');
+      const { page, q } = queryParams;
+      const query = this.repository.createQueryBuilder('u').loadRelationCountAndMap('u.referralsCount', 'u.referrals');
       if (q) query.where('u.name LIKE :q OR u.email LIKE :q', { q: `%${q}%` });
-      return await query.skip(skip).take(take).getManyAndCount();
+      return await this.findPaginatedEntities(query, { page, take: 50 });
     } catch {
       throw new BadRequestException('Utilisateurs introuvables');
     }
@@ -101,7 +94,7 @@ export class UsersService {
   async search(q: string): Promise<User[]> {
     try {
       const searchTerm = `%${q.trim()}%`;
-      return await this.userRepository
+      return await this.repository
         .createQueryBuilder('u')
         .where('u.name LIKE :q OR u.email LIKE :q', { q: searchTerm })
         .take(20)
@@ -113,9 +106,7 @@ export class UsersService {
 
   async referredBy(referral_code: string): Promise<User> {
     try {
-      return await this.userRepository.findOne({
-        where: { referral_code }
-      });
+      return await this.repository.findOne({ where: { referral_code } });
     } catch {
       throw new BadRequestException('Parrain introuvable');
     }
@@ -138,7 +129,7 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOneOrFail({
+      const user = await this.findEntity({
         where: { id },
         relations: ['roles', 'mentor_profile']
       });
@@ -150,11 +141,11 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOneOrFail({
+      const user = await this.findEntity({
         where: { email },
         relations: ['roles', 'mentor_profile']
       });
-      user['referralsCount'] = await this.userRepository.count({
+      user['referralsCount'] = await this.repository.count({
         where: { referred_by: { id: user.id } }
       });
       return this.mapUserRoles(user);
@@ -165,14 +156,14 @@ export class UsersService {
 
   async findByEmailWithPassword(email: string): Promise<User> {
     try {
-      const user = await this.userRepository
+      const user = await this.repository
         .createQueryBuilder('user')
         .addSelect('user.password')
         .leftJoinAndSelect('user.roles', 'roles')
         .leftJoinAndSelect('user.mentor_profile', 'mentor_profile')
         .where('user.email = :email', { email })
         .getOneOrFail();
-      user['referralsCount'] = await this.userRepository.count({
+      user['referralsCount'] = await this.repository.count({
         where: { referred_by: { id: user.id } }
       });
       return this.mapUserRoles(user);
@@ -183,10 +174,7 @@ export class UsersService {
 
   async findOneByEmail(email: string): Promise<User> {
     try {
-      return await this.userRepository.findOneOrFail({
-        where: { email },
-        relations: ['roles']
-      });
+      return await this.findEntity({ where: { email }, relations: ['roles'] });
     } catch {
       throw new NotFoundException("Cet utilisateur n'existe pas");
     }
@@ -194,13 +182,13 @@ export class UsersService {
 
   async findOrCreate(dto: CreateUserDto): Promise<User> {
     try {
-      const user = await this.userRepository.findOne({
+      const user = await this.repository.findOne({
         where: { email: dto.email },
         relations: ['roles']
       });
       if (user) return await this.update(user.id, dto);
       const role = await this.rolesService.findByName('user');
-      const newUser = await this.userRepository.save({
+      const newUser = await this.repository.save({
         ...dto,
         referral_code: this.generateReferralCode(),
         roles: [role]
@@ -224,12 +212,12 @@ export class UsersService {
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     try {
-      const oldUser = await this.userRepository.findOneOrFail({
+      const oldUser = await this.findEntity({
         where: { id },
         relations: ['roles']
       });
       delete oldUser.password;
-      await this.userRepository.save({
+      await this.saveEntity({
         ...oldUser,
         ...dto,
         roles: dto.roles?.map((id) => ({ id })) || oldUser.roles
@@ -241,24 +229,19 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.userRepository.softDelete(id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 
   async clear(): Promise<number> {
     try {
-      const users = await this.userRepository.find({
+      const users = await this.findEntities({
         select: ['id', 'email', 'name']
       });
       const idsToDelete = users
         .filter((user) => !this.isValidEmail(user.email) || !this.isValidName(user.name))
         .map((user) => user.id);
       if (!idsToDelete.length) return 0;
-      await this.userRepository.delete(idsToDelete);
+      await this.repository.delete(idsToDelete);
       return idsToDelete.length;
     } catch {
       throw new BadRequestException('Nettoyage impossible');
@@ -283,7 +266,7 @@ export class UsersService {
   }
 
   private async findSignUpUser(email: string): Promise<User | null> {
-    return await this.userRepository.findOne({
+    return await this.repository.findOne({
       where: { email },
       relations: ['roles']
     });
@@ -292,7 +275,7 @@ export class UsersService {
   private async createSignUpUser(dto: SignUpDto): Promise<User> {
     const role = await this.rolesService.findByName('user');
     const referredBy = await this.findReferredUser(dto.referral_code);
-    const newUser = await this.userRepository.save({
+    const newUser = await this.repository.save({
       email: dto.email,
       password: dto.password,
       referred_by: referredBy ? { id: referredBy.id } : null,

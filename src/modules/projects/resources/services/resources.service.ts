@@ -1,37 +1,35 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateResourceDto } from '../dto/create-resource.dto';
-import { FilterResourcesDto } from '../dto/filter-resources.dto';
+import { FilterResourcesInterface } from '../interfaces/filter-resources.interface';
 import { UpdateResourceDto } from '../dto/update-resource.dto';
 import { Resource } from '../entities/resource.entity';
 import { ProjectsService } from '../../../projects/projects/services/projects.service';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class ResourcesService {
+export class ResourcesService extends AbstractRepository<Resource> {
   constructor(
     @InjectRepository(Resource)
-    private readonly resourceRepository: Repository<Resource>,
+    repository: Repository<Resource>,
     private readonly projectsService: ProjectsService,
     private readonly phasesService: PhasesService
-  ) {}
-
-  async create(dto: CreateResourceDto, file: Express.Multer.File): Promise<Resource> {
-    try {
-      const resource = this.resourceRepository.create({
-        ...dto,
-        file: file.filename,
-        project: { id: dto.project_id },
-        phase: { id: dto.phase_id }
-      });
-      return await this.resourceRepository.save(resource);
-    } catch {
-      throw new BadRequestException('Création de ressource impossible');
-    }
+  ) {
+    super(repository);
   }
 
-  async findByProject(projectId: string, queryParams: FilterResourcesDto): Promise<[Resource[], number]> {
+  async create(dto: CreateResourceDto, file: Express.Multer.File): Promise<Resource> {
+    return await this.createEntity({
+      ...dto,
+      file: file.filename,
+      project: { id: dto.project_id },
+      phase: { id: dto.phase_id }
+    });
+  }
+
+  async findByProject(projectId: string, queryParams: FilterResourcesInterface): Promise<[Resource[], number]> {
     try {
       await this.projectsService.findOne(projectId);
       return await this.buildScopedQuery('r.projectId = :scopeId', projectId, queryParams).getManyAndCount();
@@ -40,7 +38,7 @@ export class ResourcesService {
     }
   }
 
-  async findByPhase(phaseId: string, queryParams: FilterResourcesDto): Promise<[Resource[], number]> {
+  async findByPhase(phaseId: string, queryParams: FilterResourcesInterface): Promise<[Resource[], number]> {
     try {
       await this.phasesService.findOne(phaseId);
       return await this.buildScopedQuery('r.phaseId = :scopeId', phaseId, queryParams).getManyAndCount();
@@ -50,51 +48,29 @@ export class ResourcesService {
   }
 
   async findOne(id: string): Promise<Resource> {
-    try {
-      return await this.resourceRepository.findOneOrFail({
-        where: { id },
-        relations: ['project', 'phase']
-      });
-    } catch {
-      throw new NotFoundException('Ressource introuvable');
-    }
+    return await this.findEntity({ where: { id }, relations: ['project', 'phase'] });
   }
 
   async update(id: string, dto: UpdateResourceDto): Promise<Resource> {
-    try {
-      const resource = await this.findOne(id);
-      return await this.resourceRepository.save({ ...resource, ...dto });
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    return await this.updateEntity(id, dto);
   }
 
   async setFile(id: string, file: string): Promise<Resource> {
-    try {
-      const resource = await this.findOne(id);
-      return await this.resourceRepository.save({ ...resource, file });
-    } catch {
-      throw new BadRequestException('Mise à jour du fichier impossible');
-    }
+    return await this.updateEntity(id, { file });
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.resourceRepository.softDelete(id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 
   private buildScopedQuery(
     scopeCondition: string,
     scopeId: string,
-    queryParams: FilterResourcesDto
+    queryParams: FilterResourcesInterface
   ): SelectQueryBuilder<Resource> {
     const { page = 1, category } = queryParams;
     const skip = (+page - 1) * 20;
-    const query = this.resourceRepository
+    const query = this.repository
       .createQueryBuilder('r')
       .leftJoinAndSelect('r.project', 'project')
       .leftJoinAndSelect('r.phase', 'phase')

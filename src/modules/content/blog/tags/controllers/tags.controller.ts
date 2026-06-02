@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { TagsService } from '../tags.service';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
-import { FilterTagsDto } from '../dto/filter-tags.dto';
+import { FilterTagsInterface } from '../interfaces/filter-tags.interface';
 import { Tag } from '../entities/tag.entity';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
@@ -20,7 +20,7 @@ export class TagsController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: FilterTagsDto): Promise<[Tag[], number]> {
+  findPaginated(@Query() query: FilterTagsInterface): Promise<[Tag[], number]> {
     return this.tagsService.findFiltered(query);
   }
 

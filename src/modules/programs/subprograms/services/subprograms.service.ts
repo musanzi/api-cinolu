@@ -1,118 +1,66 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subprogram } from '../entities/subprogram.entity';
 import { CreateSubprogramDto } from '../dto/create-subprogram.dto';
 import { UpdateSubprogramDto } from '../dto/update-subprogram.dto';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class SubprogramsService {
+export class SubprogramsService extends AbstractRepository<Subprogram> {
   constructor(
     @InjectRepository(Subprogram)
-    private readonly subprogramRepository: Repository<Subprogram>
-  ) {}
+    repository: Repository<Subprogram>
+  ) {
+    super(repository);
+  }
 
   async create(dto: CreateSubprogramDto): Promise<Subprogram> {
-    try {
-      const subprogram = this.subprogramRepository.create({
-        ...dto,
-        program: { id: dto.programId }
-      });
-      return await this.subprogramRepository.save(subprogram);
-    } catch {
-      throw new BadRequestException('Création du sous-programme impossible');
-    }
+    return await this.createEntity({ ...dto, program: { id: dto.programId } });
   }
 
   async findByProgram(programId: string): Promise<Subprogram[]> {
-    try {
-      return await this.subprogramRepository.find({
-        relations: ['program'],
-        where: { program: { id: programId } },
-        order: { updated_at: 'DESC' }
-      });
-    } catch {
-      throw new NotFoundException('Sous-programmes introuvables');
-    }
+    return await this.findEntities({
+      relations: ['program'],
+      where: { program: { id: programId } },
+      order: { updated_at: 'DESC' }
+    });
   }
 
   async findAll(): Promise<Subprogram[]> {
-    return await this.subprogramRepository.find({
+    return await this.findEntities({
       relations: ['program'],
       order: { updated_at: 'DESC' }
     });
   }
 
   async findBySlug(slug: string): Promise<Subprogram> {
-    try {
-      return await this.subprogramRepository.findOneOrFail({
-        where: { slug },
-        relations: ['projects', 'events']
-      });
-    } catch {
-      throw new NotFoundException('Sous-programme introuvable');
-    }
+    return await this.findEntity({ where: { slug }, relations: ['projects', 'events'] });
   }
 
   async highlight(id: string): Promise<Subprogram> {
-    try {
-      const subprogram = await this.findOne(id);
-      subprogram.is_highlighted = !subprogram.is_highlighted;
-      return await this.subprogramRepository.save(subprogram);
-    } catch {
-      throw new BadRequestException('Mise en avant impossible');
-    }
+    const subprogram = await this.findEntity({ where: { id } });
+    return await this.updateEntity(id, { is_highlighted: !subprogram.is_highlighted });
   }
 
   async togglePublish(id: string): Promise<Subprogram> {
-    try {
-      const subprogram = await this.findOne(id);
-      subprogram.is_published = !subprogram.is_published;
-      return await this.subprogramRepository.save(subprogram);
-    } catch {
-      throw new BadRequestException('Publication impossible');
-    }
+    const subprogram = await this.findEntity({ where: { id } });
+    return await this.updateEntity(id, { is_published: !subprogram.is_published });
   }
 
   async setLogo(id: string, logo: string): Promise<Subprogram> {
-    try {
-      const subprogram = await this.findOne(id);
-      subprogram.logo = logo;
-      return await this.subprogramRepository.save(subprogram);
-    } catch {
-      throw new BadRequestException('Ajout du logo impossible');
-    }
+    return await this.updateEntity(id, { logo });
   }
 
   async findOne(id: string): Promise<Subprogram> {
-    try {
-      return await this.subprogramRepository.findOneOrFail({
-        where: { id }
-      });
-    } catch {
-      throw new NotFoundException('Sous-programme introuvable');
-    }
+    return await this.findEntity({ where: { id } });
   }
 
   async update(id: string, dto: UpdateSubprogramDto): Promise<Subprogram> {
-    try {
-      const subprogram = await this.findOne(id);
-      return await this.subprogramRepository.save({
-        ...subprogram,
-        ...dto,
-        program: dto.programId ? { id: dto.programId } : subprogram.program
-      });
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    return await this.updateEntity(id, { ...dto, ...(dto.programId && { program: { id: dto.programId } }) });
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      const subprogram = await this.findOne(id);
-      await this.subprogramRepository.softDelete(subprogram.id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 }

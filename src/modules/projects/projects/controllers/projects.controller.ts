@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateProjectDto } from '../dto/create-project.dto';
-import { FilterProjectsDto } from '../dto/filter-projects.dto';
+import { FilterProjectsInterface } from '../interfaces/filter-projects.interface';
 import { UpdateProjectDto } from '../dto/update-project.dto';
 import { Project } from '../entities/project.entity';
 import { ProjectsService } from '../services/projects.service';
@@ -20,7 +20,7 @@ export class ProjectsController {
 
   @Get()
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findAll(@Query() query: FilterProjectsDto): Promise<[Project[], number]> {
+  findAll(@Query() query: FilterProjectsInterface): Promise<[Project[], number]> {
     return this.projectsService.findAll(query);
   }
 
@@ -32,7 +32,7 @@ export class ProjectsController {
 
   @Get('published')
   @Public()
-  findPublished(@Query() query: FilterProjectsDto): Promise<[Project[], number]> {
+  findPublished(@Query() query: FilterProjectsInterface): Promise<[Project[], number]> {
     return this.projectsService.findPublished(query);
   }
 

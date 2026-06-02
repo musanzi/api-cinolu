@@ -1,12 +1,25 @@
 import { Public } from '@/modules/auth/decorators/public.decorator';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { CreateOpportunityDto } from '../dto/create-opportunity.dto';
-import { FilterOpportunitiesDto } from '../dto/filter-opportunities.dto';
+import { FilterOpportunitiesInterface } from '../interfaces/filter-opportunities.interface';
 import { UpdateOpportunityDto } from '../dto/update-opportunity.dto';
 import { Opportunity } from '../entities/opportunity.entity';
 import { OpportunitiesService } from '../services/opportunities.service';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('opportunities')
 export class OpportunitiesController {
@@ -20,7 +33,7 @@ export class OpportunitiesController {
 
   @Get()
   @Public()
-  findAll(@Query() query: FilterOpportunitiesDto): Promise<Opportunity[]> {
+  findAll(@Query() query: FilterOpportunitiesInterface): Promise<Opportunity[]> {
     return this.opportunitiesService.findAll(query);
   }
 
@@ -34,6 +47,13 @@ export class OpportunitiesController {
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('opportunityId') opportunityId: string, @Body() dto: UpdateOpportunityDto): Promise<Opportunity> {
     return this.opportunitiesService.update(opportunityId, dto);
+  }
+
+  @Post('id/:opportunityId/cover')
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @UseInterceptors(FileInterceptor('cover', createDiskUploadOptions('./uploads/opportunities')))
+  addCover(@Param('opportunityId') id: string, @UploadedFile() file: Express.Multer.File): Promise<Opportunity> {
+    return this.opportunitiesService.addCover(id, file.filename);
   }
 
   @Delete('id/:opportunityId')

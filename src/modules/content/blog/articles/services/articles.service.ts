@@ -1,146 +1,97 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
-import { FilterArticlesDto } from '../dto/filter-articles.dto';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { FilterArticlesInterface } from '../interfaces/filter-articles.interface';
 
 @Injectable()
-export class ArticlesService {
+export class ArticlesService extends AbstractRepository<Article> {
   constructor(
     @InjectRepository(Article)
-    private articlesRepository: Repository<Article>
-  ) {}
+    repository: Repository<Article>
+  ) {
+    super(repository);
+  }
 
   async create(dto: CreateArticleDto, userId: string): Promise<Article> {
-    try {
-      return await this.articlesRepository.save({
-        ...dto,
-        published_at: dto.published_at ? new Date(dto.published_at) : new Date(),
-        tags: dto.tags.map((id) => ({ id })),
-        author: { id: userId }
-      });
-    } catch {
-      throw new BadRequestException("Création de l'article impossible");
-    }
+    return await this.createEntity({
+      ...dto,
+      published_at: dto.published_at ? new Date(dto.published_at) : new Date(),
+      tags: dto.tags.map((id) => ({ id })),
+      author: { id: userId }
+    });
   }
 
   async highlight(id: string): Promise<Article> {
-    try {
-      const article = await this.findOne(id);
-      return await this.articlesRepository.save({
-        ...article,
-        is_highlighted: !article.is_highlighted
-      });
-    } catch {
-      throw new BadRequestException('Mise en avant impossible');
-    }
+    const article = await this.findEntity({ where: { id } });
+    return await this.updateEntity(id, {
+      is_highlighted: !article.is_highlighted
+    });
   }
 
   async findRecent(): Promise<Article[]> {
-    try {
-      return await this.articlesRepository.find({
-        order: { created_at: 'DESC' },
-        take: 6,
-        relations: ['tags', 'author']
-      });
-    } catch {
-      throw new BadRequestException('Articles introuvables');
-    }
+    return await this.findEntities({
+      order: { created_at: 'DESC' },
+      take: 6,
+      relations: ['tags', 'author']
+    });
   }
 
-  async findAll(dto: FilterArticlesDto): Promise<[Article[], number]> {
-    try {
-      const { q, page = 1, filter = 'all' } = dto;
-      const query = this.articlesRepository.createQueryBuilder('a').orderBy('a.created_at', 'DESC');
-      if (filter === 'published') query.andWhere('a.published_at IS NOT NULL AND a.published_at <= NOW()');
-      if (filter === 'drafts') query.andWhere('a.published_at IS NULL OR a.published_at > NOW()');
-      if (filter === 'highlighted') query.andWhere('a.is_highlighted = :isHighlighted', { isHighlighted: true });
-      if (q) query.andWhere('a.title LIKE :search OR a.content LIKE :search', { search: `%${q}%` });
-      return await query
-        .skip((+page - 1) * 20)
-        .take(20)
-        .getManyAndCount();
-    } catch {
-      throw new BadRequestException('Articles introuvables');
-    }
+  async findAll(queryParams: FilterArticlesInterface): Promise<[Article[], number]> {
+    const { q, page, filter = 'all' } = queryParams;
+    const query = this.repository.createQueryBuilder('a').orderBy('a.created_at', 'DESC');
+    if (filter === 'published') query.andWhere('a.published_at IS NOT NULL AND a.published_at <= NOW()');
+    if (filter === 'drafts') query.andWhere('a.published_at IS NULL OR a.published_at > NOW()');
+    if (filter === 'highlighted') query.andWhere('a.is_highlighted = :isHighlighted', { isHighlighted: true });
+    if (q) query.andWhere('a.title LIKE :search OR a.content LIKE :search', { search: `%${q}%` });
+    return await this.findPaginatedEntities(query, { page, take: 20 });
   }
 
-  async findPublished(dto: FilterArticlesDto): Promise<[Article[], number]> {
-    try {
-      const { page } = dto;
-      const query = this.articlesRepository
-        .createQueryBuilder('a')
-        .leftJoinAndSelect('a.tags', 'tags')
-        .where('a.published_at <= NOW()');
-      if (page) query.skip((+page - 1) * 12).take(12);
-      return await query.orderBy('a.published_at', 'DESC').getManyAndCount();
-    } catch {
-      throw new BadRequestException('Articles introuvables');
-    }
+  async findPublished(queryParams: FilterArticlesInterface): Promise<[Article[], number]> {
+    const query = this.repository
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.tags', 'tags')
+      .where('a.published_at <= NOW()')
+      .orderBy('a.published_at', 'DESC');
+    return await this.findPaginatedEntities(query, { page: queryParams.page, take: 12 });
   }
 
   async findBySlug(slug: string): Promise<Article> {
-    try {
-      return await this.articlesRepository.findOneOrFail({
-        where: { slug },
-        relations: ['tags', 'author', 'gallery']
-      });
-    } catch {
-      throw new BadRequestException('Article introuvable');
-    }
+    return await this.findEntity({
+      where: { slug },
+      relations: ['tags', 'author', 'gallery']
+    });
   }
 
   async togglePublished(id: string): Promise<Article> {
-    try {
-      const article = await this.findOne(id);
-      article.published_at = article.published_at ? null : new Date();
-      return await this.articlesRepository.save(article);
-    } catch {
-      throw new BadRequestException('Publication impossible');
-    }
+    const article = await this.findEntity({ where: { id } });
+    return await this.updateEntity(id, {
+      published_at: article.published_at ? null : new Date()
+    });
   }
 
   async findOne(id: string): Promise<Article> {
-    try {
-      return await this.articlesRepository.findOneOrFail({
-        where: { id },
-        relations: ['tags', 'author', 'gallery']
-      });
-    } catch {
-      throw new BadRequestException('Article introuvable');
-    }
+    return await this.findEntity({
+      where: { id },
+      relations: ['tags', 'author', 'gallery']
+    });
   }
 
   async update(id: string, dto: UpdateArticleDto): Promise<Article> {
-    try {
-      const article = await this.findOne(id);
-      this.articlesRepository.merge(article, {
-        ...dto,
-        tags: dto.tags.map((id) => ({ id })) || article.tags
-      });
-      return await this.articlesRepository.save(article);
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    return await this.updateEntity(id, {
+      ...dto,
+      tags: dto.tags ? dto.tags.map((id) => ({ id })) : null
+    });
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.articlesRepository.delete(id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 
   async setImage(id: string, image: string): Promise<Article> {
-    try {
-      const article = await this.findOne(id);
-      return await this.articlesRepository.save({ ...article, image });
-    } catch {
-      throw new BadRequestException("Ajout d'image impossible");
-    }
+    return await this.updateEntity(id, { image });
   }
 }

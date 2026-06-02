@@ -3,7 +3,7 @@ import { ExpertisesService } from '../expertises.service';
 import { CreateExpertiseDto } from '../dto/create-expertise.dto';
 import { UpdateExpertiseDto } from '../dto/update-expertise.dto';
 import { Expertise } from '../entities/expertise.entity';
-import { FilterExpertisesDto } from '../dto/filter-expertises.dto';
+import { FilterExpertisesInterface } from '../interfaces/filter-expertises.interface';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
 
@@ -19,7 +19,7 @@ export class ExpertisesController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: FilterExpertisesDto): Promise<[Expertise[], number]> {
+  findPaginated(@Query() query: FilterExpertisesInterface): Promise<[Expertise[], number]> {
     return this.expertisesService.findFiltered(query);
   }
 

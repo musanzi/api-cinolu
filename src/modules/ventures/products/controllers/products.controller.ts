@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
-import { FilterProductsDto } from '../dto/filter-products.dto';
+import { FilterProductsInterface } from '../interfaces/filter-products.interface';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../entities/product.entity';
 import { ProductsService } from '../services/products.service';
@@ -18,7 +18,7 @@ export class ProductsController {
   }
 
   @Get('me')
-  findMine(@CurrentUser() user: User, @Query() query: FilterProductsDto): Promise<[Product[], number]> {
+  findMine(@CurrentUser() user: User, @Query() query: FilterProductsInterface): Promise<[Product[], number]> {
     return this.productsService.findAll(user.id, query);
   }
 

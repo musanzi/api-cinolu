@@ -4,7 +4,7 @@ import { ProjectCategoriesService } from '../categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { ProjectCategory as Category } from '../entities/category.entity';
-import { QueryParams } from '../utils/query-params.type';
+import { FilterCategoriesInterface } from '../interfaces/filter-categories.interface';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
 
@@ -26,7 +26,7 @@ export class ProjectCategoriesController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: QueryParams): Promise<[Category[], number]> {
+  findPaginated(@Query() query: FilterCategoriesInterface): Promise<[Category[], number]> {
     return this.projectCategoriesService.findAllPaginated(query);
   }
 

@@ -3,13 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateExperienceDto } from '../dto/create-experience.dto';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class MentorExperiencesService {
+export class MentorExperiencesService extends AbstractRepository<Experience> {
   constructor(
     @InjectRepository(Experience)
-    private experienceRepository: Repository<Experience>
-  ) {}
+    repository: Repository<Experience>
+  ) {
+    super(repository);
+  }
 
   async saveExperiences(mentorProfileId: string, dto: CreateExperienceDto[]): Promise<Experience[]> {
     try {
@@ -35,7 +38,7 @@ export class MentorExperiencesService {
   }
 
   private async getExistingExperiences(mentorProfileId: string): Promise<Experience[]> {
-    return await this.experienceRepository.find({
+    return await this.findEntities({
       where: { mentor_profile: { id: mentorProfileId } }
     });
   }
@@ -50,14 +53,11 @@ export class MentorExperiencesService {
 
   private async updateExperience(dto: CreateExperienceDto, existingMap: Map<string, Experience>): Promise<Experience> {
     const existing = existingMap.get(dto.id!);
-    return await this.experienceRepository.save({
-      ...existing,
-      ...dto
-    });
+    return await this.updateEntity(dto.id!, { ...existing, ...dto });
   }
 
   private async createExperience(dto: CreateExperienceDto, mentorProfileId: string): Promise<Experience> {
-    return await this.experienceRepository.save({
+    return await this.createEntity({
       ...dto,
       start_date: new Date(dto.start_date),
       end_date: new Date(dto.end_date),
@@ -68,7 +68,7 @@ export class MentorExperiencesService {
   private async deleteRemovedExperiences(existingExperiences: Experience[], processedIds: Set<string>): Promise<void> {
     const idsToDelete = existingExperiences.filter((exp) => !processedIds.has(exp.id)).map((exp) => exp.id);
     if (idsToDelete.length > 0) {
-      await this.experienceRepository.delete(idsToDelete);
+      await this.repository.delete(idsToDelete);
     }
   }
 }

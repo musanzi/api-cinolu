@@ -1,7 +1,7 @@
 import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateProgramDto } from '../dto/create-program.dto';
-import { FilterProgramsDto } from '../dto/filter-programs.dto';
+import { FilterProgramsInterface } from '../interfaces/filter-programs.interface';
 import { UpdateProgramDto } from '../dto/update-program.dto';
 import { Program } from '../entities/program.entity';
 import { ProgramsService } from '../services/programs.service';
@@ -44,7 +44,7 @@ export class ProgramsController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: FilterProgramsDto): Promise<[Program[], number]> {
+  findPaginated(@Query() query: FilterProgramsInterface): Promise<[Program[], number]> {
     return this.programsService.findFiltered(query);
   }
 

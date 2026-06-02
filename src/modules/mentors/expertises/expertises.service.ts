@@ -1,61 +1,45 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateExpertiseDto } from './dto/create-expertise.dto';
 import { UpdateExpertiseDto } from './dto/update-expertise.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Expertise } from './entities/expertise.entity';
-import { FilterExpertisesDto } from './dto/filter-expertises.dto';
+import { FilterExpertisesInterface } from './interfaces/filter-expertises.interface';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class ExpertisesService {
+export class ExpertisesService extends AbstractRepository<Expertise> {
   constructor(
     @InjectRepository(Expertise)
-    private expertiseRepository: Repository<Expertise>
-  ) {}
-
-  async create(dto: CreateExpertiseDto): Promise<Expertise> {
-    try {
-      return await this.expertiseRepository.save(dto);
-    } catch {
-      throw new BadRequestException("Création de l'expertise impossible");
-    }
+    repository: Repository<Expertise>
+  ) {
+    super(repository);
   }
 
-  async findFiltered(dto: FilterExpertisesDto): Promise<[Expertise[], number]> {
+  async create(dto: CreateExpertiseDto): Promise<Expertise> {
+    return await this.createEntity(dto);
+  }
+
+  async findFiltered(dto: FilterExpertisesInterface): Promise<[Expertise[], number]> {
     const { q, page } = dto;
-    const query = this.expertiseRepository.createQueryBuilder('e');
+    const query = this.repository.createQueryBuilder('e');
     if (q) query.andWhere('e.name LIKE :search', { search: `%${q}%` });
-    if (page) query.skip((+page - 1) * 10).take(10);
-    return await query.getManyAndCount();
+    return await this.findPaginatedEntities(query, { page, take: 10 });
   }
 
   async findAll(): Promise<Expertise[]> {
-    return await this.expertiseRepository.find();
+    return await this.findEntities();
   }
 
   async findOne(id: string): Promise<Expertise> {
-    try {
-      return await this.expertiseRepository.findOneOrFail({ where: { id } });
-    } catch {
-      throw new NotFoundException('Expertise introuvable');
-    }
+    return await this.findEntity({ where: { id } });
   }
 
   async update(id: string, dto: UpdateExpertiseDto): Promise<Expertise> {
-    try {
-      await this.expertiseRepository.update(id, dto);
-      return await this.findOne(id);
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    return await this.updateEntity(id, dto);
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.expertiseRepository.softDelete(id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 }

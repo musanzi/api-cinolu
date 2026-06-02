@@ -1,64 +1,45 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tag } from './entities/tag.entity';
 import { Repository } from 'typeorm';
-import { FilterTagsDto } from './dto/filter-tags.dto';
+import { FilterTagsInterface } from './interfaces/filter-tags.interface';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class TagsService {
+export class TagsService extends AbstractRepository<Tag> {
   constructor(
     @InjectRepository(Tag)
-    private tagRepository: Repository<Tag>
-  ) {}
+    repository: Repository<Tag>
+  ) {
+    super(repository);
+  }
 
   async create(dto: CreateTagDto): Promise<Tag> {
-    try {
-      const tag = this.tagRepository.create(dto);
-      return await this.tagRepository.save(tag);
-    } catch {
-      throw new BadRequestException('Création du tag impossible');
-    }
+    return await this.createEntity(dto);
   }
 
   async findAll(): Promise<Tag[]> {
-    return await this.tagRepository.find();
+    return await this.findEntities();
   }
 
-  async findFiltered(dto: FilterTagsDto): Promise<[Tag[], number]> {
+  async findFiltered(dto: FilterTagsInterface): Promise<[Tag[], number]> {
     const { q, page } = dto;
-    const query = this.tagRepository.createQueryBuilder('t');
+    const query = this.repository.createQueryBuilder('t');
     if (q) query.andWhere('t.name LIKE :search', { search: `%${q}%` });
-    if (page) query.skip((+page - 1) * 10).take(10);
-    return await query.getManyAndCount();
+    return await this.findPaginatedEntities(query, { page, take: 10 });
   }
 
   async findOne(id: string): Promise<Tag> {
-    try {
-      return await this.tagRepository.findOne({
-        where: { id }
-      });
-    } catch {
-      throw new NotFoundException('Tag introuvable');
-    }
+    return await this.findEntity({ where: { id } });
   }
 
   async update(id: string, dto: UpdateTagDto): Promise<Tag> {
-    try {
-      await this.tagRepository.update(id, dto);
-      return await this.tagRepository.findOne({ where: { id } });
-    } catch {
-      throw new NotFoundException('Tag introuvable');
-    }
+    return await this.updateEntity(id, dto);
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.tagRepository.delete(id);
-    } catch {
-      throw new NotFoundException('Tag introuvable');
-    }
+    await this.hardDeleteEntity(id);
   }
 }

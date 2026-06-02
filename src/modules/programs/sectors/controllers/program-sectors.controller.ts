@@ -4,7 +4,7 @@ import { ProgramSectorsService } from '../services/sectors.service';
 import { CreateSectorDto } from '../dto/create-sector.dto';
 import { UpdateSectorDto } from '../dto/update-sector.dto';
 import { ProgramSector } from '../entities/sector.entity';
-import { QueryParams } from '../utils/query-params.type';
+import { FilterSectorsInterface } from '../interfaces/filter-sectors.interface';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
 
@@ -26,7 +26,7 @@ export class ProgramSectorsController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: QueryParams): Promise<[ProgramSector[], number]> {
+  findPaginated(@Query() query: FilterSectorsInterface): Promise<[ProgramSector[], number]> {
     return this.programSectorsService.findPaginated(query);
   }
 

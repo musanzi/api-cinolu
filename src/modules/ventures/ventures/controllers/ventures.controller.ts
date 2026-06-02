@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateVentureDto } from '../dto/create-venture.dto';
-import { FilterVenturesDto } from '../dto/filter-ventures.dto';
+import { FilterVenturesInterface } from '../interfaces/filter-ventures.interface';
 import { UpdateVentureDto } from '../dto/update-venture.dto';
 import { Venture } from '../entities/venture.entity';
 import { VenturesService } from '../services/ventures.service';
@@ -23,7 +23,7 @@ export class VenturesController {
   }
 
   @Get()
-  findAll(@Query() query: FilterVenturesDto): Promise<[Venture[], number]> {
+  findAll(@Query() query: FilterVenturesInterface): Promise<[Venture[], number]> {
     return this.venturesService.findAll(query);
   }
 

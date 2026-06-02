@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
-import { FilterNotificationsDto } from '../dto/filter-notifications.dto';
+import { FilterNotificationsInterface } from '../interfaces/filter-notifications.interface';
 import { UpdateNotificationDto } from '../dto/update-notification.dto';
 import { Notification } from '../entities/notification.entity';
 import { NotificationsService } from '../services/notifications.service';
@@ -13,7 +13,7 @@ export class NotificationsController {
   @Get('project/:projectId')
   findAllByProject(
     @Param('projectId') projectId: string,
-    @Query() query: FilterNotificationsDto
+    @Query() query: FilterNotificationsInterface
   ): Promise<[Notification[], number]> {
     return this.notificationsService.findByProject(projectId, query);
   }

@@ -9,23 +9,26 @@ import { ProjectParticipationService } from './project-participations.service';
 import { ParticipationReviewDto } from '../dto/participation-review.dto';
 import { Phase } from '../../../projects/phases/entities/phase.entity';
 import { UpdateParticipationReviewDto } from '../dto/update-participation-review.dto';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class ProjectParticipationReviewService {
+export class ProjectParticipationReviewService extends AbstractRepository<ProjectParticipationReview> {
   private readonly PROMOTION_SCORE = 60;
 
   constructor(
     @InjectRepository(ProjectParticipationReview)
-    private readonly reviewRepository: Repository<ProjectParticipationReview>,
+    repository: Repository<ProjectParticipationReview>,
     @Inject(forwardRef(() => ProjectParticipationService))
     private readonly participationService: ProjectParticipationService,
     private readonly phasesService: PhasesService,
     private readonly eventEmitter: EventEmitter2
-  ) {}
+  ) {
+    super(repository);
+  }
 
   async removeHistoryForPhase(participationIds: string[], phaseId: string): Promise<void> {
     try {
-      await this.reviewRepository.delete({
+      await this.repository.delete({
         participation: { id: In(participationIds) },
         phase: { id: phaseId }
       });
@@ -43,7 +46,7 @@ export class ProjectParticipationReviewService {
       const participation = await this.participationService.findOne(participationId);
       const phase = await this.phasesService.findOne(dto.phaseId);
       this.ensureParticipationInPhase(participation, dto.phaseId);
-      const existing = await this.reviewRepository.findOne({
+      const existing = await this.repository.findOne({
         where: {
           participation: { id: participationId },
           phase: { id: dto.phaseId }
@@ -53,7 +56,7 @@ export class ProjectParticipationReviewService {
         throw new BadRequestException('Avis déjà enregistré');
       }
       const nextPhase = this.findNextPhase(participation.project?.phases ?? [], dto.phaseId, false);
-      const review = await this.reviewRepository.save({
+      const review = await this.createEntity({
         participation: { id: participationId },
         phase: { id: dto.phaseId },
         reviewer: { id: reviewerId },
@@ -80,8 +83,7 @@ export class ProjectParticipationReviewService {
       const phase = await this.phasesService.findOne(existing.phase.id);
       this.ensureParticipationInPhase(participation, existing.phase.id);
       const nextPhase = this.findNextPhase(participation.project?.phases ?? [], existing.phase.id, false);
-      const review = await this.reviewRepository.save({
-        id: existing.id,
+      const review = await this.updateEntity(existing.id, {
         participation: { id: participationId },
         phase: { id: existing.phase.id },
         reviewer: { id: reviewerId },
@@ -105,7 +107,7 @@ export class ProjectParticipationReviewService {
 
   private async findReview(reviewId: string, participationId: string): Promise<ProjectParticipationReview> {
     try {
-      return await this.reviewRepository.findOneOrFail({
+      return await this.repository.findOneOrFail({
         where: { id: reviewId, participation: { id: participationId } },
         relations: ['phase']
       });

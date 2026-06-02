@@ -11,7 +11,7 @@ import { ProjectsService } from './projects.service';
 import { MoveParticipantsDto } from '../dto/move-participants.dto';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
 import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
-import { FilterParticipationsDto } from '../dto/filter-participations.dto';
+import { FilterParticipationsInterface } from '../interfaces/filter-participations.interface';
 import { ProjectParticipationReviewService } from './project-participation-review.service';
 
 @Injectable()
@@ -90,7 +90,7 @@ export class ProjectParticipationService {
 
   async findParticipations(
     projectId: string,
-    queryParams: FilterParticipationsDto
+    queryParams: FilterParticipationsInterface
   ): Promise<[ProjectParticipation[], number]> {
     try {
       const { page = 1, phaseId, q } = queryParams;

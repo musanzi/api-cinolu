@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { FilterUsersDto } from '../dto/filter-users.dto';
+import { FilterUsersInterface } from '../interfaces/filter-users.interface';
 import { UsersExportService } from '../services/users-export.service';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
@@ -11,7 +11,7 @@ export class UsersExportController {
 
   @Get('export/users.csv')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  async exportCSV(@Query() query: FilterUsersDto, @Res() res: Response): Promise<void> {
+  async exportCSV(@Query() query: FilterUsersInterface, @Res() res: Response): Promise<void> {
     await this.usersExportService.exportCSV(query, res);
   }
 }

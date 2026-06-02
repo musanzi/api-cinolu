@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { CommentsService } from '../comments.service';
+import { CommentsService } from '../services/comments.service';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { Comment } from '../entities/comment.entity';
-import { FilterCommentsDto } from '../dto/filter-comments.dto';
+import { FilterCommentsInterface } from '../interfaces/filter-comments.interface';
 import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
 import { RoleEnum } from '@/modules/auth/enums';
@@ -25,7 +25,7 @@ export class CommentsController {
 
   @Get('by-article/:slug')
   @Public()
-  findByArticle(@Param('slug') slug: string, @Query() dto: FilterCommentsDto): Promise<[Comment[], number]> {
+  findByArticle(@Param('slug') slug: string, @Query() dto: FilterCommentsInterface): Promise<[Comment[], number]> {
     return this.commentsService.findByArticle(slug, dto);
   }
 

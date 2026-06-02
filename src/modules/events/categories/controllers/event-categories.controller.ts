@@ -3,7 +3,7 @@ import { EventCategoriesService } from '../categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { EventCategory } from '../entities/category.entity';
-import { QueryParams } from '../utils/query-params.type';
+import { FilterCategoriesInterface } from '../interfaces/filter-categories.interface';
 import { Public, Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
 
@@ -25,7 +25,7 @@ export class EventCategoriesController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: QueryParams): Promise<[EventCategory[], number]> {
+  findPaginated(@Query() query: FilterCategoriesInterface): Promise<[EventCategory[], number]> {
     return this.eventCategoriesService.findAllPaginated(query);
   }
 

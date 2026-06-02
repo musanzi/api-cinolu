@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateArticleDto } from '../dto/create-article.dto';
-import { FilterArticlesDto } from '../dto/filter-articles.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import { Article } from '../entities/article.entity';
 import { ArticlesService } from '../services/articles.service';
@@ -9,6 +8,7 @@ import { User } from '@/modules/identity/users/entities/user.entity';
 import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
+import { FilterArticlesInterface } from '../interfaces/filter-articles.interface';
 
 @Controller('articles')
 export class ArticlesController {
@@ -28,14 +28,14 @@ export class ArticlesController {
 
   @Get()
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findAll(@Query() dto: FilterArticlesDto): Promise<[Article[], number]> {
-    return this.articlesService.findAll(dto);
+  findAll(@Query() filters: FilterArticlesInterface): Promise<[Article[], number]> {
+    return this.articlesService.findAll(filters);
   }
 
   @Get('published')
   @Public()
-  findPublished(@Query() dto: FilterArticlesDto): Promise<[Article[], number]> {
-    return this.articlesService.findPublished(dto);
+  findPublished(@Query() filters: FilterArticlesInterface): Promise<[Article[], number]> {
+    return this.articlesService.findPublished(filters);
   }
 
   @Patch('id/:articleId/publish')

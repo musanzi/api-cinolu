@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createCsvUploadOptions } from '@/shared/helpers/csv-upload.helper';
-import { FilterParticipationsDto } from '../dto/filter-participations.dto';
+import { FilterParticipationsInterface } from '../interfaces/filter-participations.interface';
 import { MoveParticipantsDto } from '../dto/move-participants.dto';
 import { ParticipateProjectDto } from '../dto/participate.dto';
 import { ProjectParticipation } from '../entities/project-participation.entity';
@@ -18,7 +18,7 @@ export class ProjectParticipationsController {
   @Public()
   findParticipations(
     @Param('projectId') projectId: string,
-    @Query() query: FilterParticipationsDto
+    @Query() query: FilterParticipationsInterface
   ): Promise<[ProjectParticipation[], number]> {
     return this.participationService.findParticipations(projectId, query);
   }

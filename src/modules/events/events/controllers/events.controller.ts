@@ -1,7 +1,7 @@
 import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateEventDto } from '../dto/create-event.dto';
-import { FilterEventsDto } from '../dto/filter-events.dto';
+import { FilterEventsInterface } from '../interfaces/filter-events.interface';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventsService } from '../services/events.service';
@@ -20,7 +20,7 @@ export class EventsController {
 
   @Get()
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findAll(@Query() query: FilterEventsDto): Promise<[Event[], number]> {
+  findAll(@Query() query: FilterEventsInterface): Promise<[Event[], number]> {
     return this.eventsService.findAll(query);
   }
 
@@ -32,7 +32,7 @@ export class EventsController {
 
   @Get('published')
   @Public()
-  findPublished(@Query() query: FilterEventsDto): Promise<[Event[], number]> {
+  findPublished(@Query() query: FilterEventsInterface): Promise<[Event[], number]> {
     return this.eventsService.findPublished(query);
   }
 

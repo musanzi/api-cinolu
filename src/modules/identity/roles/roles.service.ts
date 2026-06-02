@@ -1,74 +1,51 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FilterRolesDto } from './dto/filter-roles.dto';
+import { FilterRolesInterface } from './interfaces/filter-roles.interface';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class RolesService {
+export class RolesService extends AbstractRepository<Role> {
   constructor(
     @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>
-  ) {}
-
-  async create(dto: CreateRoleDto): Promise<Role> {
-    try {
-      return await this.roleRepository.save(dto);
-    } catch {
-      throw new ConflictException('Création du rôle impossible');
-    }
+    repository: Repository<Role>
+  ) {
+    super(repository);
   }
 
-  async findAllPaginated(queryParams: FilterRolesDto): Promise<[Role[], number]> {
+  async create(dto: CreateRoleDto): Promise<Role> {
+    return await this.createEntity(dto);
+  }
+
+  async findAllPaginated(queryParams: FilterRolesInterface): Promise<[Role[], number]> {
     const { page = 1, q } = queryParams;
-    const query = this.roleRepository.createQueryBuilder('role').orderBy('role.updated_at', 'DESC');
+    const query = this.repository.createQueryBuilder('role').orderBy('role.updated_at', 'DESC');
     if (q) query.where('role.name LIKE :name', { name: `%${q}%` });
-    return await query
-      .skip((+page - 1) * 40)
-      .take(40)
-      .getManyAndCount();
+    return await this.findPaginatedEntities(query, { page, take: 40 });
   }
 
   async findAll(): Promise<Role[]> {
-    return await this.roleRepository.find({
+    return await this.findEntities({
       order: { updated_at: 'DESC' }
     });
   }
 
   async findByName(name: string): Promise<Role> {
-    try {
-      return await this.roleRepository.findOneOrFail({ where: { name } });
-    } catch {
-      throw new BadRequestException('Rôle introuvable');
-    }
+    return await this.findEntity({ where: { name } });
   }
 
   async findOne(id: string): Promise<Role> {
-    try {
-      return await this.roleRepository.findOneOrFail({ where: { id } });
-    } catch {
-      throw new BadRequestException('Rôle introuvable');
-    }
+    return await this.findEntity({ where: { id } });
   }
 
   async update(id: string, dto: UpdateRoleDto): Promise<Role> {
-    try {
-      const role = await this.findOne(id);
-      const updatedRole: Role & UpdateRoleDto = Object.assign(role, dto);
-      return await this.roleRepository.save(updatedRole);
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    return await this.updateEntity(id, dto);
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.roleRepository.delete(id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.hardDeleteEntity(id);
   }
 }

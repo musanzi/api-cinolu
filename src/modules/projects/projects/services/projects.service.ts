@@ -4,56 +4,48 @@ import { Repository } from 'typeorm';
 import { Project } from '../entities/project.entity';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { UpdateProjectDto } from '../dto/update-project.dto';
-import { FilterProjectsDto } from '../dto/filter-projects.dto';
+import { FilterProjectsInterface } from '../interfaces/filter-projects.interface';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class ProjectsService {
+export class ProjectsService extends AbstractRepository<Project> {
   constructor(
     @InjectRepository(Project)
-    private readonly projectRepository: Repository<Project>
-  ) {}
+    repository: Repository<Project>
+  ) {
+    super(repository);
+  }
 
   async create(dto: CreateProjectDto): Promise<Project> {
-    try {
-      const project = this.projectRepository.create({
-        ...dto,
-        project_manager: { id: dto.project_manager },
-        program: { id: dto.program },
-        categories: dto.categories.map((id) => ({ id }))
-      });
-      return await this.projectRepository.save(project);
-    } catch {
-      throw new BadRequestException('Création du projet impossible');
-    }
+    return await this.createEntity({
+      ...dto,
+      project_manager: { id: dto.project_manager },
+      program: { id: dto.program },
+      categories: dto.categories.map((id) => ({ id }))
+    });
   }
 
-  async findAll(queryParams: FilterProjectsDto): Promise<[Project[], number]> {
-    try {
-      const { page = 1, categories, q, filter = 'all' } = queryParams;
-      const categoryIds = Array.isArray(categories) ? categories : categories ? [categories] : [];
-      const skip = (+page - 1) * 20;
-      const query = this.projectRepository
-        .createQueryBuilder('p')
-        .leftJoinAndSelect('p.categories', 'categories')
-        .loadRelationCountAndMap('p.participantsCount', 'p.participations')
-        .orderBy('p.updated_at', 'DESC');
-      if (filter === 'published') query.andWhere('p.is_published = :isPublished', { isPublished: true });
-      if (filter === 'drafts') query.andWhere('p.is_published = :isPublished', { isPublished: false });
-      if (filter === 'highlighted') query.andWhere('p.is_highlighted = :isHighlighted', { isHighlighted: true });
-      if (q) query.andWhere('(p.name LIKE :q OR p.description LIKE :q)', { q: `%${q}%` });
-      if (categoryIds.length) query.andWhere('categories.id IN (:...categoryIds)', { categoryIds });
-      return await query.skip(skip).take(20).getManyAndCount();
-    } catch {
-      throw new BadRequestException('Projets introuvables');
-    }
+  async findAll(queryParams: FilterProjectsInterface): Promise<[Project[], number]> {
+    const { page, categories, q, filter = 'all' } = queryParams;
+    const categoryIds = Array.isArray(categories) ? categories : categories ? [categories] : [];
+    const query = this.repository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.categories', 'categories')
+      .loadRelationCountAndMap('p.participantsCount', 'p.participations')
+      .orderBy('p.updated_at', 'DESC');
+    if (filter === 'published') query.andWhere('p.is_published = :isPublished', { isPublished: true });
+    if (filter === 'drafts') query.andWhere('p.is_published = :isPublished', { isPublished: false });
+    if (filter === 'highlighted') query.andWhere('p.is_highlighted = :isHighlighted', { isHighlighted: true });
+    if (q) query.andWhere('(p.name LIKE :q OR p.description LIKE :q)', { q: `%${q}%` });
+    if (categoryIds.length) query.andWhere('categories.id IN (:...categoryIds)', { categoryIds });
+    return await this.findPaginatedEntities(query, { page, take: 20 });
   }
 
-  async findPublished(queryParams: FilterProjectsDto): Promise<[Project[], number]> {
+  async findPublished(queryParams: FilterProjectsInterface): Promise<[Project[], number]> {
     try {
-      const { page = 1, categories, q, status } = queryParams;
+      const { page, categories, q, status } = queryParams;
       const categoryIds = Array.isArray(categories) ? categories : categories ? [categories] : [];
-      const skip = (+page - 1) * 40;
-      const query = this.projectRepository
+      const query = this.repository
         .createQueryBuilder('p')
         .leftJoinAndSelect('p.categories', 'categories')
         .andWhere('p.is_published = :is_published', { is_published: true });
@@ -62,7 +54,7 @@ export class ProjectsService {
       if (status === 'past') query.andWhere('p.ended_at < NOW()');
       if (status === 'current') query.andWhere('p.started_at <= NOW() AND p.ended_at >= NOW()');
       if (status === 'future') query.andWhere('p.started_at > NOW()');
-      return await query.skip(skip).take(40).orderBy('p.started_at', 'DESC').getManyAndCount();
+      return await this.findPaginatedEntities(query.orderBy('p.started_at', 'DESC'), { page, take: 40 });
     } catch {
       throw new BadRequestException('Projets publiés introuvables');
     }
@@ -70,7 +62,7 @@ export class ProjectsService {
 
   async findMentorProjects(userId: string): Promise<Project[]> {
     try {
-      return await this.projectRepository
+      return await this.repository
         .createQueryBuilder('p')
         .leftJoinAndSelect('p.categories', 'categories')
         .leftJoinAndSelect('p.phases', 'phases')
@@ -87,20 +79,12 @@ export class ProjectsService {
   }
 
   async findRecent(): Promise<Project[]> {
-    try {
-      return await this.projectRepository.find({
-        order: { ended_at: 'DESC' },
-        where: { is_published: true },
-        take: 6
-      });
-    } catch {
-      throw new BadRequestException('Projets récents introuvables');
-    }
+    return await this.findEntities({ order: { ended_at: 'DESC' }, where: { is_published: true }, take: 6 });
   }
 
   async findBySlug(slug: string): Promise<Project> {
     try {
-      return await this.projectRepository
+      return await this.repository
         .createQueryBuilder('p')
         .leftJoinAndSelect('p.categories', 'categories')
         .leftJoinAndSelect('p.project_manager', 'project_manager')
@@ -120,82 +104,40 @@ export class ProjectsService {
   }
 
   async findOne(projectId: string): Promise<Project> {
-    try {
-      return await this.projectRepository.findOneOrFail({
-        where: { id: projectId },
-        relations: ['categories', 'project_manager', 'gallery']
-      });
-    } catch {
-      throw new NotFoundException('Projet introuvable');
-    }
+    return await this.findEntity({
+      where: { id: projectId },
+      relations: ['categories', 'project_manager', 'gallery']
+    });
   }
 
   async findOneWithParticipations(projectId: string): Promise<Project> {
-    try {
-      return await this.projectRepository.findOneOrFail({
-        where: { id: projectId },
-        relations: ['participations', 'participations.user']
-      });
-    } catch {
-      throw new NotFoundException('Projet introuvable');
-    }
+    return await this.findEntity({ where: { id: projectId }, relations: ['participations', 'participations.user'] });
   }
 
   async toggleHighlight(projectId: string): Promise<Project> {
-    try {
-      const project = await this.findOne(projectId);
-      project.is_highlighted = !project.is_highlighted;
-      return await this.projectRepository.save(project);
-    } catch {
-      throw new BadRequestException('Mise en avant impossible');
-    }
+    const project = await this.findEntity({ where: { id: projectId } });
+    return await this.updateEntity(projectId, { is_highlighted: !project.is_highlighted });
   }
 
   async togglePublish(projectId: string): Promise<Project> {
-    try {
-      const project = await this.findOne(projectId);
-      return await this.projectRepository.save({
-        ...project,
-        is_published: !project.is_published
-      });
-    } catch {
-      throw new BadRequestException('Publication impossible');
-    }
+    const project = await this.findEntity({ where: { id: projectId } });
+    return await this.updateEntity(projectId, { is_published: !project.is_published });
   }
 
   async addCover(projectId: string, cover: string): Promise<Project> {
-    try {
-      const project = await this.findOne(projectId);
-      return await this.projectRepository.save({
-        ...project,
-        cover
-      });
-    } catch {
-      throw new BadRequestException('Ajout de couverture impossible');
-    }
+    return await this.updateEntity(projectId, { cover });
   }
 
   async update(id: string, dto: UpdateProjectDto): Promise<Project> {
-    try {
-      const project = await this.findOne(id);
-      return await this.projectRepository.save({
-        ...project,
-        ...dto,
-        project_manager: { id: dto?.project_manager ?? project.project_manager.id },
-        program: { id: dto?.program ?? project.program.id },
-        categories: dto.categories?.map((type) => ({ id: type })) || project.categories
-      });
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    return await this.updateEntity(id, {
+      ...dto,
+      ...(dto.project_manager && { project_manager: { id: dto.project_manager } }),
+      ...(dto.program && { program: { id: dto.program } }),
+      ...(dto.categories && { categories: dto.categories.map((type) => ({ id: type })) })
+    });
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      const project = await this.findOne(id);
-      await this.projectRepository.softDelete(project.id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 }

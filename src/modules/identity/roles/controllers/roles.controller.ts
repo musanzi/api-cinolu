@@ -3,7 +3,7 @@ import { RolesService } from '../roles.service';
 import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
 import { Role } from '../entities/role.entity';
-import { FilterRolesDto } from '../dto/filter-roles.dto';
+import { FilterRolesInterface } from '../interfaces/filter-roles.interface';
 import { Roles } from '@/modules/auth/decorators';
 import { RoleEnum } from '@/modules/auth/enums';
 
@@ -19,7 +19,7 @@ export class RolesController {
 
   @Get('paginated')
   @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
-  findPaginated(@Query() query: FilterRolesDto): Promise<[Role[], number]> {
+  findPaginated(@Query() query: FilterRolesInterface): Promise<[Role[], number]> {
     return this.rolesService.findAllPaginated(query);
   }
 

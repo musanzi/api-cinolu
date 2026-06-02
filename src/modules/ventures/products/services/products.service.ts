@@ -1,22 +1,25 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
-import { FilterProductsDto } from '../dto/filter-products.dto';
+import { FilterProductsInterface } from '../interfaces/filter-products.interface';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService extends AbstractRepository<Product> {
   constructor(
     @InjectRepository(Product)
-    private productsRepository: Repository<Product>
-  ) {}
+    repository: Repository<Product>
+  ) {
+    super(repository);
+  }
 
-  async findAll(userId: string, query: FilterProductsDto): Promise<[Product[], number]> {
+  async findAll(userId: string, query: FilterProductsInterface): Promise<[Product[], number]> {
     try {
       const { page = 1 } = query;
-      return await this.productsRepository.findAndCount({
+      return await this.repository.findAndCount({
         where: { venture: { owner: { id: userId } } },
         order: { created_at: 'DESC' },
         take: 10,
@@ -28,54 +31,23 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto): Promise<Product> {
-    try {
-      return await this.productsRepository.save({
-        ...dto,
-        venture: { id: dto.ventureId }
-      });
-    } catch {
-      throw new BadRequestException('Création du produit impossible');
-    }
+    return await this.createEntity({ ...dto, venture: { id: dto.ventureId } });
   }
 
   async findBySlug(slug: string): Promise<Product> {
-    try {
-      return await this.productsRepository.findOneOrFail({
-        where: { slug },
-        relations: ['venture', 'gallery']
-      });
-    } catch {
-      throw new NotFoundException('Produit introuvable');
-    }
+    return await this.findEntity({ where: { slug }, relations: ['venture', 'gallery'] });
   }
 
   async findOne(id: string): Promise<Product> {
-    try {
-      return await this.productsRepository.findOneOrFail({
-        where: { id },
-        relations: ['gallery']
-      });
-    } catch {
-      throw new NotFoundException('Produit introuvable');
-    }
+    return await this.findEntity({ where: { id }, relations: ['gallery'] });
   }
 
   async update(slug: string, dto: UpdateProductDto): Promise<Product> {
-    try {
-      const product = await this.findBySlug(slug);
-      const updated = Object.assign(product, dto);
-      return await this.productsRepository.save(updated);
-    } catch {
-      throw new BadRequestException('Mise à jour impossible');
-    }
+    const product = await this.findBySlug(slug);
+    return await this.updateEntity(product.id, dto);
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.findOne(id);
-      await this.productsRepository.softDelete(id);
-    } catch {
-      throw new BadRequestException('Suppression impossible');
-    }
+    await this.deleteEntity(id);
   }
 }

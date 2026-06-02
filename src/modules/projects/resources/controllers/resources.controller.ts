@@ -14,7 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 import { CreateResourceDto } from '../dto/create-resource.dto';
-import { FilterResourcesDto } from '../dto/filter-resources.dto';
+import { FilterResourcesInterface } from '../interfaces/filter-resources.interface';
 import { UpdateResourceDto } from '../dto/update-resource.dto';
 import { Resource } from '../entities/resource.entity';
 import { ResourcesService } from '../services/resources.service';
@@ -28,14 +28,14 @@ export class ResourcesController {
   @Get('project/:projectId')
   findByProject(
     @Param('projectId') projectId: string,
-    @Query() query: FilterResourcesDto
+    @Query() query: FilterResourcesInterface
   ): Promise<[Resource[], number]> {
     return this.resourcesService.findByProject(projectId, query);
   }
 
   @Get('phase/:phaseId')
   @Public()
-  findByPhase(@Param('phaseId') phaseId: string, @Query() query: FilterResourcesDto): Promise<[Resource[], number]> {
+  findByPhase(@Param('phaseId') phaseId: string, @Query() query: FilterResourcesInterface): Promise<[Resource[], number]> {
     return this.resourcesService.findByPhase(phaseId, query);
   }
 

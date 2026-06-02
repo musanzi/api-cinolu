@@ -1,53 +1,46 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { promises as fs } from 'fs';
 import { Gallery } from './entities/gallery.entity';
 import { AddImageDto } from './dto/add-image.dto';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class GalleriesService {
+export class GalleriesService extends AbstractRepository<Gallery> {
   constructor(
     @InjectRepository(Gallery)
-    private readonly galleryRepository: Repository<Gallery>
-  ) {}
+    repository: Repository<Gallery>
+  ) {
+    super(repository);
+  }
 
   async create(dto: AddImageDto): Promise<Gallery> {
-    try {
-      return await this.galleryRepository.save(dto);
-    } catch {
-      throw new BadRequestException("Ajout d'image impossible");
-    }
+    return await this.createEntity(dto);
   }
 
   async findOne(id: string): Promise<Gallery> {
-    try {
-      return await this.galleryRepository.findOneOrFail({
-        where: { id }
-      });
-    } catch {
-      throw new NotFoundException('Image introuvable');
-    }
+    return await this.findEntity({ where: { id } });
   }
 
   async remove(id: string): Promise<void> {
     try {
       const gallery = await this.findOne(id);
       await this.removeImageFile(gallery.image);
-      await this.galleryRepository.delete(id);
+      await this.hardDeleteEntity(id);
     } catch {
       throw new BadRequestException("Suppression de l'image impossible");
     }
   }
 
   async findGallery(repo: string, key: string): Promise<Gallery[]> {
-    return this.galleryRepository.find({
+    return this.findEntities({
       where: { [repo]: { slug: key } }
     });
   }
 
   async findVentureGallery(slug: string): Promise<Gallery[]> {
-    return this.galleryRepository.find({
+    return this.findEntities({
       where: { product: { slug } }
     });
   }

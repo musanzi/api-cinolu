@@ -3,13 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeliverableDto } from '../dto/deliverable.dto';
 import { Deliverable } from '../entities/deliverable.entity';
+import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
-export class DeliverablesService {
+export class DeliverablesService extends AbstractRepository<Deliverable> {
   constructor(
     @InjectRepository(Deliverable)
-    private readonly deliverableRepository: Repository<Deliverable>
-  ) {}
+    repository: Repository<Deliverable>
+  ) {
+    super(repository);
+  }
 
   async create(phaseId: string, dto: DeliverableDto[]): Promise<Deliverable[]> {
     if (!dto?.length) return;
@@ -19,7 +22,7 @@ export class DeliverablesService {
         description: dto.description,
         phase: { id: phaseId }
       }));
-      return await this.deliverableRepository.save(payload);
+      return await this.repository.save(payload);
     } catch {
       throw new BadRequestException('Création des livrables impossible');
     }
@@ -41,7 +44,7 @@ export class DeliverablesService {
   }
 
   private async findByPhase(phaseId: string): Promise<Deliverable[]> {
-    return await this.deliverableRepository.find({
+    return await this.findEntities({
       where: { phase: { id: phaseId } }
     });
   }
@@ -64,7 +67,7 @@ export class DeliverablesService {
       const existing = currentById.get(d.id as string);
       if (!existing) continue;
       if (!this.hasChanges(existing, d)) continue;
-      await this.deliverableRepository.save(this.buildUpdated(existing, d));
+      await this.repository.save(this.buildUpdated(existing, d));
     }
   }
 
@@ -84,7 +87,7 @@ export class DeliverablesService {
     const ids = new Set(dto.map((dto) => dto.id as string));
     const toDeleteIds = current.filter((deliverable) => !ids.has(deliverable.id)).map((deliverable) => deliverable.id);
     if (!toDeleteIds.length) return;
-    await this.deliverableRepository.softDelete(toDeleteIds);
+    await this.repository.softDelete(toDeleteIds);
   }
 
   private async addNew(phaseId: string, dto: DeliverableDto[]): Promise<void> {

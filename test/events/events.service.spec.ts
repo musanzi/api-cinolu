@@ -4,6 +4,7 @@ import { EventsService } from '@/modules/events/events/services/events.service';
 const makeQueryBuilder = (result: [any[], number] = [[], 0]) => ({
   leftJoinAndSelect: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
+  addOrderBy: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
   skip: jest.fn().mockReturnThis(),
   take: jest.fn().mockReturnThis(),
@@ -164,7 +165,7 @@ describe('EventsService', () => {
 
   it('soft deletes event', async () => {
     const { service, eventRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'e1' } as any);
+    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1' });
     eventRepository.softDelete.mockResolvedValue(undefined);
     await expect(service.remove('e1')).resolves.toBeUndefined();
     expect(eventRepository.softDelete).toHaveBeenCalledWith('e1');

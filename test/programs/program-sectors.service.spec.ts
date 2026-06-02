@@ -14,8 +14,11 @@ describe('ProgramSectorsService', () => {
   const setup = () => {
     const queryBuilder = makeQueryBuilder([[{ id: 's1' }], 1]);
     const sectorRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       find: jest.fn(),
+      findOneOrFail: jest.fn().mockResolvedValue({ id: 's1' }),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
       softDelete: jest.fn()
     } as any;
@@ -55,21 +58,19 @@ describe('ProgramSectorsService', () => {
   });
 
   it('throws on missing sector', async () => {
-    const { service, queryBuilder } = setup();
-    queryBuilder.getOneOrFail.mockRejectedValue(new Error('bad'));
+    const { service, sectorRepository } = setup();
+    sectorRepository.findOneOrFail.mockRejectedValue(new Error('bad'));
     await expect(service.findOne('s1')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('updates a sector', async () => {
     const { service, sectorRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1', name: 'Old' } as any);
     sectorRepository.save.mockResolvedValue({ id: 's1', name: 'New' });
     await expect(service.update('s1', { name: 'New' })).resolves.toEqual({ id: 's1', name: 'New' });
   });
 
   it('removes a sector', async () => {
     const { service, sectorRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1' } as any);
     sectorRepository.softDelete.mockResolvedValue(undefined);
     await expect(service.remove('s1')).resolves.toBeUndefined();
   });
