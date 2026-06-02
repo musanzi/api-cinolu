@@ -1,5 +1,5 @@
 import { Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { User } from '../../../identity/users/entities/user.entity';
 import { Event } from '../../../events/events/entities/event.entity';
 

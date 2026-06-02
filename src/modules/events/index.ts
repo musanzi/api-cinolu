@@ -1,2 +1,2 @@
-export * from './events/events.module'
-export * from '../events/categories/categories.module'
+export * from './events/events.module';
+export * from '../events/categories/categories.module';

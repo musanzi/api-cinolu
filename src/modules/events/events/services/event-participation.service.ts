@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventParticipation } from '../entities/event-participation.entity';
 import { Event } from '../entities/event.entity';
-import { User } from '../../../identity/users/entities/user.entity';
 import { EventsService } from './events.service';
 
 @Injectable()
@@ -16,9 +15,9 @@ export class EventParticipationService {
     private readonly eventsService: EventsService
   ) {}
 
-  async participate(eventId: string, user: User): Promise<Event> {
+  async participate(eventId: string, userId: string): Promise<Event> {
     const existing = await this.participationRepository.findOne({
-      where: { event: { id: eventId }, user: { id: user.id } }
+      where: { event: { id: eventId }, user: { id: userId } }
     });
     if (existing) {
       throw new BadRequestException('Participation déjà enregistrée');
@@ -26,7 +25,7 @@ export class EventParticipationService {
 
     await this.eventsService.findOne(eventId);
     await this.participationRepository.save({
-      user: { id: user.id },
+      user: { id: userId },
       event: { id: eventId }
     });
 

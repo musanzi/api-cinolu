@@ -1,23 +1,25 @@
+import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { Public, Rbac } from '@musanzi/nestjs-session-auth';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { FilterEventsDto } from '../dto/filter-events.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventsService } from '../services/events.service';
+import { Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  @Rbac({ resource: 'events', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@Body() dto: CreateEventDto): Promise<Event> {
     return this.eventsService.create(dto);
   }
 
   @Get()
-  @Rbac({ resource: 'events', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findAll(@Query() query: FilterEventsDto): Promise<[Event[], number]> {
     return this.eventsService.findAll(query);
   }
@@ -41,31 +43,31 @@ export class EventsController {
   }
 
   @Get('id/:eventId')
-  @Rbac({ resource: 'events', action: 'read' })
+  @Public()
   findOne(@Param('eventId') eventId: string): Promise<Event> {
     return this.eventsService.findOne(eventId);
   }
 
   @Patch('id/:eventId/publish')
-  @Rbac({ resource: 'events', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   togglePublish(@Param('eventId') eventId: string): Promise<Event> {
     return this.eventsService.togglePublish(eventId);
   }
 
   @Patch('id/:eventId/highlight')
-  @Rbac({ resource: 'events', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   toggleHighlight(@Param('eventId') eventId: string): Promise<Event> {
     return this.eventsService.highlight(eventId);
   }
 
   @Patch('id/:eventId')
-  @Rbac({ resource: 'events', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('eventId') eventId: string, @Body() dto: UpdateEventDto): Promise<Event> {
     return this.eventsService.update(eventId, dto);
   }
 
   @Delete('id/:eventId')
-  @Rbac({ resource: 'events', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('eventId') eventId: string): Promise<void> {
     return this.eventsService.remove(eventId);
   }

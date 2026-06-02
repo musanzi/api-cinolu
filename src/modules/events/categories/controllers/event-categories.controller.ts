@@ -4,15 +4,15 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { EventCategory } from '../entities/category.entity';
 import { QueryParams } from '../utils/query-params.type';
-import { Rbac } from '@musanzi/nestjs-session-auth';
-import { Public } from '@musanzi/nestjs-session-auth';
+import { Public, Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('event-categories')
 export class EventCategoriesController {
   constructor(private readonly eventCategoriesService: EventCategoriesService) {}
 
   @Post()
-  @Rbac({ resource: 'eventCategories', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@Body() dto: CreateCategoryDto): Promise<EventCategory> {
     return this.eventCategoriesService.create(dto);
   }
@@ -24,25 +24,24 @@ export class EventCategoriesController {
   }
 
   @Get('paginated')
-  @Rbac({ resource: 'eventCategories', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findPaginated(@Query() query: QueryParams): Promise<[EventCategory[], number]> {
     return this.eventCategoriesService.findAllPaginated(query);
   }
 
   @Get('id/:id')
-  @Rbac({ resource: 'eventCategories', action: 'read' })
   findOne(@Param('id') id: string): Promise<EventCategory> {
     return this.eventCategoriesService.findOne(id);
   }
 
   @Patch('id/:id')
-  @Rbac({ resource: 'eventCategories', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto): Promise<EventCategory> {
     return this.eventCategoriesService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Rbac({ resource: 'eventCategories', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.eventCategoriesService.remove(id);
   }
