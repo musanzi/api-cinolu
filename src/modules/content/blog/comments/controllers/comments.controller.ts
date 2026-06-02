@@ -3,11 +3,10 @@ import { CommentsService } from '../comments.service';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { Comment } from '../entities/comment.entity';
-import { User } from '../../../../identity/users/entities/user.entity';
-import { CurrentUser } from '@musanzi/nestjs-session-auth';
 import { FilterCommentsDto } from '../dto/filter-comments.dto';
-import { Rbac } from '@musanzi/nestjs-session-auth';
-import { Public } from '@musanzi/nestjs-session-auth';
+import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { User } from '@/modules/identity/users/entities/user.entity';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('comments')
 export class CommentsController {
@@ -15,11 +14,11 @@ export class CommentsController {
 
   @Post()
   create(@CurrentUser() user: User, @Body() dto: CreateCommentDto): Promise<Comment> {
-    return this.commentsService.create(dto, user);
+    return this.commentsService.create(dto, user.id);
   }
 
   @Get()
-  @Rbac({ resource: 'comments', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findAll(): Promise<Comment[]> {
     return this.commentsService.findAll();
   }
@@ -31,19 +30,16 @@ export class CommentsController {
   }
 
   @Get('id/:id')
-  @Rbac({ resource: 'comments', action: 'read' })
   findOne(@Param('id') id: string): Promise<Comment> {
     return this.commentsService.findOne(id);
   }
 
   @Patch('id/:id')
-  @Rbac({ resource: 'comments', action: 'update' })
   update(@Param('id') id: string, @Body() dto: UpdateCommentDto): Promise<Comment> {
     return this.commentsService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Rbac({ resource: 'comments', action: 'delete' })
   remove(@Param('id') id: string): Promise<void> {
     return this.commentsService.remove(id);
   }

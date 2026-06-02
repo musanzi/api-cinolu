@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { FilterArticlesDto } from '../dto/filter-articles.dto';
-import { User } from '../../../../identity/users/entities/user.entity';
 
 @Injectable()
 export class ArticlesService {
@@ -14,13 +13,13 @@ export class ArticlesService {
     private articlesRepository: Repository<Article>
   ) {}
 
-  async create(dto: CreateArticleDto, user: User): Promise<Article> {
+  async create(dto: CreateArticleDto, userId: string): Promise<Article> {
     try {
       return await this.articlesRepository.save({
         ...dto,
         published_at: dto.published_at ? new Date(dto.published_at) : new Date(),
         tags: dto.tags.map((id) => ({ id })),
-        author: user
+        author: { id: userId }
       });
     } catch {
       throw new BadRequestException("Création de l'article impossible");

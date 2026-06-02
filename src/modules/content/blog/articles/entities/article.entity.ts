@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany
 import { Tag } from '../../tags/entities/tag.entity';
 import { Comment } from '../../comments/entities/comment.entity';
 import { User } from '../../../../identity/users/entities/user.entity';
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { Gallery } from '../../../../galleries/entities/gallery.entity';
 
 @Entity()

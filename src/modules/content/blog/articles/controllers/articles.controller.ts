@@ -1,20 +1,23 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { CurrentUser, Public, Rbac } from '@musanzi/nestjs-session-auth';
-import { User } from '../../../../identity/users/entities/user.entity';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { FilterArticlesDto } from '../dto/filter-articles.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import { Article } from '../entities/article.entity';
 import { ArticlesService } from '../services/articles.service';
+import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
+import { User } from '@/modules/identity/users/entities/user.entity';
+import { Public } from '@/modules/auth/decorators/public.decorator';
+import { Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Post()
-  @Rbac({ resource: 'blogs', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@CurrentUser() user: User, @Body() dto: CreateArticleDto): Promise<Article> {
-    return this.articlesService.create(dto, user);
+    return this.articlesService.create(dto, user.id);
   }
 
   @Get('recent')
@@ -24,7 +27,7 @@ export class ArticlesController {
   }
 
   @Get()
-  @Rbac({ resource: 'blogs', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findAll(@Query() dto: FilterArticlesDto): Promise<[Article[], number]> {
     return this.articlesService.findAll(dto);
   }
@@ -36,7 +39,7 @@ export class ArticlesController {
   }
 
   @Patch('id/:articleId/publish')
-  @Rbac({ resource: 'blogs', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   togglePublished(@Param('articleId') articleId: string): Promise<Article> {
     return this.articlesService.togglePublished(articleId);
   }
@@ -48,25 +51,25 @@ export class ArticlesController {
   }
 
   @Get('id/:articleId')
-  @Rbac({ resource: 'blogs', action: 'read' })
+  @Public()
   findOne(@Param('articleId') articleId: string): Promise<Article> {
     return this.articlesService.findOne(articleId);
   }
 
   @Patch('id/:articleId/highlight')
-  @Rbac({ resource: 'blogs', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   toggleHighlight(@Param('articleId') articleId: string): Promise<Article> {
     return this.articlesService.highlight(articleId);
   }
 
   @Patch('id/:articleId')
-  @Rbac({ resource: 'blogs', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('articleId') articleId: string, @Body() dto: UpdateArticleDto): Promise<Article> {
     return this.articlesService.update(articleId, dto);
   }
 
   @Delete('id/:articleId')
-  @Rbac({ resource: 'blogs', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('articleId') articleId: string): Promise<void> {
     return this.articlesService.remove(articleId);
   }

@@ -4,7 +4,6 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
-import { User } from '../../../identity/users/entities/user.entity';
 import { FilterCommentsDto } from './dto/filter-comments.dto';
 
 @Injectable()
@@ -14,12 +13,12 @@ export class CommentsService {
     private commentsRepository: Repository<Comment>
   ) {}
 
-  async create(dto: CreateCommentDto, user: User): Promise<Comment> {
+  async create(dto: CreateCommentDto, userId: string): Promise<Comment> {
     try {
       const comment = await this.commentsRepository.save({
         ...dto,
         article: { id: dto.articleId },
-        author: user
+        author: { id: userId }
       });
       return await this.findOne(comment.id);
     } catch {
