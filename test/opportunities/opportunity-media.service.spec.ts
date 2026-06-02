@@ -54,8 +54,6 @@ describe('OpportunityMediaService', () => {
     const { service, opportunitiesService } = setup();
     opportunitiesService.setCover.mockRejectedValue(new Error('bad'));
     opportunitiesService.findOneById.mockResolvedValue({ id: 'o1', cover: null });
-    await expect(service.updateCover('o1', { filename: 'new.png' } as any)).rejects.toBeInstanceOf(
-      BadRequestException
-    );
+    await expect(service.updateCover('o1', { filename: 'new.png' } as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 });

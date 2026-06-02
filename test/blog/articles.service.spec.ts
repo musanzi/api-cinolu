@@ -33,7 +33,7 @@ describe('ArticlesService', () => {
     await expect(
       service.create(
         { title: 'Article', content: 'Body', tags: ['t1', 't2'], published_at: '2026-01-15T10:00:00.000Z' } as any,
-        { id: 'u1' } as any
+        'u1'
       )
     ).resolves.toEqual({ id: 'a1' });
 
@@ -52,7 +52,7 @@ describe('ArticlesService', () => {
     const { service, articlesRepository } = setup();
     articlesRepository.save.mockResolvedValue({ id: 'a1' });
 
-    await service.create({ title: 'Article', content: 'Body', tags: ['t1'] } as any, { id: 'u1' } as any);
+    await service.create({ title: 'Article', content: 'Body', tags: ['t1'] } as any, 'u1');
 
     expect(articlesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ published_at: expect.any(Date) }));
   });
@@ -61,9 +61,9 @@ describe('ArticlesService', () => {
     const { service, articlesRepository } = setup();
     articlesRepository.save.mockRejectedValue(new Error('bad'));
 
-    await expect(
-      service.create({ title: 'A', content: 'B', tags: ['t1'] } as any, { id: 'u1' } as any)
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.create({ title: 'A', content: 'B', tags: ['t1'] } as any, 'u1')).rejects.toBeInstanceOf(
+      BadRequestException
+    );
   });
 
   it('toggles highlight flag', async () => {

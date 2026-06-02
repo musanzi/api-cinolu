@@ -19,7 +19,7 @@ describe('CommentsService', () => {
     const { service, commentsRepository } = setup();
     commentsRepository.save.mockResolvedValue({ id: 'c1' });
     jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'c1', content: 'hello' } as any);
-    await expect(service.create({ content: 'hello', articleId: 'a1' } as any, { id: 'u1' } as any)).resolves.toEqual({
+    await expect(service.create({ content: 'hello', articleId: 'a1' } as any, 'u1')).resolves.toEqual({
       id: 'c1',
       content: 'hello'
     });
@@ -28,9 +28,7 @@ describe('CommentsService', () => {
   it('throws bad request when create fails', async () => {
     const { service, commentsRepository } = setup();
     commentsRepository.save.mockRejectedValue(new Error('bad'));
-    await expect(service.create({ articleId: 'a1' } as any, { id: 'u1' } as any)).rejects.toBeInstanceOf(
-      BadRequestException
-    );
+    await expect(service.create({ articleId: 'a1' } as any, 'u1')).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('finds all comments', async () => {

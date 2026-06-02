@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UsersService } from '@/modules/identity/users/services/users.service';
-import { parseUsersCsv } from '@/shared/helpers/user-csv.helper';
+import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
 import { UserStatus } from '@/modules/identity/users/types/user-status.enum';
 
 jest.mock('@/shared/helpers/user-csv.helper', () => ({
@@ -15,7 +15,7 @@ const makeUsersQueryBuilder = () => ({
   skip: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
   take: jest.fn().mockReturnThis(),
-  getOneOrFail: jest.fn().mockResolvedValue({ id: 'u1', password: 'hashed', roles: [{ name: 'user' }] }),
+  getOneOrFail: jest.fn().mockResolvedValue({ id: 'u1', roles: [{ name: 'user' }] }),
   getManyAndCount: jest.fn().mockResolvedValue([[{ id: 'u1' }], 1]),
   getMany: jest.fn().mockResolvedValue([{ id: 'u1' }])
 });
@@ -34,10 +34,9 @@ describe('UsersService', () => {
       delete: jest.fn()
     } as any;
     const rolesService = { findByName: jest.fn() } as any;
-    const eventEmitter = { emit: jest.fn() } as any;
-    const service = new UsersService(userRepository, rolesService, eventEmitter);
+    const service = new UsersService(userRepository, rolesService);
     jest.spyOn(service as any, 'generateReferralCode').mockReturnValue('ref-code');
-    return { service, userRepository, rolesService, eventEmitter, queryBuilder };
+    return { service, userRepository, rolesService, queryBuilder };
   };
 
   it('finds users by ids', async () => {
@@ -75,7 +74,6 @@ describe('UsersService', () => {
     ).resolves.toEqual({ id: 'u1' });
     expect(userRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        password: 'user1234',
         referral_code: 'ref-code',
         status: UserStatus.ENTREPRENEUR,
         roles: [{ id: 'r1' }]
@@ -108,57 +106,6 @@ describe('UsersService', () => {
     await expect(service.referredBy('ref')).resolves.toEqual({ id: 'u1' });
   });
 
-  it('signs up without referral', async () => {
-    const { service, rolesService, userRepository, eventEmitter } = setup();
-    rolesService.findByName.mockResolvedValue({ id: 'role-user' });
-    userRepository.findOne.mockResolvedValue(null);
-    userRepository.save.mockResolvedValue({ id: 'u1', email: 'a@a.com' });
-    jest.spyOn(service, 'findByEmail').mockResolvedValue({ id: 'u1', email: 'a@a.com' } as any);
-    await expect(service.signUp({ email: 'a@a.com', password: 'secret123' } as any)).resolves.toEqual({
-      user: { id: 'u1', email: 'a@a.com' },
-      isNew: true
-    });
-    expect(eventEmitter.emit).not.toHaveBeenCalled();
-  });
-
-  it('signs up with referral and emits event', async () => {
-    const { service, rolesService, userRepository, eventEmitter } = setup();
-    rolesService.findByName.mockResolvedValue({ id: 'role-user' });
-    userRepository.findOne.mockResolvedValue(null);
-    jest.spyOn(service, 'referredBy').mockResolvedValue({ id: 'u-ref' } as any);
-    userRepository.save.mockResolvedValue({ id: 'u1', email: 'a@a.com' });
-    jest.spyOn(service, 'findByEmail').mockResolvedValue({ id: 'u1', email: 'a@a.com' } as any);
-    await expect(
-      service.signUp({ email: 'a@a.com', password: 'secret123', referral_code: 'abc' } as any)
-    ).resolves.toEqual({
-      user: { id: 'u1', email: 'a@a.com' },
-      isNew: true
-    });
-    expect(eventEmitter.emit).toHaveBeenCalledWith(
-      'user.referral-signup',
-      expect.objectContaining({ referredBy: { id: 'u-ref' }, newUser: expect.objectContaining({ id: 'u1' }) })
-    );
-  });
-
-  it('updates password when signup email already exists', async () => {
-    const { service, userRepository, eventEmitter } = setup();
-    userRepository.findOne.mockResolvedValue({ id: 'u1', email: 'a@a.com', roles: [{ id: 'r1' }] });
-    jest.spyOn(service, 'update').mockResolvedValue({ id: 'u1', email: 'a@a.com' } as any);
-
-    await expect(service.signUp({ email: 'a@a.com', password: 'new-secret' } as any)).resolves.toEqual({
-      user: { id: 'u1', email: 'a@a.com' },
-      isNew: false
-    });
-    expect(service.update).toHaveBeenCalledWith('u1', { password: 'new-secret' });
-    expect(eventEmitter.emit).not.toHaveBeenCalled();
-  });
-
-  it('throws signup-specific error on signUp failure', async () => {
-    const { service, rolesService } = setup();
-    rolesService.findByName.mockRejectedValue(new Error('bad'));
-    await expect(service.signUp({ email: 'a@a.com' } as any)).rejects.toThrow('Cet utilisateur existe déjà');
-  });
-
   it('finds one user and maps roles', async () => {
     const { service, userRepository } = setup();
     userRepository.findOneOrFail.mockResolvedValue({ id: 'u1', roles: [{ name: 'user' }] });
@@ -178,17 +125,6 @@ describe('UsersService', () => {
     await expect(service.findByEmail('a@a.com')).resolves.toEqual(
       expect.objectContaining({ roles: ['user'], referralsCount: 3 })
     );
-  });
-
-  it('finds user by email with password when authentication needs it', async () => {
-    const { service, userRepository, queryBuilder } = setup();
-    userRepository.count.mockResolvedValue(1);
-
-    await expect(service.findByEmailWithPassword('a@a.com')).resolves.toEqual(
-      expect.objectContaining({ password: 'hashed', roles: ['user'], referralsCount: 1 })
-    );
-    expect(queryBuilder.addSelect).toHaveBeenCalledWith('user.password');
-    expect(queryBuilder.where).toHaveBeenCalledWith('user.email = :email', { email: 'a@a.com' });
   });
 
   it('throws not found for missing email', async () => {
@@ -250,7 +186,7 @@ describe('UsersService', () => {
 
   it('updates user and remaps roles', async () => {
     const { service, userRepository } = setup();
-    userRepository.findOneOrFail.mockResolvedValue({ id: 'u1', password: 'p', roles: [{ id: 'r-old' }] });
+    userRepository.findOneOrFail.mockResolvedValue({ id: 'u1', roles: [{ id: 'r-old' }] });
     userRepository.save.mockResolvedValue({ id: 'u1' });
     jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'u1', roles: ['user'] } as any);
     await expect(service.update('u1', { roles: ['r1'] } as any)).resolves.toEqual({ id: 'u1', roles: ['user'] });

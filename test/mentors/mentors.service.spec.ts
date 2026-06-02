@@ -35,7 +35,7 @@ describe('MentorsService', () => {
   it('submits mentor request and emits application event', async () => {
     const { service, eventEmitter } = setup();
     jest.spyOn(service as any, 'createProfile').mockResolvedValue({ id: 'm1' } as any);
-    await expect(service.submitRequest({ id: 'u1' } as any, { bio: 'x' } as any)).resolves.toEqual({ id: 'm1' });
+    await expect(service.submitRequest('u1', { bio: 'x' } as any)).resolves.toEqual({ id: 'm1' });
     expect(eventEmitter.emit).toHaveBeenCalledWith('mentor.application', { id: 'm1' });
   });
 
@@ -136,7 +136,7 @@ describe('MentorsService', () => {
     const { service, mentorRepository } = setup();
     mentorRepository.find.mockResolvedValue([{ id: 'm1' }]);
     mentorRepository.findOneOrFail.mockResolvedValue({ id: 'm1' });
-    await expect(service.findByUser({ id: 'u1' } as any)).resolves.toEqual([{ id: 'm1' }]);
+    await expect(service.findByUser('u1')).resolves.toEqual([{ id: 'm1' }]);
     await expect(service.findOne('m1')).resolves.toEqual({ id: 'm1' });
   });
 

@@ -18,7 +18,7 @@ describe('ProjectParticipationReviewController', () => {
     reviewService.createReview.mockResolvedValue({ id: 'r1' });
 
     await expect(controller.createReview('pp1', user as any, dto as any)).resolves.toEqual({ id: 'r1' });
-    expect(reviewService.createReview).toHaveBeenCalledWith('pp1', user, dto);
+    expect(reviewService.createReview).toHaveBeenCalledWith('pp1', user.id, dto);
   });
 
   it('updateReview delegates to reviewService.updateReview', async () => {
@@ -28,6 +28,6 @@ describe('ProjectParticipationReviewController', () => {
     reviewService.updateReview.mockResolvedValue({ id: 'r1' });
 
     await expect(controller.updateReview('pp1', 'r1', user as any, dto as any)).resolves.toEqual({ id: 'r1' });
-    expect(reviewService.updateReview).toHaveBeenCalledWith('pp1', 'r1', user, dto);
+    expect(reviewService.updateReview).toHaveBeenCalledWith('pp1', 'r1', user.id, dto);
   });
 });

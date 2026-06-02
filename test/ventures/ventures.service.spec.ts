@@ -30,14 +30,14 @@ describe('VenturesService', () => {
     const { service, ventureRepository, eventEmitter } = setup();
     ventureRepository.save.mockResolvedValue({ id: 'v1' });
     jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'v1' } as any);
-    await expect(service.create({ id: 'u1' } as any, { name: 'venture' } as any)).resolves.toEqual({ id: 'v1' });
+    await expect(service.create('u1', { name: 'venture' } as any)).resolves.toEqual({ id: 'v1' });
     expect(eventEmitter.emit).toHaveBeenCalledWith('venture.created', { id: 'v1' });
   });
 
   it('throws on create failure', async () => {
     const { service, ventureRepository } = setup();
     ventureRepository.save.mockRejectedValue(new Error('bad'));
-    await expect(service.create({ id: 'u1' } as any, {} as any)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.create('u1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('finds published ventures', async () => {
@@ -89,14 +89,14 @@ describe('VenturesService', () => {
   it('finds ventures by user paginated', async () => {
     const { service, ventureRepository } = setup();
     ventureRepository.findAndCount.mockResolvedValue([[{ id: 'v1' }], 1]);
-    await expect(service.findByUser('2', { id: 'u1' } as any)).resolves.toEqual([[{ id: 'v1' }], 1]);
+    await expect(service.findByUser('2', 'u1')).resolves.toEqual([[{ id: 'v1' }], 1]);
     expect(ventureRepository.findAndCount).toHaveBeenCalledWith(expect.objectContaining({ skip: 40, take: 40 }));
   });
 
   it('throws on findByUser failure', async () => {
     const { service, ventureRepository } = setup();
     ventureRepository.findAndCount.mockRejectedValue(new Error('bad'));
-    await expect(service.findByUser('1', { id: 'u1' } as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findByUser('1', 'u1')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('finds ventures by user unpaginated', async () => {

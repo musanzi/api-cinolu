@@ -51,16 +51,12 @@ describe('ProjectParticipationReviewService', () => {
     participationService.saveMany.mockResolvedValue(undefined);
 
     await expect(
-      service.createReview(
-        'pp1',
-        reviewer as any,
-        {
-          phaseId: 'phase-1',
-          score: 80,
-          message: 'Bien joué',
-          notifyParticipant: true
-        } as any
-      )
+      service.createReview('pp1', reviewer.id, {
+        phaseId: 'phase-1',
+        score: 80,
+        message: 'Bien joué',
+        notifyParticipant: true
+      } as any)
     ).resolves.toEqual({
       id: 'r1',
       score: 80,
@@ -68,7 +64,6 @@ describe('ProjectParticipationReviewService', () => {
       reviewer
     });
     expect(reviewRepository.save).toHaveBeenCalledWith({
-      id: undefined,
       participation: { id: 'pp1' },
       phase: { id: 'phase-1' },
       reviewer: { id: 'reviewer-1' },
@@ -105,7 +100,7 @@ describe('ProjectParticipationReviewService', () => {
     reviewRepository.findOneOrFail.mockResolvedValue({ id: 'r1', phase: { id: 'phase-1' } });
     reviewRepository.save.mockResolvedValue({ id: 'r1', score: 95, message: null, reviewer });
 
-    await expect(service.updateReview('pp1', 'r1', reviewer as any, { score: 95 } as any)).resolves.toEqual({
+    await expect(service.updateReview('pp1', 'r1', reviewer.id, { score: 95 } as any)).resolves.toEqual({
       id: 'r1',
       score: 95,
       message: null,
@@ -133,7 +128,7 @@ describe('ProjectParticipationReviewService', () => {
     phasesService.findOne.mockResolvedValue({ id: 'phase-1' });
 
     await expect(
-      service.createReview('pp1', { id: 'reviewer-1' } as any, { phaseId: 'phase-1', score: 50 } as any)
+      service.createReview('pp1', 'reviewer-1', { phaseId: 'phase-1', score: 50 } as any)
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
@@ -158,16 +153,12 @@ describe('ProjectParticipationReviewService', () => {
     reviewRepository.save.mockResolvedValue({ id: 'r1', score: 59, message: 'Continue', reviewer });
 
     await expect(
-      service.createReview(
-        'pp1',
-        reviewer as any,
-        {
-          phaseId: 'phase-1',
-          score: 59,
-          message: 'Continue',
-          notifyParticipant: true
-        } as any
-      )
+      service.createReview('pp1', reviewer.id, {
+        phaseId: 'phase-1',
+        score: 59,
+        message: 'Continue',
+        notifyParticipant: true
+      } as any)
     ).resolves.toEqual({
       id: 'r1',
       score: 59,
@@ -175,7 +166,6 @@ describe('ProjectParticipationReviewService', () => {
       reviewer
     });
     expect(reviewRepository.save).toHaveBeenCalledWith({
-      id: undefined,
       participation: { id: 'pp1' },
       phase: { id: 'phase-1' },
       reviewer: { id: 'reviewer-1' },
@@ -218,16 +208,11 @@ describe('ProjectParticipationReviewService', () => {
     participationService.saveMany.mockResolvedValue(undefined);
 
     await expect(
-      service.updateReview(
-        'pp1',
-        'r1',
-        reviewer as any,
-        {
-          score: 50,
-          message: 'Insuffisant',
-          notifyParticipant: true
-        } as any
-      )
+      service.updateReview('pp1', 'r1', reviewer.id, {
+        score: 50,
+        message: 'Insuffisant',
+        notifyParticipant: true
+      } as any)
     ).resolves.toEqual({
       id: 'r1',
       score: 50,
@@ -261,7 +246,7 @@ describe('ProjectParticipationReviewService', () => {
     reviewRepository.findOne.mockResolvedValue({ id: 'r1' });
 
     await expect(
-      service.createReview('pp1', { id: 'reviewer-1' } as any, { phaseId: 'phase-1', score: 80 } as any)
+      service.createReview('pp1', 'reviewer-1', { phaseId: 'phase-1', score: 80 } as any)
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

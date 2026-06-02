@@ -24,7 +24,7 @@ describe('EventParticipationService', () => {
     participationRepository.save.mockResolvedValue(undefined);
     eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1', participations: [{ user: { id: 'u1' } }] });
 
-    await expect(service.participate('e1', { id: 'u1' } as any)).resolves.toEqual({
+    await expect(service.participate('e1', 'u1')).resolves.toEqual({
       id: 'e1',
       participations: [{ user: { id: 'u1' } }]
     });
@@ -33,13 +33,13 @@ describe('EventParticipationService', () => {
   it('throws when user already participates', async () => {
     const { service, participationRepository } = setup();
     participationRepository.findOne.mockResolvedValue({ id: 'existing' });
-    await expect(service.participate('e1', { id: 'u1' } as any)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.participate('e1', 'u1')).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('propagates errors when event lookup fails', async () => {
     const { service, participationRepository, eventsService } = setup();
     participationRepository.findOne.mockResolvedValue(null);
     eventsService.findOne.mockRejectedValue(new Error('bad'));
-    await expect(service.participate('e1', { id: 'u1' } as any)).rejects.toThrow('bad');
+    await expect(service.participate('e1', 'u1')).rejects.toThrow('bad');
   });
 });

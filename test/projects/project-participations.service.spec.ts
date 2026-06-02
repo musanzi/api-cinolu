@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { parseUsersCsv } from '@/shared/helpers/user-csv.helper';
+import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
 import { ProjectParticipationService } from '@/modules/projects/projects/services/project-participations.service';
 
 jest.mock('@/shared/helpers/user-csv.helper', () => ({
@@ -246,9 +246,7 @@ describe('ProjectParticipationService', () => {
     venturesService.findOne.mockResolvedValue({ id: 'venture-1' });
     participationRepository.save.mockResolvedValue(undefined);
 
-    await expect(
-      service.participate('project-1', { id: 'u1' } as any, { ventureId: 'venture-1' } as any)
-    ).resolves.toBeUndefined();
+    await expect(service.participate('project-1', 'u1', { ventureId: 'venture-1' } as any)).resolves.toBeUndefined();
     expect(participationRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         user: { id: 'u1' },

@@ -36,17 +36,6 @@ describe('RolesService', () => {
     await expect(service.create({ name: 'staff' } as any)).rejects.toBeInstanceOf(ConflictException);
   });
 
-  it('signUpRoles filters out admin and staff', async () => {
-    roleRepository.find.mockResolvedValue([{ name: 'user' }]);
-    await expect(service.signUpRoles()).resolves.toEqual([{ name: 'user' }]);
-    expect(roleRepository.find).toHaveBeenCalledWith(expect.objectContaining({ where: expect.any(Object) }));
-  });
-
-  it('signUpRoles maps repository errors to BadRequestException', async () => {
-    roleRepository.find.mockRejectedValue(new Error('db'));
-    await expect(service.signUpRoles()).rejects.toBeInstanceOf(BadRequestException);
-  });
-
   it('findAllPaginated applies query and page window', async () => {
     const qb = createQueryBuilder([[{ id: 'r1' }], 1]);
     roleRepository.createQueryBuilder.mockReturnValue(qb);

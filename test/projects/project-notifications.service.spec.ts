@@ -41,13 +41,13 @@ describe('ProjectNotificationService', () => {
     projectsService.findOne.mockResolvedValue({ id: 'p1' });
     notificationsService.create.mockResolvedValue({ id: 'n1' });
     notificationsService.findOne.mockResolvedValue({ id: 'n1' });
-    await expect(service.create('p1', { id: 'u1' } as any, { title: 'hello' } as any)).resolves.toEqual({ id: 'n1' });
+    await expect(service.create('p1', 'u1', { title: 'hello' } as any)).resolves.toEqual({ id: 'n1' });
   });
 
   it('throws on create failure', async () => {
     const { service, projectsService } = setup();
     projectsService.findOne.mockRejectedValue(new Error('bad'));
-    await expect(service.create('p1', { id: 'u1' } as any, {} as any)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.create('p1', 'u1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('sends notification to staff when notify_staff is true', async () => {
