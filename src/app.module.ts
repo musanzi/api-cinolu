@@ -13,23 +13,49 @@ import { PhasesModule, ProjectCategoriesModule, ProjectsModule, ResourcesModule 
 import { StatsModule } from './modules/stats/stats.module';
 import { ProductsModule, VenturesModule } from './modules/ventures';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { JwtModule } from '@/modules/jwt/jwt.module';
 import { ConfigModule } from './modules/config/config.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { EmailModule } from './modules/email/email.module';
 import { GalleriesModule } from './modules/galleries/galleries.module';
-import { StaticModule } from './modules/static/static.module';
-import { RbacGuard, SessionAuthGuard } from '@musanzi/nestjs-session-auth';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { AuthGuard } from './modules/auth/guards/auth.guard';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            singleLine: true,
+            colorize: true,
+            translateTime: 'UTC:yyyy-mm-dd HH:MM:ss.l o'
+          }
+        }
+      }
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads'
+    }),
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        global: true,
+        secret: configService.getOrThrow('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' }
+      })
+    }),
     ConfigModule,
     DatabaseModule,
     EmailModule,
     GalleriesModule,
-    JwtModule,
-    StaticModule,
     AuthModule,
     BlogModule,
     HighlightsModule,
@@ -54,8 +80,8 @@ import { RbacGuard, SessionAuthGuard } from '@musanzi/nestjs-session-auth';
     ProductsModule
   ],
   providers: [
-    { provide: APP_GUARD, useClass: SessionAuthGuard },
-    { provide: APP_GUARD, useClass: RbacGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor }
   ]
 })
