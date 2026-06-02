@@ -56,7 +56,7 @@ export class GalleriesService {
     try {
       await fs.unlink(`./uploads/galleries/${filename}`);
     } catch {
-      throw new BadRequestException("Suppression du fichier impossible");
+      throw new BadRequestException('Suppression du fichier impossible');
     }
   }
 }
