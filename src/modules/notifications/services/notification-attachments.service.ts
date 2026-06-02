@@ -23,7 +23,7 @@ export class NotificationAttachmentsService {
       }));
       return await this.attachmentsRepository.save(attachments);
     } catch {
-      throw new BadRequestException("Ajout des pièces jointes impossible");
+      throw new BadRequestException('Ajout des pièces jointes impossible');
     }
   }
 

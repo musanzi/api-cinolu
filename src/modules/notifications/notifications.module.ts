@@ -7,15 +7,9 @@ import { Notification } from './entities/notification.entity';
 import { NotificationAttachment } from './entities/attachment.entity';
 import { UsersModule } from '../identity/users/users.module';
 import { NotificationAttachmentsService } from './services/notification-attachments.service';
-import { NOTIFICATIONS_RBAC_POLICY } from './notifications-rbac';
-import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Notification, NotificationAttachment]),
-    UsersModule,
-    SessionAuthModule.forFeature([NOTIFICATIONS_RBAC_POLICY])
-  ],
+  imports: [TypeOrmModule.forFeature([Notification, NotificationAttachment]), UsersModule],
   controllers: [NotificationsController, NotificationAttachmentsController],
   providers: [NotificationsService, NotificationAttachmentsService],
   exports: [NotificationsService]
