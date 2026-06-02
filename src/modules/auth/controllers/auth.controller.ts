@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CurrentUser, GoogleAuthGuard, LocalAuthGuard, Public } from '@musanzi/nestjs-session-auth';
 import { User } from '../../identity/users/entities/user.entity';
 import { UpdateUserDto } from '../../identity/users/dto/update-user.dto';
 import { ContactSupportDto } from '../dto/contact-support.dto';
@@ -9,14 +8,14 @@ import { AuthService } from '../services/auth.service';
 import { UpdatePasswordDto } from '@/modules/auth/dto/update-password.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dto/forgot-password.dto';
 import { ResetPasswordDto } from '@/modules/auth/dto/reset-password.dto';
-import { AuthPasswordService } from '@/modules/auth/services/auth-password.service';
+import { Public } from '../decorators/public.decorator';
+import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { GoogleAuthGuard } from '../guards/google-auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly authPasswordService: AuthPasswordService
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('support/contact')
   @Public()
@@ -27,7 +26,7 @@ export class AuthController {
   @Post('signup')
   @Public()
   signUp(@Body() dto: SignUpDto): Promise<User> {
-    return this.authService.signUp (dto);
+    return this.authService.signUp(dto);
   }
 
   @Post('signin')
@@ -66,17 +65,17 @@ export class AuthController {
 
   @Patch('me/password')
   updatePassword(user: User, @Body() dto: UpdatePasswordDto): Promise<User> {
-    return this.authPasswordService.updatePassword(user, dto);
+    return this.authService.updatePassword(user, dto);
   }
 
   @Post('password/forgot')
   @Public()
   forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
-    return this.authPasswordService.forgotPassword(dto);
+    return this.authService.forgotPassword(dto);
   }
 
   @Post('password/reset')
   resetPassword(@Body() dto: ResetPasswordDto): Promise<User> {
-    return this.authPasswordService.resetPassword(dto);
+    return this.authService.resetPassword(dto);
   }
 }
