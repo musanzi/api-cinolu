@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import passport from 'passport';
-import { ConfigService } from '@nestjs/config';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,7 @@ async function bootstrap(): Promise<void> {
       transform: true
     })
   );
+  app.useLogger(app.get(Logger));
   app.enableCors({
     origin: true,
     credentials: true,
@@ -21,10 +23,10 @@ async function bootstrap(): Promise<void> {
   });
   app.use(
     session({
-      secret: configService.get('SESSION_SECRET') as string,
-      resave: configService.get('SESSION_RESAVE') === 'true',
-      saveUninitialized: configService.get('SESSION_SAVE_UNINITIALIZED') === 'true',
-      cookie: { maxAge: 86400000, secure: false, sameSite: 'strict', httpOnly: true }
+      saveUninitialized: false,
+      resave: false,
+      secret: process.env.SESSION_SECRET as string,
+      cookie: { maxAge: +process.env.SESSION_MAX_AGE, httpOnly: true }
     })
   );
   app.use(passport.initialize());
