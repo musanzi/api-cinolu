@@ -1,17 +1,19 @@
+import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { Public, Rbac } from '@musanzi/nestjs-session-auth';
 import { CreateProgramDto } from '../dto/create-program.dto';
 import { FilterProgramsDto } from '../dto/filter-programs.dto';
 import { UpdateProgramDto } from '../dto/update-program.dto';
 import { Program } from '../entities/program.entity';
 import { ProgramsService } from '../services/programs.service';
+import { Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('programs')
 export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Post()
-  @Rbac({ resource: 'programs', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@Body() dto: CreateProgramDto): Promise<Program> {
     return this.programsService.create(dto);
   }
@@ -23,7 +25,7 @@ export class ProgramsController {
   }
 
   @Patch('id/:programId/publish')
-  @Rbac({ resource: 'programs', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   togglePublish(@Param('programId') programId: string): Promise<Program> {
     return this.programsService.togglePublish(programId);
   }
@@ -41,31 +43,31 @@ export class ProgramsController {
   }
 
   @Get('paginated')
-  @Rbac({ resource: 'programs', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findPaginated(@Query() query: FilterProgramsDto): Promise<[Program[], number]> {
     return this.programsService.findFiltered(query);
   }
 
   @Get('id/:programId')
-  @Rbac({ resource: 'programs', action: 'update' })
+  @Public()
   findOne(@Param('programId') programId: string): Promise<Program> {
     return this.programsService.findOne(programId);
   }
 
   @Patch('id/:programId/highlight')
-  @Rbac({ resource: 'programs', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   toggleHighlight(@Param('programId') programId: string): Promise<Program> {
     return this.programsService.highlight(programId);
   }
 
   @Patch('id/:programId')
-  @Rbac({ resource: 'programs', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('programId') programId: string, @Body() dto: UpdateProgramDto): Promise<Program> {
     return this.programsService.update(programId, dto);
   }
 
   @Delete('id/:programId')
-  @Rbac({ resource: 'programs', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('programId') programId: string): Promise<void> {
     return this.programsService.remove(programId);
   }
