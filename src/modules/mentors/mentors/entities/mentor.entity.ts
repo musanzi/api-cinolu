@@ -1,7 +1,7 @@
 import { Entity, Column, OneToMany, ManyToMany, JoinTable, OneToOne, JoinColumn } from 'typeorm';
 import { Experience } from './experience.entity';
 import { Expertise } from '../../../mentors/expertises/entities/expertise.entity';
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { User } from '../../../identity/users/entities/user.entity';
 import { MentorStatus, MentorType } from '../enums/mentor.enum';
 import { Phase } from '../../../projects/phases/entities/phase.entity';

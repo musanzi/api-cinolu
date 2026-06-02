@@ -10,7 +10,7 @@ import { UsersService } from '../../../identity/users/services/users.service';
 import { MentorStatus } from '../enums/mentor.enum';
 import { MentorExperiencesService } from './mentor-experiences.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Role } from '../../../auth/enums/roles.enum';
+import { Role } from '../../../identity/roles/enums/roles.enum';
 import { CreateMentorDto } from '../dto/create-mentor.dto';
 import { UpdateMentorDto } from '../dto/update-mentor.dto';
 
@@ -24,9 +24,9 @@ export class MentorsService {
     private eventEmitter: EventEmitter2
   ) {}
 
-  async submitRequest(user: User, dto: MentorRequestDto): Promise<MentorProfile> {
+  async submitRequest(userId: string, dto: MentorRequestDto): Promise<MentorProfile> {
     try {
-      const savedProfile = await this.createProfile(user.id, dto, MentorStatus.PENDING);
+      const savedProfile = await this.createProfile(userId, dto, MentorStatus.PENDING);
       this.eventEmitter.emit('mentor.application', savedProfile);
       return savedProfile;
     } catch {
@@ -134,7 +134,7 @@ export class MentorsService {
       this.eventEmitter.emit('mentor.approved', mentorProfile);
       return await this.findOne(id);
     } catch {
-      throw new BadRequestException("Approbation impossible");
+      throw new BadRequestException('Approbation impossible');
     }
   }
 
@@ -151,10 +151,10 @@ export class MentorsService {
     }
   }
 
-  async findByUser(user: User): Promise<MentorProfile[]> {
+  async findByUser(userId: string): Promise<MentorProfile[]> {
     try {
       return await this.mentorRepository.find({
-        where: { owner: { id: user.id } },
+        where: { owner: { id: userId } },
         relations: ['experiences', 'expertises']
       });
     } catch {

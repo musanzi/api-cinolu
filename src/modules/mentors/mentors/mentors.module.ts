@@ -10,16 +10,9 @@ import { UsersModule } from '../../identity/users/users.module';
 import { MentorExperiencesService } from './services/mentor-experiences.service';
 import { MentorsEmailService } from './services/mentors-email.service';
 import { MentorMediaService } from './services/mentor-media.service';
-import { MENTORS_RBAC_POLICY } from './mentors-rbac';
-import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([MentorProfile, Experience]),
-    ExpertisesModule,
-    UsersModule,
-    SessionAuthModule.forFeature([MENTORS_RBAC_POLICY])
-  ],
+  imports: [TypeOrmModule.forFeature([MentorProfile, Experience]), ExpertisesModule, UsersModule],
   controllers: [MentorsController, MentorMediaController],
   providers: [MentorsService, MentorMediaService, MentorExperiencesService, MentorsEmailService],
   exports: [MentorsService]
