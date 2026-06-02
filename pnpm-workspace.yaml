@@ -3,6 +3,7 @@ allowBuilds:
   '@scarf/scarf': true
   bcrypt: true
   unrs-resolver: true
+
 minimumReleaseAgeExclude:
   - '@better-auth/core@1.6.13'
   - '@better-auth/drizzle-adapter@1.6.13'
@@ -12,3 +13,7 @@ minimumReleaseAgeExclude:
   - '@better-auth/prisma-adapter@1.6.13'
   - '@better-auth/telemetry@1.6.13'
   - better-auth@1.6.13
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - unrs-resolver
