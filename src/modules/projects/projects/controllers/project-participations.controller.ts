@@ -1,13 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CurrentUser, Public, Rbac } from '@musanzi/nestjs-session-auth';
 import { createCsvUploadOptions } from '@/shared/helpers/csv-upload.helper';
-import { User } from '../../../identity/users/entities/user.entity';
 import { FilterParticipationsDto } from '../dto/filter-participations.dto';
 import { MoveParticipantsDto } from '../dto/move-participants.dto';
 import { ParticipateProjectDto } from '../dto/participate.dto';
 import { ProjectParticipation } from '../entities/project-participation.entity';
 import { ProjectParticipationService } from '../services/project-participations.service';
+import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { User } from '@/modules/identity/users/entities/user.entity';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('projects')
 export class ProjectParticipationsController {
@@ -23,13 +24,13 @@ export class ProjectParticipationsController {
   }
 
   @Post('participants/move')
-  @Rbac({ resource: 'projects', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   moveParticipants(@Body() dto: MoveParticipantsDto): Promise<void> {
     return this.participationService.moveParticipants(dto);
   }
 
   @Post('participants/remove')
-  @Rbac({ resource: 'projects', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   removeParticipantsFromPhase(@Body() dto: MoveParticipantsDto): Promise<void> {
     return this.participationService.removeParticipantsFromPhase(dto);
   }
@@ -50,7 +51,7 @@ export class ProjectParticipationsController {
     @CurrentUser() user: User,
     @Body() dto: ParticipateProjectDto
   ): Promise<void> {
-    return this.participationService.participate(projectId, user, dto);
+    return this.participationService.participate(projectId, user.id, dto);
   }
 
   @Get('me/participations')
@@ -59,12 +60,13 @@ export class ProjectParticipationsController {
   }
 
   @Get('participations/:participationId')
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findOneParticipation(@Param('participationId') participationId: string): Promise<ProjectParticipation> {
     return this.participationService.findOne(participationId);
   }
 
   @Post('id/:projectId/participants/import-csv')
-  @Rbac({ resource: 'projects', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   @UseInterceptors(FileInterceptor('file', createCsvUploadOptions()))
   addParticipantsFromCsv(
     @Param('projectId') projectId: string,

@@ -10,7 +10,7 @@ import { ParticipateProjectDto } from '../dto/participate.dto';
 import { ProjectsService } from './projects.service';
 import { MoveParticipantsDto } from '../dto/move-participants.dto';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
-import { parseUsersCsv } from '@/shared/helpers/user-csv.helper';
+import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
 import { FilterParticipationsDto } from '../dto/filter-participations.dto';
 import { ProjectParticipationReviewService } from './project-participation-review.service';
 
@@ -208,12 +208,12 @@ export class ProjectParticipationService {
       });
   }
 
-  async participate(projectId: string, user: User, dto: ParticipateProjectDto): Promise<void> {
+  async participate(projectId: string, userId: string, dto: ParticipateProjectDto): Promise<void> {
     try {
       await this.projectsService.findOne(projectId);
       const venture = await this.venturesService.findOne(dto.ventureId);
       await this.participationRepository.save({
-        user: { id: user.id },
+        user: { id: userId },
         project: { id: projectId },
         venture: venture ? { id: venture.id } : null
       });

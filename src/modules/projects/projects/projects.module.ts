@@ -22,9 +22,7 @@ import { ProjectsEmailService } from './services/projects-email.service';
 import { ProjectsService } from './services/projects.service';
 import { ProjectSubscriber } from './subscribers/project.subscriber';
 import { MentorsModule } from '../../mentors/mentors/mentors.module';
-import { PROJECTS_RBAC_POLICY } from './projects-rbac';
 import { GalleriesModule } from '../../galleries/galleries.module';
-import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
 
 @Module({
   imports: [
@@ -35,8 +33,7 @@ import { SessionAuthModule } from '@musanzi/nestjs-session-auth';
     ProjectCategoriesModule,
     UsersModule,
     VenturesModule,
-    TypeOrmModule.forFeature([Project, ProjectParticipation, ProjectParticipationUpvote, ProjectParticipationReview]),
-    SessionAuthModule.forFeature([PROJECTS_RBAC_POLICY])
+    TypeOrmModule.forFeature([Project, ProjectParticipation, ProjectParticipationUpvote, ProjectParticipationReview])
   ],
   providers: [
     ProjectsService,

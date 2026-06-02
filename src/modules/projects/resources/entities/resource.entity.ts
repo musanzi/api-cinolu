@@ -1,4 +1,4 @@
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { Project } from '../../../projects/projects/entities/project.entity';
 import { Phase } from '../../../projects/phases/entities/phase.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';

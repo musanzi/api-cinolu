@@ -2,7 +2,6 @@ import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/com
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { User } from '../../../identity/users/entities/user.entity';
 import { ProjectParticipationReview } from '../entities/project-participation-review.entity';
 import { ProjectParticipation } from '../entities/project-participation.entity';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
@@ -37,7 +36,7 @@ export class ProjectParticipationReviewService {
 
   async createReview(
     participationId: string,
-    reviewer: User,
+    reviewerId: string,
     dto: ParticipationReviewDto
   ): Promise<ProjectParticipationReview> {
     try {
@@ -57,7 +56,7 @@ export class ProjectParticipationReviewService {
       const review = await this.reviewRepository.save({
         participation: { id: participationId },
         phase: { id: dto.phaseId },
-        reviewer: { id: reviewer.id },
+        reviewer: { id: reviewerId },
         message: dto.message ?? null,
         score: dto.score
       });
@@ -72,7 +71,7 @@ export class ProjectParticipationReviewService {
   async updateReview(
     participationId: string,
     reviewId: string,
-    reviewer: User,
+    reviewerId: string,
     dto: UpdateParticipationReviewDto
   ): Promise<ProjectParticipationReview> {
     try {
@@ -85,7 +84,7 @@ export class ProjectParticipationReviewService {
         id: existing.id,
         participation: { id: participationId },
         phase: { id: existing.phase.id },
-        reviewer: { id: reviewer.id },
+        reviewer: { id: reviewerId },
         message: dto.message ?? null,
         score: dto.score
       });

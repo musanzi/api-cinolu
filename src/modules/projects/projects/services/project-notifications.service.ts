@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationsService } from '../../../notifications/services/notifications.service';
 import { Notification } from '../../../notifications/entities/notification.entity';
 import { CreateNotificationDto } from '../../../notifications/dto/create-notification.dto';
-import { User } from '../../../identity/users/entities/user.entity';
 import { ProjectsService } from './projects.service';
 import { ProjectParticipationService } from './project-participations.service';
 import { MentorsService } from '../../../mentors/mentors/services/mentors.service';
@@ -20,10 +19,10 @@ export class ProjectNotificationService {
     private readonly eventEmitter: EventEmitter2
   ) {}
 
-  async create(projectId: string, user: User, dto: CreateNotificationDto): Promise<Notification> {
+  async create(projectId: string, userId: string, dto: CreateNotificationDto): Promise<Notification> {
     try {
       await this.projectsService.findOne(projectId);
-      const notification = await this.notificationsService.create(projectId, user.id, dto);
+      const notification = await this.notificationsService.create(projectId, userId, dto);
       return this.notificationsService.findOne(notification.id);
     } catch {
       throw new BadRequestException('Création de notification impossible');
