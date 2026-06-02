@@ -1,9 +1,9 @@
 import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CurrentUser } from '@musanzi/nestjs-session-auth';
 import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 import { User } from '../entities/user.entity';
 import { UserMediaService } from '../services/user-media.service';
+import { CurrentUser } from '@/modules/auth/decorators';
 
 @Controller('users')
 export class UserMediaController {

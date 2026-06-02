@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Role } from '../../../identity/roles/entities/role.entity';
 import { Venture } from '../../../ventures/ventures/entities/venture.entity';
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { Article } from '../../../content/blog/articles/entities/article.entity';
 import { Comment } from '../../../content/blog/comments/entities/comment.entity';
 import { Project } from '../../../projects/projects/entities/project.entity';

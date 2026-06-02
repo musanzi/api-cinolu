@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { CurrentUser, Public } from '@musanzi/nestjs-session-auth';
 import { User } from '../entities/user.entity';
 import { UsersReferralService } from '../services/users-referral.service';
+import { CurrentUser, Public } from '@/modules/auth/decorators';
 
 @Controller('users')
 export class UsersReferralController {

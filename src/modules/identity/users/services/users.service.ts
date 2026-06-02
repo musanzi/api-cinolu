@@ -9,7 +9,7 @@ import { FilterUsersDto } from '../dto/filter-users.dto';
 import { SignUpDto } from '../../../auth/dto/sign-up.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomBytes } from 'crypto';
-import { parseUsersCsv } from '@/shared/helpers/user-csv.helper';
+import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
 import { SignUpResult } from '../types/sign-up-result.type';
 
 @Injectable()

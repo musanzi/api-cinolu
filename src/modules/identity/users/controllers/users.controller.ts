@@ -1,44 +1,56 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Public, Rbac } from '@musanzi/nestjs-session-auth';
 import { createCsvUploadOptions } from '@/shared/helpers/csv-upload.helper';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { FilterUsersDto } from '../dto/filter-users.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
+import { Public, Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('staff')
-  @Rbac({ resource: 'users', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   async findStaff(): Promise<User[]> {
     return this.usersService.findStaff();
   }
 
   @Post()
-  @Rbac({ resource: 'users', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@Body() dto: CreateUserDto): Promise<User> {
     return this.usersService.create(dto);
   }
 
   @Get('search')
-  @Rbac({ resource: 'users', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   search(@Query('term') term: string): Promise<User[]> {
     return this.usersService.search(term);
   }
 
   @Post('import-csv')
-  @Rbac({ resource: 'users', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   @UseInterceptors(FileInterceptor('file', createCsvUploadOptions()))
   importCsv(@UploadedFile() file: Express.Multer.File): Promise<void> {
     return this.usersService.importCsv(file);
   }
 
   @Get()
-  @Rbac({ resource: 'users', action: 'read' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   findAll(@Query() query: FilterUsersDto): Promise<[User[], number]> {
     return this.usersService.findAll(query);
   }
@@ -56,19 +68,19 @@ export class UsersController {
   }
 
   @Patch('id/:userId')
-  @Rbac({ resource: 'users', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('userId') userId: string, @Body() dto: UpdateUserDto): Promise<User> {
     return this.usersService.update(userId, dto);
   }
 
   @Delete('clear')
-  @Rbac({ resource: 'users', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   clear(): Promise<number> {
     return this.usersService.clear();
   }
 
   @Delete('id/:userId')
-  @Rbac({ resource: 'users', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('userId') userId: string): Promise<void> {
     return this.usersService.remove(userId);
   }
