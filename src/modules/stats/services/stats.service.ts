@@ -20,10 +20,10 @@ import { EventParticipation } from '../../events/events/entities/event-participa
 export class StatsService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async findUserStats(user: User): Promise<IUSerStats> {
+  async findUserStats(userId: string): Promise<IUSerStats> {
     const [totalVentures, referralsCount] = await Promise.all([
-      this.countUserVentures(user.id),
-      this.countUserReferrals(user.id)
+      this.countUserVentures(userId),
+      this.countUserReferrals(userId)
     ]);
     return { totalVentures, referralsCount };
   }
