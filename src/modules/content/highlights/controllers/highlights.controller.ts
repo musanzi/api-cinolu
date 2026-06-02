@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { HighlightsService } from '../highlights.service';
-import { Public } from '@musanzi/nestjs-session-auth';
 import { HighlightedItems } from '../types';
+import { Public } from '@/modules/auth/decorators';
 
 @Controller('highlights')
 export class HighlightsController {
