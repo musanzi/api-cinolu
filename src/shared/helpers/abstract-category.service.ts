@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { AbstractEntity } from '@/shared/helpers/abstract.entity';
+import { AbstractEntity } from '@/modules/database/abstract.entity';
 import { PaginationQuery } from '@/shared/types/pagination.query';
 
 type NameDto = { name: string };
