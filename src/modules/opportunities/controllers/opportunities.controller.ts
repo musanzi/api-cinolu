@@ -1,17 +1,19 @@
+import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { Public, Rbac } from '@musanzi/nestjs-session-auth';
 import { CreateOpportunityDto } from '../dto/create-opportunity.dto';
 import { FilterOpportunitiesDto } from '../dto/filter-opportunities.dto';
 import { UpdateOpportunityDto } from '../dto/update-opportunity.dto';
 import { Opportunity } from '../entities/opportunity.entity';
 import { OpportunitiesService } from '../services/opportunities.service';
+import { Roles } from '@/modules/auth/decorators';
+import { RoleEnum } from '@/modules/auth/enums';
 
 @Controller('opportunities')
 export class OpportunitiesController {
   constructor(private readonly opportunitiesService: OpportunitiesService) {}
 
   @Post()
-  @Rbac({ resource: 'opportunities', action: 'create' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   create(@Body() dto: CreateOpportunityDto): Promise<Opportunity> {
     return this.opportunitiesService.create(dto);
   }
@@ -29,13 +31,13 @@ export class OpportunitiesController {
   }
 
   @Patch('id/:opportunityId')
-  @Rbac({ resource: 'opportunities', action: 'update' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   update(@Param('opportunityId') opportunityId: string, @Body() dto: UpdateOpportunityDto): Promise<Opportunity> {
     return this.opportunitiesService.update(opportunityId, dto);
   }
 
   @Delete('id/:opportunityId')
-  @Rbac({ resource: 'opportunities', action: 'delete' })
+  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
   remove(@Param('opportunityId') opportunityId: string): Promise<void> {
     return this.opportunitiesService.remove(opportunityId);
   }
