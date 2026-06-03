@@ -4,7 +4,10 @@ import { MentorExperiencesService } from '@/modules/mentors/mentors/services/men
 describe('MentorExperiencesService', () => {
   const setup = () => {
     const experienceRepository = {
+      create: jest.fn((dto) => dto),
       find: jest.fn(),
+      findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       save: jest.fn(),
       delete: jest.fn()
     } as any;

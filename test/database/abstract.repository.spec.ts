@@ -90,7 +90,7 @@ describe('AbstractRepository', () => {
     const entity = { id: '1', name: 'Test' };
     repository.findOneOrFail.mockResolvedValue(entity);
 
-    await expect(abstractRepository.findEntity('1')).resolves.toEqual(entity);
+    await expect(abstractRepository.findEntity({ where: { id: '1' } })).resolves.toEqual(entity);
     expect(repository.findOneOrFail).toHaveBeenCalledWith({ where: { id: '1' } });
   });
 

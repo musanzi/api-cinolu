@@ -1,18 +1,31 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { promises as fs } from 'fs';
 import { OpportunitiesService } from '@/modules/opportunities/services/opportunities.service';
 import { OpportunityLanguage } from '@/modules/opportunities/entities/opportunity.entity';
 
 describe('OpportunitiesService', () => {
+  let unlinkSpy: jest.SpiedFunction<typeof fs.unlink>;
+
   const setup = () => {
     const opportunitiesRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       delete: jest.fn()
     } as any;
     const service = new OpportunitiesService(opportunitiesRepository);
     return { service, opportunitiesRepository };
   };
+
+  beforeEach(() => {
+    unlinkSpy = jest.spyOn(fs, 'unlink').mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    unlinkSpy.mockRestore();
+  });
 
   it('creates an opportunity', async () => {
     const { service, opportunitiesRepository } = setup();
@@ -63,7 +76,7 @@ describe('OpportunitiesService', () => {
   it('throws on findAll failure', async () => {
     const { service, opportunitiesRepository } = setup();
     opportunitiesRepository.find.mockRejectedValue(new Error('bad'));
-    await expect(service.findAll({})).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findAll({})).rejects.toThrow('bad');
   });
 
   it('finds one opportunity by slug', async () => {
@@ -92,29 +105,37 @@ describe('OpportunitiesService', () => {
 
   it('updates an opportunity', async () => {
     const { service, opportunitiesRepository } = setup();
-    jest.spyOn(service, 'findOneById').mockResolvedValue({ id: 'o1', title: 'Old' } as any);
+    opportunitiesRepository.findOneOrFail.mockResolvedValue({ id: 'o1', title: 'Old' });
     opportunitiesRepository.save.mockResolvedValue({ id: 'o1', title: 'New' });
     await expect(service.update('o1', { title: 'New' })).resolves.toEqual({ id: 'o1', title: 'New' });
   });
 
-  it('sets cover', async () => {
+  it('adds cover', async () => {
     const { service, opportunitiesRepository } = setup();
-    jest.spyOn(service, 'findOneById').mockResolvedValue({ id: 'o1', cover: null } as any);
+    opportunitiesRepository.findOneOrFail.mockResolvedValue({ id: 'o1', cover: null });
     opportunitiesRepository.save.mockResolvedValue({ id: 'o1', cover: 'cover.png' });
-    await expect(service.setCover('o1', 'cover.png')).resolves.toEqual({ id: 'o1', cover: 'cover.png' });
+    await expect(service.addCover('o1', 'cover.png')).resolves.toEqual({ id: 'o1', cover: 'cover.png' });
+    expect(unlinkSpy).not.toHaveBeenCalled();
+  });
+
+  it('replaces the old cover', async () => {
+    const { service, opportunitiesRepository } = setup();
+    opportunitiesRepository.findOneOrFail.mockResolvedValue({ id: 'o1', cover: 'old.png' });
+    opportunitiesRepository.save.mockResolvedValue({ id: 'o1', cover: 'new.png' });
+    await expect(service.addCover('o1', 'new.png')).resolves.toEqual({ id: 'o1', cover: 'new.png' });
+    expect(unlinkSpy).toHaveBeenCalledWith('./uploads/opportunities/old.png');
   });
 
   it('removes an opportunity', async () => {
     const { service, opportunitiesRepository } = setup();
-    jest.spyOn(service, 'findOneById').mockResolvedValue({ id: 'o1' } as any);
     opportunitiesRepository.delete.mockResolvedValue(undefined);
     await expect(service.remove('o1')).resolves.toBeUndefined();
     expect(opportunitiesRepository.delete).toHaveBeenCalledWith('o1');
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOneById').mockRejectedValue(new Error('bad'));
+    const { service, opportunitiesRepository } = setup();
+    opportunitiesRepository.delete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('o1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });

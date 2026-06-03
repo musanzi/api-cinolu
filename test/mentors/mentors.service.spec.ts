@@ -14,9 +14,11 @@ describe('MentorsService', () => {
   const setup = () => {
     const queryBuilder = makeQueryBuilder([[{ id: 'm1' }], 1]);
     const mentorRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
       update: jest.fn(),
       softDelete: jest.fn()

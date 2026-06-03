@@ -4,8 +4,10 @@ import { ProjectParticipationReviewService } from '@/modules/projects/projects/s
 describe('ProjectParticipationReviewService', () => {
   const setup = () => {
     const reviewRepository = {
+      create: jest.fn((dto) => dto),
       findOne: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       save: jest.fn(),
       find: jest.fn()
     } as any;

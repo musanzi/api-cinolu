@@ -9,6 +9,7 @@ describe('GalleriesService', () => {
 
   const setup = () => {
     const galleryRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       findOneOrFail: jest.fn(),
       delete: jest.fn(),
@@ -53,8 +54,8 @@ describe('GalleriesService', () => {
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, galleryRepository } = setup();
+    galleryRepository.findOneOrFail.mockRejectedValue(new Error('bad'));
     await expect(service.remove('g1')).rejects.toBeInstanceOf(BadRequestException);
   });
 

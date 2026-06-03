@@ -10,8 +10,10 @@ describe('PhasesService', () => {
       getMany: jest.fn().mockResolvedValue([{ id: 'ph1' }])
     };
     const phaseRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       find: jest.fn(),
       softDelete: jest.fn(),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder)

@@ -3,7 +3,7 @@ import { UsersService } from '@/modules/identity/users/services/users.service';
 import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
 import { UserStatus } from '@/modules/identity/users/types/user-status.enum';
 
-jest.mock('@/shared/helpers/user-csv.helper', () => ({
+jest.mock('@/modules/identity/users/helpers/user-csv.helper', () => ({
   parseUsersCsv: jest.fn()
 }));
 

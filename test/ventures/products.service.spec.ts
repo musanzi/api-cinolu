@@ -4,9 +4,11 @@ import { ProductsService } from '@/modules/ventures/products/services/products.s
 describe('ProductsService', () => {
   const setup = () => {
     const productsRepository = {
+      create: jest.fn((dto) => dto),
       findAndCount: jest.fn(),
       save: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       softDelete: jest.fn()
     } as any;
     const service = new ProductsService(productsRepository);
@@ -60,14 +62,16 @@ describe('ProductsService', () => {
   it('updates product by slug', async () => {
     const { service, productsRepository } = setup();
     jest.spyOn(service, 'findBySlug').mockResolvedValue({ id: 'prod1', name: 'old' } as any);
+    productsRepository.findOneOrFail.mockResolvedValue({ id: 'prod1', name: 'old' });
     productsRepository.save.mockResolvedValue({ id: 'prod1', name: 'new' });
     await expect(service.update('slug', { name: 'new' } as any)).resolves.toEqual({ id: 'prod1', name: 'new' });
   });
 
   it('throws on update failure', async () => {
-    const { service } = setup();
+    const { service, productsRepository } = setup();
     jest.spyOn(service, 'findBySlug').mockRejectedValue(new Error('bad'));
-    await expect(service.update('slug', {} as any)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.update('slug', {} as any)).rejects.toThrow('bad');
+    expect(productsRepository.save).not.toHaveBeenCalled();
   });
 
   it('soft deletes product', async () => {
@@ -78,8 +82,8 @@ describe('ProductsService', () => {
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, productsRepository } = setup();
+    productsRepository.softDelete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('prod1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });

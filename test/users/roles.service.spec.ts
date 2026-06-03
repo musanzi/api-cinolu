@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { RolesService } from '@/modules/identity/roles/roles.service';
 
 function createQueryBuilder(result: [any[], number]) {
@@ -17,9 +17,11 @@ describe('RolesService', () => {
 
   beforeEach(() => {
     roleRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       createQueryBuilder: jest.fn(),
       delete: jest.fn()
     };
@@ -31,9 +33,9 @@ describe('RolesService', () => {
     await expect(service.create({ name: 'staff' } as any)).resolves.toEqual({ id: 'r1', name: 'staff' });
   });
 
-  it('create maps repository error to ConflictException', async () => {
+  it('create maps repository error to BadRequestException', async () => {
     roleRepository.save.mockRejectedValue(new Error('duplicate'));
-    await expect(service.create({ name: 'staff' } as any)).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.create({ name: 'staff' } as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('findAllPaginated applies query and page window', async () => {
@@ -56,14 +58,14 @@ describe('RolesService', () => {
     expect(qb.take).toHaveBeenCalledWith(40);
   });
 
-  it('findByName maps errors to BadRequestException', async () => {
+  it('findByName maps errors to NotFoundException', async () => {
     roleRepository.findOneOrFail.mockRejectedValue(new Error('missing'));
-    await expect(service.findByName('none')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findByName('none')).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('findOne maps repository errors to BadRequestException', async () => {
+  it('findOne maps repository errors to NotFoundException', async () => {
     roleRepository.findOneOrFail.mockRejectedValue(new Error('missing'));
-    await expect(service.findOne('none')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findOne('none')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('update merges role and dto then saves', async () => {
@@ -75,7 +77,6 @@ describe('RolesService', () => {
   });
 
   it('remove deletes existing role', async () => {
-    roleRepository.findOneOrFail.mockResolvedValue({ id: 'r1' });
     roleRepository.delete.mockResolvedValue({});
 
     await expect(service.remove('r1')).resolves.toBeUndefined();
@@ -83,7 +84,7 @@ describe('RolesService', () => {
   });
 
   it('remove maps errors to BadRequestException', async () => {
-    roleRepository.findOneOrFail.mockRejectedValue(new Error('missing'));
+    roleRepository.delete.mockRejectedValue(new Error('missing'));
     await expect(service.remove('r1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });
