@@ -131,9 +131,9 @@ export class ProjectsService extends AbstractRepository<Project> {
   async update(id: string, dto: UpdateProjectDto): Promise<Project> {
     return await this.updateEntity(id, {
       ...dto,
-      ...(dto.project_manager && { project_manager: { id: dto.project_manager } }),
-      ...(dto.program && { program: { id: dto.program } }),
-      ...(dto.categories && { categories: dto.categories.map((type) => ({ id: type })) })
+      project_manager: { id: dto.project_manager },
+      program: { id: dto.program },
+      categories: dto.categories ? dto.categories.map((type) => ({ id: type })) : null
     });
   }
 
