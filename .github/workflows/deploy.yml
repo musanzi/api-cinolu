@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-  deploy:
+  cd:
     name: Deploy to VPS
     runs-on: ubuntu-latest
     needs: ci
@@ -62,7 +62,8 @@ jobs:
 
             cd "${{ secrets.PROJECT_PATH }}"
 
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             pnpm install --frozen-lockfile
             pnpm build
