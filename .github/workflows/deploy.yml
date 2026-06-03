@@ -45,9 +45,8 @@ jobs:
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment: production
-    if: github.ref == 'refs/heads/main'
+    needs: ci
+    if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Deploy through SSH
@@ -62,11 +61,11 @@ jobs:
 
             cd "${{ secrets.PROJECT_PATH }}"
 
-            git pull
+            git pull origin main
 
             pnpm install --frozen-lockfile
             pnpm build
             pnpm prune --prod
 
-            pm2 reload api --update-env || pm2 restart api --update-env
+            pm2 restart api --update-env
             pm2 save
