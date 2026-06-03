@@ -1,71 +1,26 @@
 # CINOLU API
 
-Backend API for the CINOLU platform, built with **NestJS**, **TypeORM**, and **MariaDB**.
+Backend API for the CINOLU platform. The service is built with **NestJS**, **TypeScript**, **TypeORM**, and **MySQL/MariaDB**.
 
-It powers the core platform features around authentication, users, programs, projects, events, ventures, mentors, blog content, notifications, highlights, stats, galleries, and static assets.
+It powers authentication, identity management, programs, projects, events, opportunities, ventures, mentors, content, notifications, galleries, and dashboard statistics.
 
 ## Stack
 
 - **Framework:** NestJS 11
 - **Language:** TypeScript
-- **Database:** MariaDB
+- **Database:** MySQL/MariaDB
 - **ORM:** TypeORM
-- **Authentication:** Session auth, Passport, JWT, Google OAuth
-- **Email:** Nodemailer + `@nestjs-modules/mailer`
-- **File handling:** Multer
-- **Validation:** class-validator + class-transformer
-
-## Core Features
-
-- Modular NestJS architecture
-- Session-based authentication with role-based access control
-- Google OAuth integration
-- JWT support for token-based flows
-- Database migrations with TypeORM
-- Static file serving
-- Email sending support
-- Global request validation
-- CORS enabled for frontend integration
-
-## Project Structure
-
-```text
-src/
-├── app.module.ts
-├── main.ts
-├── core/
-│   ├── auth/
-│   ├── helpers/
-│   ├── interceptors/
-│   └── types/
-├── modules/
-│   ├── blog/
-│   ├── events/
-│   ├── highlights/
-│   ├── mentors/
-│   ├── notifications/
-│   ├── programs/
-│   ├── projects/
-│   ├── stats/
-│   ├── subprograms/
-│   ├── users/
-│   └── ventures/
-└── shared/
-    ├── config/
-    ├── database/
-    ├── email/
-    ├── galleries/
-    ├── jwt/
-    └── static/
-```
+- **Auth:** Passport, sessions, JWT, Google OAuth
+- **Email:** `@nestjs-modules/mailer` + Nodemailer
+- **Logging:** `nestjs-pino`
+- **Validation:** `class-validator` + `class-transformer`
+- **File uploads:** Multer, served from `/uploads`
 
 ## Requirements
 
-Before running the project, make sure you have:
-
-- **Node.js** 18+
-- **pnpm**
-- **MariaDB** database
+- Node.js 18+
+- pnpm
+- MySQL or MariaDB
 
 ## Installation
 
@@ -73,13 +28,9 @@ Before running the project, make sure you have:
 pnpm install
 ```
 
-## Environment Variables
+## Environment
 
-Create a `.env` file in the project root.
-
-A starter template is available in `.env.example`.
-
-### Example
+Create a `.env` file in the project root. Use `.env.example` as the starting point.
 
 ```env
 PORT=8000
@@ -96,117 +47,136 @@ MAIL_USERNAME=
 MAIL_PASSWORD=
 
 SESSION_SECRET=
-SESSION_RESAVE=
-SESSION_SAVE_UNINITIALIZED=
+SESSION_MAX_AGE=
+
+JWT_SECRET=
 
 GOOGLE_CLIENT_ID=
 GOOGLE_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/redirect
 FRONTEND_URI=http://localhost:4200
+
+SUPPORT_EMAIL=
 ```
 
-### Notes
+Notes:
 
-- `PORT` defaults to `3000` in code when not provided.
-- Google OAuth callback is configured through `GOOGLE_REDIRECT_URI`.
-- Session behavior depends on the session-related environment variables.
+- `PORT` defaults to `3000` when it is not provided.
+- `SESSION_SECRET` is required for session middleware.
+- `SESSION_MAX_AGE` is used as the session cookie lifetime in milliseconds.
+- `JWT_SECRET` is required because `JwtModule` uses `getOrThrow('JWT_SECRET')`.
+- Static uploads are served from the local `uploads/` directory at `/uploads`.
 
-## Running the API
-
-### Development
+## Running
 
 ```bash
 pnpm start:dev
 ```
 
-### Debug mode
+The API will listen on the configured `PORT`, commonly:
 
-```bash
-pnpm start:debug
+```text
+http://localhost:8000
 ```
 
-### Production
+Other runtime commands:
 
 ```bash
-pnpm build
-pnpm start:prod
+pnpm start         # Start the app
+pnpm start:debug   # Start in debug/watch mode
+pnpm build         # Build the application
+pnpm start:prod    # Run compiled output from dist/
 ```
 
-### Standard start
-
-```bash
-pnpm start
-```
-
-By default, local development commonly runs on:
-
-- `http://localhost:8000`
-
-## Available Scripts
+## Scripts
 
 ```bash
 pnpm build         # Build the application
-pnpm start         # Start the app
-pnpm start:dev     # Start in watch mode
-pnpm start:debug   # Start in debug + watch mode
-pnpm start:prod    # Run compiled output from dist/
+pnpm format        # Format TypeScript source files
 pnpm lint          # Lint and auto-fix files
-pnpm format        # Format source files
+pnpm start         # Start the application
+pnpm start:dev     # Start in watch mode
+pnpm start:debug   # Start in debug/watch mode
+pnpm start:prod    # Run dist/main
 pnpm test          # Run tests
 pnpm test:watch    # Run tests in watch mode
-pnpm test:cov      # Generate coverage report
-pnpm test:debug    # Run tests in debug mode
+pnpm test:cov      # Run tests with coverage
+pnpm test:debug    # Run tests with the Node debugger
 ```
 
 ## Database Migrations
 
-### Generate a migration
+Migration files live in:
+
+```text
+src/modules/database/migrations/
+```
+
+Generate a migration:
 
 ```bash
 pnpm db:migrate --name=your_migration_name
 ```
 
-### Run migrations
+Run pending migrations:
 
 ```bash
 pnpm db:up
 ```
 
-### Revert the last migration
+Revert the last migration:
 
 ```bash
 pnpm db:down
 ```
 
-Migration files are stored in:
+The migration scripts build the app first, then run the TypeORM CLI against `src/modules/database/orm.config.ts`.
+
+## Project Structure
 
 ```text
-src/shared/database/migrations/
+src/
+├── app.module.ts
+├── main.ts
+├── modules/
+│   ├── auth/
+│   ├── config/
+│   ├── content/
+│   │   ├── blog/
+│   │   └── highlights/
+│   ├── database/
+│   ├── email/
+│   ├── events/
+│   ├── galleries/
+│   ├── identity/
+│   │   ├── roles/
+│   │   └── users/
+│   ├── mentors/
+│   ├── notifications/
+│   ├── opportunities/
+│   ├── programs/
+│   ├── projects/
+│   ├── stats/
+│   └── ventures/
+└── shared/
+    ├── helpers/
+    └── interceptors/
 ```
 
 ## Runtime Behavior
 
-A few relevant runtime details from the current app setup:
-
-- Global validation is enabled with NestJS `ValidationPipe`
-- CORS is enabled with credentials support
-- Session middleware is enabled through `express-session`
-- Passport is initialized for authentication flows
-- Global guards are applied for session auth and RBAC
-- A global transform interceptor is registered at application level
-
-## Development Notes
-
-- The project uses **TypeORM CLI** through a pnpm script.
-- Husky is configured via the `prepare` script.
-- Static assets and galleries are handled through dedicated shared modules.
-- The codebase follows a modular structure that keeps domain logic separated and scalable.
+- Global validation is enabled with `ValidationPipe`.
+- CORS is enabled with credentials support.
+- Session middleware is configured with `express-session`.
+- Passport is initialized for local, session, JWT, and Google OAuth flows.
+- Global guards apply role checks and authentication.
+- Responses pass through a global transform interceptor.
+- Request logging is handled by `nestjs-pino`.
 
 ## License
 
 This project is licensed under the **MIT License**.
-See the [LICENSE](./LICENSE) file for details.
 
 ## Author
 
-**Wilfried M**
+Wilfried M
