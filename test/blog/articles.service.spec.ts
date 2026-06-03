@@ -15,12 +15,13 @@ describe('ArticlesService', () => {
   const setup = () => {
     const queryBuilder = makeQueryBuilder([[{ id: 'a1' }], 1]);
     const articlesRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
-      merge: jest.fn(),
-      delete: jest.fn()
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
+      softDelete: jest.fn()
     } as any;
     const service = new ArticlesService(articlesRepository);
     return { service, articlesRepository, queryBuilder };
@@ -124,8 +125,8 @@ describe('ArticlesService', () => {
     queryBuilder.skip.mockClear();
     queryBuilder.take.mockClear();
     await service.findPublished({} as any);
-    expect(queryBuilder.skip).not.toHaveBeenCalled();
-    expect(queryBuilder.take).not.toHaveBeenCalled();
+    expect(queryBuilder.skip).toHaveBeenCalledWith(0);
+    expect(queryBuilder.take).toHaveBeenCalledWith(12);
   });
 
   it('finds by slug with relations', async () => {
@@ -143,8 +144,7 @@ describe('ArticlesService', () => {
     const { service, articlesRepository } = setup();
     const draft = { id: 'a1', published_at: null };
     const published = { id: 'a1', published_at: new Date('2026-01-01T00:00:00.000Z') };
-    const findOneSpy = jest.spyOn(service, 'findOne');
-    findOneSpy.mockResolvedValueOnce(draft as any).mockResolvedValueOnce(published as any);
+    articlesRepository.findOneOrFail.mockResolvedValueOnce(draft).mockResolvedValueOnce(draft).mockResolvedValueOnce(published).mockResolvedValueOnce(published);
     articlesRepository.save.mockResolvedValueOnce({ id: 'a1', published_at: new Date() }).mockResolvedValueOnce({
       id: 'a1',
       published_at: null
@@ -177,7 +177,7 @@ describe('ArticlesService', () => {
   it('updates article and maps tags', async () => {
     const { service, articlesRepository } = setup();
     const existing = { id: 'a1', tags: [{ id: 'old' }] };
-    jest.spyOn(service, 'findOne').mockResolvedValue(existing as any);
+    articlesRepository.findOneOrFail.mockResolvedValue(existing);
     articlesRepository.save.mockResolvedValue({ id: 'a1', tags: [{ id: 't1' }] });
 
     await expect(service.update('a1', { title: 'Updated', tags: ['t1'] } as any)).resolves.toEqual({
@@ -192,24 +192,23 @@ describe('ArticlesService', () => {
 
   it('throws on update failure when tags are missing', async () => {
     const { service, articlesRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'a1', tags: [{ id: 'old' }] } as any);
-    articlesRepository.merge.mockImplementation(() => undefined);
+    articlesRepository.findOneOrFail.mockResolvedValue({ id: 'a1', tags: [{ id: 'old' }] });
+    articlesRepository.save.mockRejectedValue(new Error('bad'));
 
     await expect(service.update('a1', { title: 'Updated' } as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('removes article after ensuring it exists', async () => {
     const { service, articlesRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'a1' } as any);
-    articlesRepository.delete.mockResolvedValue(undefined);
+    articlesRepository.softDelete.mockResolvedValue(undefined);
 
     await expect(service.remove('a1')).resolves.toBeUndefined();
-    expect(articlesRepository.delete).toHaveBeenCalledWith('a1');
+    expect(articlesRepository.softDelete).toHaveBeenCalledWith('a1');
   });
 
   it('sets article image', async () => {
     const { service, articlesRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'a1', image: null } as any);
+    articlesRepository.findOneOrFail.mockResolvedValue({ id: 'a1', image: null });
     articlesRepository.save.mockResolvedValue({ id: 'a1', image: 'cover.png' });
 
     await expect(service.setImage('a1', 'cover.png')).resolves.toEqual({ id: 'a1', image: 'cover.png' });
