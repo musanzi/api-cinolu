@@ -212,17 +212,10 @@ export class UsersService extends AbstractRepository<User> {
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     try {
-      const oldUser = await this.findEntity({
-        where: { id },
-        relations: ['roles']
-      });
-      delete oldUser.password;
-      await this.saveEntity({
-        ...oldUser,
+      return await this.updateEntity(id, {
         ...dto,
-        roles: dto.roles?.map((id) => ({ id })) || oldUser.roles
+        roles: dto.roles ? dto.roles.map((id) => ({ id })) : null
       });
-      return this.findOne(id);
     } catch {
       throw new BadRequestException('Mise à jour impossible');
     }
