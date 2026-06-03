@@ -1,25 +1,41 @@
 name: Deploy OneStop API
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22
+  PNPM_VERSION: 11.5.0
+
 jobs:
-  test:
-    name: Run tests
+  ci:
+    name: Test and build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.5.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: Install dependencies
@@ -28,36 +44,16 @@ jobs:
       - name: Run tests
         run: pnpm test
 
-  build:
-    name: Build app
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Build
         run: pnpm build
 
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: build
+    needs: ci
+    timeout-minutes: 10
+    environment: production
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Deploy through SSH
@@ -68,9 +64,16 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ${{ secrets.PROJECT_PATH }}
-            git pull
-            pnpm install --frozen-lockfile 
+            set -eu
+
+            cd "${{ secrets.PROJECT_PATH }}"
+
+            git fetch --prune origin main
+            git checkout --force "${{ github.sha }}"
+
+            pnpm install --frozen-lockfile
             pnpm build
-            pm2 restart api
+            pnpm prune --prod
+
+            pm2 reload api --update-env || pm2 restart api --update-env
             pm2 save
