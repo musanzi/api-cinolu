@@ -16,9 +16,10 @@ describe('ResourcesService', () => {
   const setup = () => {
     const queryBuilder = makeQueryBuilder();
     const resourceRepository = {
-      create: jest.fn(),
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       softDelete: jest.fn(),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder)
     } as any;
@@ -111,21 +112,20 @@ describe('ResourcesService', () => {
 
   it('updates resource metadata', async () => {
     const { service, resourceRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'r1', tags: ['old'] } as any);
+    resourceRepository.findOneOrFail.mockResolvedValue({ id: 'r1', tags: ['old'] });
     resourceRepository.save.mockResolvedValue({ id: 'r1', title: 'Updated' });
     await expect(service.update('r1', { title: 'Updated' } as any)).resolves.toEqual({ id: 'r1', title: 'Updated' });
   });
 
   it('updates resource file', async () => {
     const { service, resourceRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'r1', file: 'old.pdf' } as any);
+    resourceRepository.findOneOrFail.mockResolvedValue({ id: 'r1', file: 'old.pdf' });
     resourceRepository.save.mockResolvedValue({ id: 'r1', file: 'new.pdf' });
     await expect(service.setFile('r1', 'new.pdf')).resolves.toEqual({ id: 'r1', file: 'new.pdf' });
   });
 
   it('soft deletes a resource', async () => {
     const { service, resourceRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'r1' } as any);
     resourceRepository.softDelete.mockResolvedValue(undefined);
     await expect(service.remove('r1')).resolves.toBeUndefined();
     expect(resourceRepository.softDelete).toHaveBeenCalledWith('r1');
@@ -137,8 +137,11 @@ describe('ResourcesService', () => {
     queryBuilder.getManyAndCount.mockRejectedValue(new Error('bad'));
     await expect(service.findByProject('project-1', {} as any)).rejects.toBeInstanceOf(NotFoundException);
 
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    resourceRepository.findOneOrFail.mockResolvedValue({ id: 'r1' });
+    resourceRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.update('r1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
+    resourceRepository.save.mockReset();
+    resourceRepository.softDelete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('r1')).rejects.toBeInstanceOf(BadRequestException);
     resourceRepository.save.mockRejectedValue(new Error('bad'));
     await expect(

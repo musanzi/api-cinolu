@@ -30,12 +30,10 @@ describe('CommentsService', () => {
   it('creates comment and reloads it', async () => {
     const { service, commentsRepository } = setup();
     commentsRepository.save.mockResolvedValue({ id: 'c1' });
-    await expect(service.create({ content: 'hello', articleId: 'a1' } as any, 'u1')).resolves.toEqual({
-      id: 'c1',
-      article: { id: 'a1' },
-      author: { id: 'u1' },
-      content: 'hello'
-    });
+    await expect(service.create({ content: 'hello', articleId: 'a1' } as any, 'u1')).resolves.toEqual({ id: 'c1' });
+    expect(commentsRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ article: { id: 'a1' }, author: { id: 'u1' }, content: 'hello' })
+    );
   });
 
   it('throws bad request when create fails', async () => {

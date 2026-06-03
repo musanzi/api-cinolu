@@ -8,6 +8,7 @@ describe('SubprogramsService', () => {
       save: jest.fn(),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       softDelete: jest.fn()
     } as any;
     const service = new SubprogramsService(subprogramRepository);
@@ -39,7 +40,7 @@ describe('SubprogramsService', () => {
   it('throws on findByProgram failure', async () => {
     const { service, subprogramRepository } = setup();
     subprogramRepository.find.mockRejectedValue(new Error('bad'));
-    await expect(service.findByProgram('p1')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findByProgram('p1')).rejects.toThrow('bad');
   });
 
   it('finds all subprograms', async () => {
@@ -62,21 +63,21 @@ describe('SubprogramsService', () => {
 
   it('toggles highlight', async () => {
     const { service, subprogramRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1', is_highlighted: false } as any);
+    subprogramRepository.findOneOrFail.mockResolvedValue({ id: 's1', is_highlighted: false });
     subprogramRepository.save.mockResolvedValue({ id: 's1', is_highlighted: true });
     await expect(service.highlight('s1')).resolves.toEqual({ id: 's1', is_highlighted: true });
   });
 
   it('toggles publish', async () => {
     const { service, subprogramRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1', is_published: false } as any);
+    subprogramRepository.findOneOrFail.mockResolvedValue({ id: 's1', is_published: false });
     subprogramRepository.save.mockResolvedValue({ id: 's1', is_published: true });
     await expect(service.togglePublish('s1')).resolves.toEqual({ id: 's1', is_published: true });
   });
 
   it('sets logo', async () => {
     const { service, subprogramRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1', logo: null } as any);
+    subprogramRepository.findOneOrFail.mockResolvedValue({ id: 's1', logo: null });
     subprogramRepository.save.mockResolvedValue({ id: 's1', logo: 'logo.png' });
     await expect(service.setLogo('s1', 'logo.png')).resolves.toEqual({ id: 's1', logo: 'logo.png' });
   });
@@ -95,7 +96,7 @@ describe('SubprogramsService', () => {
 
   it('updates subprogram', async () => {
     const { service, subprogramRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1', program: { id: 'p1' } } as any);
+    subprogramRepository.findOneOrFail.mockResolvedValue({ id: 's1', program: { id: 'p1' } });
     subprogramRepository.save.mockResolvedValue({ id: 's1', name: 'new' });
     await expect(service.update('s1', { name: 'new', programId: 'p2' } as any)).resolves.toEqual({
       id: 's1',
@@ -104,14 +105,14 @@ describe('SubprogramsService', () => {
   });
 
   it('throws on update failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, subprogramRepository } = setup();
+    subprogramRepository.findOneOrFail.mockResolvedValue({ id: 's1' });
+    subprogramRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.update('s1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('removes subprogram', async () => {
     const { service, subprogramRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 's1' } as any);
     subprogramRepository.softDelete.mockResolvedValue(undefined);
     await expect(service.remove('s1')).resolves.toBeUndefined();
   });

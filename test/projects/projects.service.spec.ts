@@ -22,6 +22,7 @@ describe('ProjectsService', () => {
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       softDelete: jest.fn()
     } as any;
     const service = new ProjectsService(projectRepository);
@@ -67,7 +68,7 @@ describe('ProjectsService', () => {
     const { service, projectRepository, queryBuilder } = setup();
     queryBuilder.getManyAndCount.mockRejectedValue(new Error('bad'));
     projectRepository.createQueryBuilder.mockReturnValue(queryBuilder);
-    await expect(service.findAll({} as any)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findAll({} as any)).rejects.toThrow('bad');
   });
 
   it('finds published with status filters', async () => {
@@ -97,7 +98,7 @@ describe('ProjectsService', () => {
   it('throws on recent failure', async () => {
     const { service, projectRepository } = setup();
     projectRepository.find.mockRejectedValue(new Error('bad'));
-    await expect(service.findRecent()).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findRecent()).rejects.toThrow('bad');
   });
 
   it('finds by slug', async () => {
@@ -132,34 +133,35 @@ describe('ProjectsService', () => {
 
   it('toggles highlight', async () => {
     const { service, projectRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'p1', is_highlighted: false } as any);
+    projectRepository.findOneOrFail.mockResolvedValue({ id: 'p1', is_highlighted: false });
     projectRepository.save.mockResolvedValue({ id: 'p1', is_highlighted: true });
     await expect(service.toggleHighlight('p1')).resolves.toEqual({ id: 'p1', is_highlighted: true });
   });
 
   it('throws on toggleHighlight failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, projectRepository } = setup();
+    projectRepository.findOneOrFail.mockResolvedValue({ id: 'p1' });
+    projectRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.toggleHighlight('p1')).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('toggles publish', async () => {
     const { service, projectRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'p1', is_published: false } as any);
+    projectRepository.findOneOrFail.mockResolvedValue({ id: 'p1', is_published: false });
     projectRepository.save.mockResolvedValue({ id: 'p1', is_published: true });
     await expect(service.togglePublish('p1')).resolves.toEqual({ id: 'p1', is_published: true });
   });
 
   it('adds cover', async () => {
     const { service, projectRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'p1' } as any);
+    projectRepository.findOneOrFail.mockResolvedValue({ id: 'p1' });
     projectRepository.save.mockResolvedValue({ id: 'p1', cover: 'c.png' });
     await expect(service.addCover('p1', 'c.png')).resolves.toEqual({ id: 'p1', cover: 'c.png' });
   });
 
   it('updates project', async () => {
     const { service, projectRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({
+    projectRepository.findOneOrFail.mockResolvedValue({
       id: 'p1',
       project_manager: { id: 'u-old' },
       program: { id: 'pr-old' },
@@ -173,22 +175,22 @@ describe('ProjectsService', () => {
   });
 
   it('throws on update failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, projectRepository } = setup();
+    projectRepository.findOneOrFail.mockResolvedValue({ id: 'p1' });
+    projectRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.update('p1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('soft deletes project', async () => {
     const { service, projectRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'p1' } as any);
     projectRepository.softDelete.mockResolvedValue(undefined);
     await expect(service.remove('p1')).resolves.toBeUndefined();
     expect(projectRepository.softDelete).toHaveBeenCalledWith('p1');
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, projectRepository } = setup();
+    projectRepository.softDelete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('p1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });

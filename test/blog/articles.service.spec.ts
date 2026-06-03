@@ -69,7 +69,7 @@ describe('ArticlesService', () => {
 
   it('toggles highlight flag', async () => {
     const { service, articlesRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'a1', is_highlighted: false } as any);
+    articlesRepository.findOneOrFail.mockResolvedValue({ id: 'a1', is_highlighted: false });
     articlesRepository.save.mockResolvedValue({ id: 'a1', is_highlighted: true });
 
     await expect(service.highlight('a1')).resolves.toEqual({ id: 'a1', is_highlighted: true });

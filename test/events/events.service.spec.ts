@@ -20,6 +20,7 @@ describe('EventsService', () => {
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
       find: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       softDelete: jest.fn()
     } as any;
     const service = new EventsService(eventRepository);
@@ -57,7 +58,9 @@ describe('EventsService', () => {
     ).resolves.toEqual([[{ id: 'e1' }], 1]);
     expect(queryBuilder.andWhere).toHaveBeenCalledWith('e.is_published = :isPublished', { isPublished: true });
     expect(queryBuilder.andWhere).toHaveBeenCalledWith('(e.name LIKE :q OR e.description LIKE :q)', { q: '%hack%' });
-    expect(queryBuilder.andWhere).toHaveBeenCalledWith('categories.id IN (:...categories)', { categories: ['c1'] });
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith('categories.id IN (:...categoryIds)', {
+      categoryIds: ['c1']
+    });
     expect(queryBuilder.skip).toHaveBeenCalledWith(20);
     expect(queryBuilder.take).toHaveBeenCalledWith(20);
   });
@@ -82,27 +85,28 @@ describe('EventsService', () => {
 
   it('toggles highlight flag', async () => {
     const { service, eventRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'e1', is_highlighted: false } as any);
+    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1', is_highlighted: false });
     eventRepository.save.mockResolvedValue({ id: 'e1', is_highlighted: true });
     await expect(service.highlight('e1')).resolves.toEqual({ id: 'e1', is_highlighted: true });
   });
 
   it('throws on highlight failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, eventRepository } = setup();
+    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1' });
+    eventRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.highlight('e1')).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('toggles publish flag', async () => {
     const { service, eventRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'e1', is_published: false } as any);
+    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1', is_published: false });
     eventRepository.save.mockResolvedValue({ id: 'e1', is_published: true });
     await expect(service.togglePublish('e1')).resolves.toEqual({ id: 'e1', is_published: true });
   });
 
   it('sets cover', async () => {
     const { service, eventRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'e1', cover: null } as any);
+    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1', cover: null });
     eventRepository.save.mockResolvedValue({ id: 'e1', cover: 'img.png' });
     await expect(service.setCover('e1', 'img.png')).resolves.toEqual({ id: 'e1', cover: 'img.png' });
   });
@@ -116,7 +120,7 @@ describe('EventsService', () => {
   it('throws on findRecent failure', async () => {
     const { service, eventRepository } = setup();
     eventRepository.find.mockRejectedValue(new Error('bad'));
-    await expect(service.findRecent()).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findRecent()).rejects.toThrow('bad');
   });
 
   it('finds by slug', async () => {
@@ -145,7 +149,7 @@ describe('EventsService', () => {
 
   it('updates event relations and fields', async () => {
     const { service, eventRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({
+    eventRepository.findOneOrFail.mockResolvedValue({
       id: 'e1',
       event_manager: { id: 'old' },
       program: { id: 'p-old' },
@@ -158,8 +162,9 @@ describe('EventsService', () => {
   });
 
   it('throws on update failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, eventRepository } = setup();
+    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1' });
+    eventRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.update('e1', { name: 'new' } as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
@@ -172,8 +177,8 @@ describe('EventsService', () => {
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, eventRepository } = setup();
+    eventRepository.softDelete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('e1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });

@@ -57,10 +57,9 @@ describe('PhasesService', () => {
 
   it('updates phase and syncs deliverables', async () => {
     const { service, phaseRepository, deliverablesService } = setup();
-    jest
-      .spyOn(service, 'findOne')
-      .mockResolvedValueOnce({ id: 'ph1', mentors: [{ id: 'old' }] } as any)
-      .mockResolvedValueOnce({ id: 'ph1', name: 'updated' } as any);
+    phaseRepository.findOneOrFail
+      .mockResolvedValueOnce({ id: 'ph1', mentors: [{ id: 'old' }] })
+      .mockResolvedValueOnce({ id: 'ph1', name: 'updated' });
     phaseRepository.save.mockResolvedValue(undefined);
     deliverablesService.sync.mockResolvedValue(undefined);
 

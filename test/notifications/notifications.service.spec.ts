@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '@/modules/notifications/services/notifications.service';
 import { NotificationStatus } from '@/modules/notifications/types/notification-status.enum';
 
@@ -16,11 +16,11 @@ describe('NotificationsService', () => {
   const setup = () => {
     const queryBuilder = makeQueryBuilder([[{ id: 'n1' }], 1]);
     const notificationsRepository = {
+      create: jest.fn((dto) => dto),
       save: jest.fn(),
-      update: jest.fn(),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
       findOneOrFail: jest.fn(),
-      merge: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       softDelete: jest.fn()
     } as any;
     const usersService = {
@@ -61,15 +61,18 @@ describe('NotificationsService', () => {
 
   it('sends notification', async () => {
     const { service, notificationsRepository } = setup();
-    notificationsRepository.update.mockResolvedValue(undefined);
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'n1', status: NotificationStatus.SENT } as any);
+    notificationsRepository.findOneOrFail.mockResolvedValue({ id: 'n1', status: NotificationStatus.DRAFT });
+    notificationsRepository.save.mockResolvedValue({ id: 'n1', status: NotificationStatus.SENT });
     await expect(service.send('n1')).resolves.toEqual({ id: 'n1', status: NotificationStatus.SENT });
-    expect(notificationsRepository.update).toHaveBeenCalledWith('n1', { status: NotificationStatus.SENT });
+    expect(notificationsRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'n1', status: NotificationStatus.SENT })
+    );
   });
 
   it('throws on send failure', async () => {
     const { service, notificationsRepository } = setup();
-    notificationsRepository.update.mockRejectedValue(new Error('bad'));
+    notificationsRepository.findOneOrFail.mockResolvedValue({ id: 'n1' });
+    notificationsRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.send('n1')).rejects.toBeInstanceOf(BadRequestException);
   });
 
@@ -87,11 +90,8 @@ describe('NotificationsService', () => {
 
   it('throws on findByProject failure', async () => {
     const { service, queryBuilder } = setup();
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     queryBuilder.getManyAndCount.mockRejectedValue(new Error('bad'));
-    await expect(service.findByProject('p1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    await expect(service.findByProject('p1', {} as any)).rejects.toThrow('bad');
   });
 
   it('finds one notification', async () => {
@@ -103,35 +103,35 @@ describe('NotificationsService', () => {
   it('throws on findOne failure', async () => {
     const { service, notificationsRepository } = setup();
     notificationsRepository.findOneOrFail.mockRejectedValue(new Error('bad'));
-    await expect(service.findOne('n1')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findOne('n1')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('updates notification', async () => {
     const { service, notificationsRepository } = setup();
     const existing = { id: 'n1', title: 'old' };
-    jest.spyOn(service, 'findOne').mockResolvedValue(existing as any);
-    notificationsRepository.save.mockResolvedValue({ id: 'n1' });
-    await expect(service.update('n1', { title: 'new' } as any)).resolves.toEqual(existing);
+    notificationsRepository.findOneOrFail.mockResolvedValue(existing);
+    notificationsRepository.save.mockResolvedValue({ id: 'n1', title: 'new' });
+    await expect(service.update('n1', { title: 'new' } as any)).resolves.toEqual({ id: 'n1', title: 'new' });
     expect(notificationsRepository.merge).toHaveBeenCalledWith(existing, { title: 'new' });
   });
 
   it('throws on update failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, notificationsRepository } = setup();
+    notificationsRepository.findOneOrFail.mockResolvedValue({ id: 'n1' });
+    notificationsRepository.save.mockRejectedValue(new Error('bad'));
     await expect(service.update('n1', {} as any)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('soft deletes notification', async () => {
     const { service, notificationsRepository } = setup();
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'n1' } as any);
     notificationsRepository.softDelete.mockResolvedValue(undefined);
     await expect(service.remove('n1')).resolves.toBeUndefined();
     expect(notificationsRepository.softDelete).toHaveBeenCalledWith('n1');
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, notificationsRepository } = setup();
+    notificationsRepository.softDelete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('n1')).rejects.toBeInstanceOf(BadRequestException);
   });
 });

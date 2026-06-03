@@ -24,11 +24,13 @@ describe('UsersService', () => {
   const setup = () => {
     const queryBuilder = makeUsersQueryBuilder();
     const userRepository = {
+      create: jest.fn((dto) => dto),
       find: jest.fn(),
       save: jest.fn(),
       createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
       findOne: jest.fn(),
       findOneOrFail: jest.fn(),
+      merge: jest.fn((entity, dto) => ({ ...entity, ...dto })),
       count: jest.fn(),
       softDelete: jest.fn(),
       delete: jest.fn()
@@ -48,7 +50,7 @@ describe('UsersService', () => {
   it('throws on findByIds failure', async () => {
     const { service, userRepository } = setup();
     userRepository.find.mockRejectedValue(new Error('bad'));
-    await expect(service.findByIds(['u1'])).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findByIds(['u1'])).rejects.toThrow('bad');
   });
 
   it('finds staff', async () => {
@@ -62,6 +64,7 @@ describe('UsersService', () => {
     const { service, rolesService, userRepository } = setup();
     rolesService.findByName.mockResolvedValue({ id: 'r1', name: 'staff' });
     jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'u1', roles: [] } as any);
+    userRepository.findOneOrFail.mockResolvedValue({ id: 'u1', roles: [] });
     userRepository.save.mockResolvedValue({ id: 'u1' });
     await expect(service.assignRole('u1', 'staff')).resolves.toEqual({ id: 'u1' });
   });
@@ -206,8 +209,8 @@ describe('UsersService', () => {
   });
 
   it('throws on remove failure', async () => {
-    const { service } = setup();
-    jest.spyOn(service, 'findOne').mockRejectedValue(new Error('bad'));
+    const { service, userRepository } = setup();
+    userRepository.softDelete.mockRejectedValue(new Error('bad'));
     await expect(service.remove('u1')).rejects.toBeInstanceOf(BadRequestException);
   });
 

@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { NotificationAttachmentsService } from '@/modules/notifications/services/notification-attachments.service';
 
@@ -50,7 +50,7 @@ describe('NotificationAttachmentsService', () => {
   it('throws on findAttachment failure', async () => {
     const { service, attachmentsRepository } = setup();
     attachmentsRepository.findOneOrFail.mockRejectedValue(new Error('bad'));
-    await expect(service.findAttachment('a1')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.findAttachment('a1')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('removes attachment and unlinks file when filename exists', async () => {
