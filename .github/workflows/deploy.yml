@@ -6,10 +6,6 @@ on:
     branches:
       - main
 
-concurrency:
-  group: production-deploy
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
@@ -21,8 +17,6 @@ jobs:
   ci:
     name: Test and build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -57,7 +51,7 @@ jobs:
 
     steps:
       - name: Deploy through SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
