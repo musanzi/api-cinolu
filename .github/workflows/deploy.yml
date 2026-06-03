@@ -10,15 +10,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Run tests
         run: pnpm test
   build:
@@ -28,20 +34,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
+
         with:
           node-version: 22
           cache: pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Build
         run: pnpm build
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
+    needs: build
+
     steps:
       - name: Deploy through SSH
         uses: appleboy/ssh-action@v1.2.0
