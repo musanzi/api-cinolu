@@ -1,4 +1,4 @@
-import { HighlightsService } from '@/modules/content/highlights/highlights.service';
+import { HighlightsService } from '@/modules/content/highlights/services/highlights.service';
 
 describe('HighlightsService', () => {
   it('aggregates highlighted items from repositories', async () => {

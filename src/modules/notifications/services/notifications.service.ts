@@ -1,22 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Notification } from '../entities/notification.entity';
 import { CreateNotificationDto } from '../dto/create-notification.dto';
 import { UpdateNotificationDto } from '../dto/update-notification.dto';
 import { NotificationStatus } from '../types/notification-status.enum';
 import { FilterNotificationsInterface } from '../interfaces/filter-notifications.interface';
-import { UsersService } from '../../identity/users/services/users.service';
 import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()
 export class NotificationsService extends AbstractRepository<Notification> {
   constructor(
     @InjectRepository(Notification)
-    repository: Repository<Notification>,
-    private readonly usersService: UsersService,
-    private readonly eventEmitter: EventEmitter2
+    repository: Repository<Notification>
   ) {
     super(repository);
   }

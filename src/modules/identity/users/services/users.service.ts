@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { RolesService } from '../../../identity/roles/roles.service';
+import { RolesService } from '../../roles/services/roles.service';
 import { FilterUsersInterface } from '../interfaces/filter-users.interface';
 import { SignUpDto } from '../../../auth/dto/sign-up.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';

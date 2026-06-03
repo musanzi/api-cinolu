@@ -39,15 +39,13 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
 
   async updateRequest(mentorId: string, dto: UpdateMentorRequestDto): Promise<MentorProfile> {
     try {
-      const mentorProfile = await this.findOne(mentorId);
       if (dto.experiences) {
         await this.experiencesService.saveExperiences(mentorId, dto.experiences);
       }
-      await this.updateEntity(mentorId, {
+      return await this.updateEntity(mentorId, {
         ...dto,
-        expertises: dto?.expertises?.map((id) => ({ id })) || mentorProfile.expertises
+        expertises: dto.experiences ? dto?.expertises?.map((id) => ({ id })) : null
       });
-      return await this.findOne(mentorId);
     } catch {
       throw new BadRequestException('Mise à jour impossible');
     }
@@ -92,7 +90,7 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
       await this.usersService.update(mentorProfile.owner.id, dto.user);
       await this.updateEntity(mentorId, {
         ...dto.mentor,
-        expertises: dto.mentor.expertises?.map((id) => ({ id })) || mentorProfile.expertises
+        expertises: dto.mentor.expertises ? dto.mentor.expertises.map((id) => ({ id })) : null
       });
       return await this.findOne(mentorId);
     } catch {
@@ -165,13 +163,12 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
 
   async update(id: string, dto: UpdateMentorRequestDto): Promise<MentorProfile> {
     try {
-      const mentorProfile = await this.findOne(id);
       if (dto.experiences) {
         await this.experiencesService.saveExperiences(id, dto.experiences);
       }
       return await this.updateEntity(id, {
         ...dto,
-        expertises: dto?.expertises?.map((id) => ({ id })) || mentorProfile.expertises
+        expertises: dto.experiences ? dto.expertises.map((id) => ({ id })) : null
       });
     } catch {
       throw new BadRequestException('Mise à jour impossible');

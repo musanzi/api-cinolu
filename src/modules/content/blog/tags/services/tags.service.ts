@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTagDto } from './dto/create-tag.dto';
-import { UpdateTagDto } from './dto/update-tag.dto';
+import { CreateTagDto } from '../dto/create-tag.dto';
+import { UpdateTagDto } from '../dto/update-tag.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Tag } from './entities/tag.entity';
+import { Tag } from '../entities/tag.entity';
 import { Repository } from 'typeorm';
-import { FilterTagsInterface } from './interfaces/filter-tags.interface';
+import { FilterTagsInterface } from '../interfaces/filter-tags.interface';
 import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()

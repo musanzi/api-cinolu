@@ -48,7 +48,7 @@ describe('MentorsService', () => {
       .mockResolvedValueOnce({ id: 'm1', expertises: [] } as any)
       .mockResolvedValueOnce({ id: 'm1', updated: true } as any);
     experiencesService.saveExperiences.mockResolvedValue(undefined);
-    mentorRepository.save.mockResolvedValue(undefined);
+    mentorRepository.save.mockResolvedValue({ id: 'm1', updated: true });
     await expect(
       service.updateRequest('m1', { expertises: ['e1'], experiences: [{ role: 'r' }] } as any)
     ).resolves.toEqual({

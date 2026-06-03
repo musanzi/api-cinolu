@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Article } from '../blog/articles/entities/article.entity';
-import { Program } from '../../programs/programs/entities/program.entity';
-import { Project } from '../../projects/projects/entities/project.entity';
-import { Subprogram } from '../../programs/subprograms/entities/subprogram.entity';
-import { HighlightedItems } from './types';
-import { Event } from '../../events/events/entities/event.entity';
+import { Article } from '../../blog/articles/entities/article.entity';
+import { Program } from '../../../programs/programs/entities/program.entity';
+import { Project } from '../../../projects/projects/entities/project.entity';
+import { Subprogram } from '../../../programs/subprograms/entities/subprogram.entity';
+import { HighlightedItems } from '../types';
+import { Event } from '../../../events/events/entities/event.entity';
 
 @Injectable()
 export class HighlightsService {

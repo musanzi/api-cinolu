@@ -1,6 +1,6 @@
 import { Public } from '@/modules/auth/decorators/public.decorator';
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { TagsService } from '../tags.service';
+import { TagsService } from '../services/tags.service';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
 import { FilterTagsInterface } from '../interfaces/filter-tags.interface';

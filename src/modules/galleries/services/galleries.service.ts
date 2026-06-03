@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { promises as fs } from 'fs';
-import { Gallery } from './entities/gallery.entity';
-import { AddImageDto } from './dto/add-image.dto';
+import { Gallery } from '../entities/gallery.entity';
+import { AddImageDto } from '../dto/add-image.dto';
 import { AbstractRepository } from '@/modules/database/abstract.repository';
 
 @Injectable()

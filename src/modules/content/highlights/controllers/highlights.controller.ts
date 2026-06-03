@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { HighlightsService } from '../highlights.service';
+import { HighlightsService } from '../services/highlights.service';
 import { HighlightedItems } from '../types';
 import { Public } from '@/modules/auth/decorators';
 

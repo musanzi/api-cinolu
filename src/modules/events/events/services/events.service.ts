@@ -91,9 +91,9 @@ export class EventsService extends AbstractRepository<Event> {
   async update(id: string, dto: UpdateEventDto): Promise<Event> {
     return await this.updateEntity(id, {
       ...dto,
-      ...(dto.event_manager && { event_manager: { id: dto.event_manager } }),
-      ...(dto.program && { program: { id: dto.program } }),
-      ...(dto.categories && { categories: dto.categories.map((type) => ({ id: type })) })
+      event_manager: { id: dto.event_manager },
+      program: { id: dto.program },
+      categories: dto.categories && dto.categories.map((type) => ({ id: type }))
     });
   }
 

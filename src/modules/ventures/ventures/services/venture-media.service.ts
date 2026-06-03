@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import { Venture } from '../entities/venture.entity';
 import { VenturesService } from './ventures.service';
 import { Gallery } from '../../../galleries/entities/gallery.entity';
-import { GalleriesService } from '../../../galleries/galleries.service';
+import { GalleriesService } from '../../../galleries/services/galleries.service';
 
 @Injectable()
 export class VentureMediaService {

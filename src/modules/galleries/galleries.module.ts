@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GalleriesService } from './galleries.service';
+import { GalleriesService } from './services/galleries.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Gallery } from './entities/gallery.entity';
 

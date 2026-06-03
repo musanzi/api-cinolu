@@ -7,22 +7,20 @@ describe('EventParticipationService', () => {
       findOne: jest.fn(),
       save: jest.fn()
     } as any;
-    const eventRepository = {
-      findOneOrFail: jest.fn()
-    } as any;
     const eventsService = {
       findOne: jest.fn()
     } as any;
-    const service = new EventParticipationService(participationRepository, eventRepository, eventsService);
-    return { service, participationRepository, eventRepository, eventsService };
+    const service = new EventParticipationService(participationRepository, eventsService);
+    return { service, participationRepository, eventsService };
   };
 
   it('participates in event and returns refreshed event', async () => {
-    const { service, participationRepository, eventsService, eventRepository } = setup();
+    const { service, participationRepository, eventsService } = setup();
     participationRepository.findOne.mockResolvedValue(null);
-    eventsService.findOne.mockResolvedValue({ id: 'e1' });
+    eventsService.findOne
+      .mockResolvedValueOnce({ id: 'e1' })
+      .mockResolvedValueOnce({ id: 'e1', participations: [{ user: { id: 'u1' } }] });
     participationRepository.save.mockResolvedValue(undefined);
-    eventRepository.findOneOrFail.mockResolvedValue({ id: 'e1', participations: [{ user: { id: 'u1' } }] });
 
     await expect(service.participate('e1', 'u1')).resolves.toEqual({
       id: 'e1',

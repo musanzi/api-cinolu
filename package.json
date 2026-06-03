@@ -108,7 +108,7 @@
       "^.+\\.(t|j)s$": [
         "ts-jest",
         {
-          "tsconfig": "tsconfig.json",
+          "tsconfig": "tsconfig.spec.json",
           "diagnostics": false
         }
       ]
@@ -116,6 +116,9 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     },
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/jest.setup.ts"
+    ],
     "testEnvironment": "node"
   }
 }

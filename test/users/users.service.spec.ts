@@ -36,9 +36,10 @@ describe('UsersService', () => {
       delete: jest.fn()
     } as any;
     const rolesService = { findByName: jest.fn() } as any;
-    const service = new UsersService(userRepository, rolesService);
+    const eventEmitter = { emit: jest.fn() } as any;
+    const service = new UsersService(userRepository, rolesService, eventEmitter);
     jest.spyOn(service as any, 'generateReferralCode').mockReturnValue('ref-code');
-    return { service, userRepository, rolesService, queryBuilder };
+    return { service, userRepository, rolesService, eventEmitter, queryBuilder };
   };
 
   it('finds users by ids', async () => {
@@ -191,8 +192,13 @@ describe('UsersService', () => {
     const { service, userRepository } = setup();
     userRepository.findOneOrFail.mockResolvedValue({ id: 'u1', roles: [{ id: 'r-old' }] });
     userRepository.save.mockResolvedValue({ id: 'u1' });
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'u1', roles: ['user'] } as any);
-    await expect(service.update('u1', { roles: ['r1'] } as any)).resolves.toEqual({ id: 'u1', roles: ['user'] });
+    await expect(service.update('u1', { roles: ['r1'] } as any)).resolves.toEqual({ id: 'u1' });
+    expect(userRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'u1',
+        roles: [{ id: 'r1' }]
+      })
+    );
   });
 
   it('throws on update failure', async () => {

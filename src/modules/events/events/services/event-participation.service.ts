@@ -10,8 +10,6 @@ export class EventParticipationService {
   constructor(
     @InjectRepository(EventParticipation)
     private readonly participationRepository: Repository<EventParticipation>,
-    @InjectRepository(Event)
-    private readonly eventRepository: Repository<Event>,
     private readonly eventsService: EventsService
   ) {}
 
@@ -22,16 +20,11 @@ export class EventParticipationService {
     if (existing) {
       throw new BadRequestException('Participation déjà enregistrée');
     }
-
     await this.eventsService.findOne(eventId);
     await this.participationRepository.save({
       user: { id: userId },
       event: { id: eventId }
     });
-
-    return this.eventRepository.findOneOrFail({
-      where: { id: eventId },
-      relations: ['categories', 'event_manager', 'participations', 'participations.user']
-    });
+    return this.eventsService.findOne(eventId);
   }
 }
