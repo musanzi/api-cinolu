@@ -1,19 +1,59 @@
-name: Deploy OneStop API
+name: OneStop API CI/CD
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  cd:
+  ci:
+    name: Test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test --runInBand
+
+      - name: Build application
+        run: pnpm build
+
+  deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
+    needs: ci
     environment: production
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+
     steps:
-      - name: Deploy through SSH
+      - name: Deploy over SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -25,12 +65,9 @@ jobs:
 
             cd "${{ secrets.PROJECT_PATH }}"
 
-            git fetch origin main
-            git reset --hard origin/main
-
+            git pull --ff-only origin main
             pnpm install --frozen-lockfile
             pnpm build
-            pnpm prune --prod
 
             pm2 reload api --update-env
             pm2 save
