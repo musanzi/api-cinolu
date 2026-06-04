@@ -1,15 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import passport from 'passport';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT', 3000);
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true
@@ -31,7 +28,7 @@ async function bootstrap(): Promise<void> {
   );
   app.use(passport.initialize());
   app.use(passport.session());
-  await app.listen(port);
+  await app.listen(process.env.PORT ?? 3000);
 }
 
 bootstrap();
