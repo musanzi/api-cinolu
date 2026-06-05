@@ -24,19 +24,19 @@ import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60000, limit: 50 }]
+    }),
     LoggerModule.forRoot({
       pinoHttp: {
         transport: {
           target: 'pino-pretty',
-          options: {
-            singleLine: true,
-            colorize: true,
-            translateTime: 'UTC:yyyy-mm-dd HH:MM:ss.l o'
-          }
+          options: { singleLine: true, colorize: true }
         }
       }
     }),
