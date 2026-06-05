@@ -6,9 +6,7 @@ import passport from 'passport';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, {
-    logger: false
-  });
+  const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true
