@@ -121,8 +121,7 @@ export class UsersService extends AbstractRepository<User> {
       }
       const user = await this.createSignUpUser(dto);
       return { user, isNew: true };
-    } catch (e) {
-      console.log(e);
+    } catch {
       throw new BadRequestException('Cet utilisateur existe déjà');
     }
   }
