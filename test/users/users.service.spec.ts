@@ -153,10 +153,12 @@ describe('UsersService', () => {
     const { service, userRepository } = setup();
     userRepository.findOne.mockResolvedValue({ id: 'u1' });
     jest.spyOn(service, 'update').mockResolvedValue({ id: 'u1', name: 'new' } as any);
+    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'u1', name: 'new' } as any);
     await expect(service.findOrCreate({ email: 'a@a.com', name: 'new' } as any)).resolves.toEqual({
       id: 'u1',
       name: 'new'
     });
+    expect(service.findOne).toHaveBeenCalledWith('u1');
   });
 
   it('creates user when not existing', async () => {
