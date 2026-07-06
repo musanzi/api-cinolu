@@ -185,7 +185,10 @@ export class UsersService extends AbstractRepository<User> {
         where: { email: dto.email },
         relations: ['roles']
       });
-      if (user) return await this.update(user.id, dto);
+      if (user) {
+        const newUser = await this.update(user.id, dto);
+        return await this.findOne(newUser.id);
+      }
       const role = await this.rolesService.findByName('user');
       const newUser = await this.repository.save({
         ...dto,
