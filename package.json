@@ -5,6 +5,7 @@
   "author": "Wilfried M",
   "private": true,
   "license": "MIT",
+  "packageManager": "pnpm@11.7.0",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",

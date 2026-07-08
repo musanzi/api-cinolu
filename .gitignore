@@ -16,6 +16,10 @@ lerna-debug.log*
 # OS
 .DS_Store
 .env
+
+# nginx TLS certs
+/nginx/certs/*
+!/nginx/certs/.gitkeep
 # Tests
 /coverage
 /.nyc_output
