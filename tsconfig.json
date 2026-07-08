@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "module": "NodeNext",
-    "types": ["node", "jest"],
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": false,
     "strictPropertyInitialization": false,
