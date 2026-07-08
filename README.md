@@ -1,6 +1,6 @@
-# CINOLU API
+# OneStop API
 
-Backend API for the CINOLU platform. The service is built with **NestJS**, **TypeScript**, **TypeORM**, and **MySQL/MariaDB**.
+Backend API for the OneStop platform. The service is built with **NestJS**, **TypeScript**, **TypeORM**, and **MySQL/MariaDB**.
 
 It powers authentication, identity management, programs, projects, events, opportunities, ventures, mentors, content, notifications, galleries, and dashboard statistics.
 
@@ -98,10 +98,6 @@ pnpm start         # Start the application
 pnpm start:dev     # Start in watch mode
 pnpm start:debug   # Start in debug/watch mode
 pnpm start:prod    # Run dist/main
-pnpm test          # Run tests
-pnpm test:watch    # Run tests in watch mode
-pnpm test:cov      # Run tests with coverage
-pnpm test:debug    # Run tests with the Node debugger
 ```
 
 ## Database Migrations
@@ -155,10 +151,17 @@ src/
 │   ├── notifications/
 │   ├── opportunities/
 │   ├── programs/
+│   │   ├── categories/
+│   │   ├── programs/
+│   │   ├── sectors/
+│   │   └── subprograms/
 │   ├── projects/
 │   ├── stats/
 │   └── ventures/
+│       ├── products/
+│       └── ventures/
 └── shared/
+    ├── filters/
     ├── helpers/
     └── interceptors/
 ```
