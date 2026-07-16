@@ -16,6 +16,7 @@ lerna-debug.log*
 # OS
 .DS_Store
 .env
+.pnpm-store
 
 # nginx TLS certs
 /nginx/certs/*
