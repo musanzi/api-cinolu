@@ -3,8 +3,8 @@ import { FilterNotificationsInterface } from '../interfaces/filter-notifications
 import { UpdateNotificationDto } from '../dto/update-notification.dto';
 import { Notification } from '../entities/notification.entity';
 import { NotificationsService } from '../services/notifications.service';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -19,13 +19,13 @@ export class NotificationsController {
   }
 
   @Patch('id/:notificationId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('notificationId') notificationId: string, @Body() dto: UpdateNotificationDto): Promise<Notification> {
     return this.notificationsService.update(notificationId, dto);
   }
 
   @Delete('id/:notificationId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('notificationId') notificationId: string): Promise<void> {
     return this.notificationsService.remove(notificationId);
   }

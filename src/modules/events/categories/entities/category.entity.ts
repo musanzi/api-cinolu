@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToMany } from 'typeorm';
-import { AbstractEntity } from '@/modules/database/abstract.entity';
+import { AbstractEntity } from '@/shared/abstracts';
 import { Event } from '../../../events/events/entities/event.entity';
 
 @Entity()

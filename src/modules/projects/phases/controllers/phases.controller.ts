@@ -3,15 +3,15 @@ import { PhasesService } from '../services/phases.service';
 import { CreatePhaseDto } from '../dto/create-phase.dto';
 import { UpdatePhaseDto } from '../dto/update-phase.dto';
 import { Phase } from '../entities/phase.entity';
-import { Public, Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Public, HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('phases')
 export class PhasesController {
   constructor(private readonly phasesService: PhasesService) {}
 
   @Post('project/:projectId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Param('projectId') projectId: string, @Body() dto: CreatePhaseDto): Promise<Phase> {
     return this.phasesService.create(projectId, dto);
   }
@@ -29,13 +29,13 @@ export class PhasesController {
   }
 
   @Patch('id/:phaseId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('phaseId') phaseId: string, @Body() dto: UpdatePhaseDto): Promise<Phase> {
     return this.phasesService.update(phaseId, dto);
   }
 
   @Delete('id/:phaseId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('phaseId') phaseId: string): Promise<void> {
     return this.phasesService.remove(phaseId);
   }

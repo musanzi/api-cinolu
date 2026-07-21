@@ -18,8 +18,8 @@ import { FilterResourcesInterface } from '../interfaces/filter-resources.interfa
 import { UpdateResourceDto } from '../dto/update-resource.dto';
 import { Resource } from '../entities/resource.entity';
 import { ResourcesService } from '../services/resources.service';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('resources')
 export class ResourcesController {
@@ -35,25 +35,28 @@ export class ResourcesController {
 
   @Get('phase/:phaseId')
   @Public()
-  findByPhase(@Param('phaseId') phaseId: string, @Query() query: FilterResourcesInterface): Promise<[Resource[], number]> {
+  findByPhase(
+    @Param('phaseId') phaseId: string,
+    @Query() query: FilterResourcesInterface
+  ): Promise<[Resource[], number]> {
     return this.resourcesService.findByPhase(phaseId, query);
   }
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   @UseInterceptors(FileInterceptor('file', createDiskUploadOptions('./uploads/resources')))
   create(@Body() dto: CreateResourceDto, @UploadedFile() file: Express.Multer.File): Promise<Resource> {
     return this.resourcesService.create(dto, file);
   }
 
   @Patch('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('id') id: string, @Body() dto: UpdateResourceDto): Promise<Resource> {
     return this.resourcesService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.resourcesService.remove(id);
   }

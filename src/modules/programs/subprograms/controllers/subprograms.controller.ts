@@ -4,15 +4,15 @@ import { CreateSubprogramDto } from '../dto/create-subprogram.dto';
 import { UpdateSubprogramDto } from '../dto/update-subprogram.dto';
 import { Subprogram } from '../entities/subprogram.entity';
 import { SubprogramsService } from '../services/subprograms.service';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('subprograms')
 export class SubprogramsController {
   constructor(private readonly subprogramsService: SubprogramsService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateSubprogramDto): Promise<Subprogram> {
     return this.subprogramsService.create(dto);
   }
@@ -24,7 +24,7 @@ export class SubprogramsController {
   }
 
   @Patch('id/:subprogramId/publish')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   togglePublish(@Param('subprogramId') subprogramId: string): Promise<Subprogram> {
     return this.subprogramsService.togglePublish(subprogramId);
   }
@@ -48,19 +48,19 @@ export class SubprogramsController {
   }
 
   @Patch('id/:subprogramId/highlight')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   toggleHighlight(@Param('subprogramId') subprogramId: string): Promise<Subprogram> {
     return this.subprogramsService.highlight(subprogramId);
   }
 
   @Patch('id/:subprogramId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('subprogramId') subprogramId: string, @Body() dto: UpdateSubprogramDto): Promise<Subprogram> {
     return this.subprogramsService.update(subprogramId, dto);
   }
 
   @Delete('id/:subprogramId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('subprogramId') subprogramId: string): Promise<void> {
     return this.subprogramsService.remove(subprogramId);
   }

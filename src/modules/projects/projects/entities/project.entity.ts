@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
-import { AbstractEntity } from '@/modules/database/abstract.entity';
+import { AbstractEntity } from '@/shared/abstracts';
 import { User } from '../../../identity/users/entities/user.entity';
 import { Subprogram } from '../../../programs/subprograms/entities/subprogram.entity';
 import { ProjectCategory } from '../../../projects/categories/entities/category.entity';

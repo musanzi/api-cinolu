@@ -4,9 +4,9 @@ import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { Comment } from '../entities/comment.entity';
 import { FilterCommentsInterface } from '../interfaces/filter-comments.interface';
-import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('comments')
 export class CommentsController {
@@ -18,7 +18,7 @@ export class CommentsController {
   }
 
   @Get()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findAll(): Promise<Comment[]> {
     return this.commentsService.findAll();
   }

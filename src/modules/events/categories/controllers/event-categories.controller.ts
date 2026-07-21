@@ -4,15 +4,15 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { EventCategory } from '../entities/category.entity';
 import { FilterCategoriesInterface } from '../interfaces/filter-categories.interface';
-import { Public, Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Public, HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('event-categories')
 export class EventCategoriesController {
   constructor(private readonly eventCategoriesService: EventCategoriesService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateCategoryDto): Promise<EventCategory> {
     return this.eventCategoriesService.create(dto);
   }
@@ -24,7 +24,7 @@ export class EventCategoriesController {
   }
 
   @Get('paginated')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findPaginated(@Query() query: FilterCategoriesInterface): Promise<[EventCategory[], number]> {
     return this.eventCategoriesService.findAllPaginated(query);
   }
@@ -35,13 +35,13 @@ export class EventCategoriesController {
   }
 
   @Patch('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto): Promise<EventCategory> {
     return this.eventCategoriesService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.eventCategoriesService.remove(id);
   }

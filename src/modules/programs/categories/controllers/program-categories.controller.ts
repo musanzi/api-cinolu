@@ -5,8 +5,8 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { ProgramCategory } from '../entities/category.entity';
 import { FilterCategoriesInterface } from '../interfaces/filter-categories.interface';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('program-categories')
 export class ProgramCategoriesController {
@@ -19,13 +19,13 @@ export class ProgramCategoriesController {
   }
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateCategoryDto): Promise<ProgramCategory> {
     return this.programCategoriesService.create(dto);
   }
 
   @Get('paginated')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findPaginated(@Query() query: FilterCategoriesInterface): Promise<[ProgramCategory[], number]> {
     return this.programCategoriesService.findPaginated(query);
   }
@@ -37,13 +37,13 @@ export class ProgramCategoriesController {
   }
 
   @Patch('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto): Promise<ProgramCategory> {
     return this.programCategoriesService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.programCategoriesService.remove(id);
   }

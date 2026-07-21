@@ -4,22 +4,22 @@ import { FilterProjectsInterface } from '../interfaces/filter-projects.interface
 import { UpdateProjectDto } from '../dto/update-project.dto';
 import { Project } from '../entities/project.entity';
 import { ProjectsService } from '../services/projects.service';
-import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateProjectDto): Promise<Project> {
     return this.projectsService.create(dto);
   }
 
   @Get()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findAll(@Query() query: FilterProjectsInterface): Promise<[Project[], number]> {
     return this.projectsService.findAll(query);
   }
@@ -54,25 +54,25 @@ export class ProjectsController {
   }
 
   @Patch('id/:projectId/publish')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   togglePublish(@Param('projectId') projectId: string): Promise<Project> {
     return this.projectsService.togglePublish(projectId);
   }
 
   @Patch('id/:projectId/highlight')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   toggleHighlight(@Param('projectId') projectId: string): Promise<Project> {
     return this.projectsService.toggleHighlight(projectId);
   }
 
   @Patch('id/:projectId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('projectId') projectId: string, @Body() dto: UpdateProjectDto): Promise<Project> {
     return this.projectsService.update(projectId, dto);
   }
 
   @Delete('id/:projectId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('projectId') projectId: string): Promise<void> {
     return this.projectsService.remove(projectId);
   }

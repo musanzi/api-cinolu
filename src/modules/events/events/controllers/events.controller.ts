@@ -5,21 +5,21 @@ import { FilterEventsInterface } from '../interfaces/filter-events.interface';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventsService } from '../services/events.service';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateEventDto): Promise<Event> {
     return this.eventsService.create(dto);
   }
 
   @Get()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findAll(@Query() query: FilterEventsInterface): Promise<[Event[], number]> {
     return this.eventsService.findAll(query);
   }
@@ -49,25 +49,25 @@ export class EventsController {
   }
 
   @Patch('id/:eventId/publish')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   togglePublish(@Param('eventId') eventId: string): Promise<Event> {
     return this.eventsService.togglePublish(eventId);
   }
 
   @Patch('id/:eventId/highlight')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   toggleHighlight(@Param('eventId') eventId: string): Promise<Event> {
     return this.eventsService.highlight(eventId);
   }
 
   @Patch('id/:eventId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('eventId') eventId: string, @Body() dto: UpdateEventDto): Promise<Event> {
     return this.eventsService.update(eventId, dto);
   }
 
   @Delete('id/:eventId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('eventId') eventId: string): Promise<void> {
     return this.eventsService.remove(eventId);
   }

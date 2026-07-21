@@ -6,9 +6,9 @@ import { MoveParticipantsDto } from '../dto/move-participants.dto';
 import { ParticipateProjectDto } from '../dto/participate.dto';
 import { ProjectParticipation } from '../entities/project-participation.entity';
 import { ProjectParticipationService } from '../services/project-participations.service';
-import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')
 export class ProjectParticipationsController {
@@ -24,13 +24,13 @@ export class ProjectParticipationsController {
   }
 
   @Post('participants/move')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   moveParticipants(@Body() dto: MoveParticipantsDto): Promise<void> {
     return this.participationService.moveParticipants(dto);
   }
 
   @Post('participants/remove')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   removeParticipantsFromPhase(@Body() dto: MoveParticipantsDto): Promise<void> {
     return this.participationService.removeParticipantsFromPhase(dto);
   }
@@ -60,13 +60,13 @@ export class ProjectParticipationsController {
   }
 
   @Get('participations/:participationId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findOneParticipation(@Param('participationId') participationId: string): Promise<ProjectParticipation> {
     return this.participationService.findOne(participationId);
   }
 
   @Post('id/:projectId/participants/import-csv')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   @UseInterceptors(FileInterceptor('file', createCsvUploadOptions()))
   addParticipantsFromCsv(
     @Param('projectId') projectId: string,

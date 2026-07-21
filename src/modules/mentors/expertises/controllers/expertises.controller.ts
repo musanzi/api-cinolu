@@ -4,21 +4,21 @@ import { CreateExpertiseDto } from '../dto/create-expertise.dto';
 import { UpdateExpertiseDto } from '../dto/update-expertise.dto';
 import { Expertise } from '../entities/expertise.entity';
 import { FilterExpertisesInterface } from '../interfaces/filter-expertises.interface';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('expertises')
 export class ExpertisesController {
   constructor(private readonly expertisesService: ExpertisesService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateExpertiseDto): Promise<Expertise> {
     return this.expertisesService.create(dto);
   }
 
   @Get('paginated')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findPaginated(@Query() query: FilterExpertisesInterface): Promise<[Expertise[], number]> {
     return this.expertisesService.findFiltered(query);
   }
@@ -34,13 +34,13 @@ export class ExpertisesController {
   }
 
   @Patch('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('id') id: string, @Body() dto: UpdateExpertiseDto): Promise<Expertise> {
     return this.expertisesService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.expertisesService.remove(id);
   }

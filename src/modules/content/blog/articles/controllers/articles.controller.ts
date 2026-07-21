@@ -6,8 +6,8 @@ import { ArticlesService } from '../services/articles.service';
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import { User } from '@/modules/identity/users/entities/user.entity';
 import { Public } from '@/modules/auth/decorators/public.decorator';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 import { FilterArticlesInterface } from '../interfaces/filter-articles.interface';
 
 @Controller('articles')
@@ -15,7 +15,7 @@ export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@CurrentUser() user: User, @Body() dto: CreateArticleDto): Promise<Article> {
     return this.articlesService.create(dto, user.id);
   }
@@ -27,7 +27,7 @@ export class ArticlesController {
   }
 
   @Get()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findAll(@Query() filters: FilterArticlesInterface): Promise<[Article[], number]> {
     return this.articlesService.findAll(filters);
   }
@@ -39,7 +39,7 @@ export class ArticlesController {
   }
 
   @Patch('id/:articleId/publish')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   togglePublished(@Param('articleId') articleId: string): Promise<Article> {
     return this.articlesService.togglePublished(articleId);
   }
@@ -57,19 +57,19 @@ export class ArticlesController {
   }
 
   @Patch('id/:articleId/highlight')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   toggleHighlight(@Param('articleId') articleId: string): Promise<Article> {
     return this.articlesService.highlight(articleId);
   }
 
   @Patch('id/:articleId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('articleId') articleId: string, @Body() dto: UpdateArticleDto): Promise<Article> {
     return this.articlesService.update(articleId, dto);
   }
 
   @Delete('id/:articleId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('articleId') articleId: string): Promise<void> {
     return this.articlesService.remove(articleId);
   }

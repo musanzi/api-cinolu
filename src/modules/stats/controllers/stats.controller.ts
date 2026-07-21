@@ -2,9 +2,9 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { StatsService } from '../services/stats.service';
 import { IUSerStats } from '../types/user-stats.type';
 import { IAdminStatsGeneral, IAdminStatsByYear } from '../types/admin-stats.type';
-import { CurrentUser, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('stats')
 export class StatsController {
@@ -16,13 +16,13 @@ export class StatsController {
   }
 
   @Get('admin/overview')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   async findAdminOverview(): Promise<IAdminStatsGeneral> {
     return await this.statsService.findAdminStatsGeneral();
   }
 
   @Get('admin/year/:year')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   async findAdminStatsByYear(@Param('year') year: number): Promise<IAdminStatsByYear> {
     return await this.statsService.findAdminStatsByYear(+year);
   }

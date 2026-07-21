@@ -6,16 +6,16 @@ import { UpdateMentorDto } from '../dto/update-mentor.dto';
 import { UpdateMentorRequestDto } from '../dto/update-mentor-request.dto';
 import { MentorProfile } from '../entities/mentor.entity';
 import { MentorsService } from '../services/mentors.service';
-import { CurrentUser, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('mentors')
 export class MentorsController {
   constructor(private readonly mentorsService: MentorsService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateMentorDto): Promise<MentorProfile> {
     return this.mentorsService.create(dto);
   }
@@ -36,19 +36,19 @@ export class MentorsController {
   }
 
   @Get('paginated')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findPaginated(@Query() query: FilterMentorsInterface): Promise<[MentorProfile[], number]> {
     return this.mentorsService.findFiltered(query);
   }
 
   @Patch('id/:mentorId/approve')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   approve(@Param('mentorId') mentorId: string): Promise<MentorProfile> {
     return this.mentorsService.approve(mentorId);
   }
 
   @Patch('id/:mentorId/reject')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   reject(@Param('mentorId') mentorId: string): Promise<MentorProfile> {
     return this.mentorsService.reject(mentorId);
   }
@@ -59,7 +59,7 @@ export class MentorsController {
   }
 
   @Get()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findApproved(): Promise<MentorProfile[]> {
     return this.mentorsService.findApproved();
   }
@@ -70,13 +70,13 @@ export class MentorsController {
   }
 
   @Patch('id/:mentorId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('mentorId') mentorId: string, @Body() dto: UpdateMentorRequestDto): Promise<MentorProfile> {
     return this.mentorsService.update(mentorId, dto);
   }
 
   @Delete('id/:mentorId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('mentorId') mentorId: string): Promise<void> {
     return this.mentorsService.remove(mentorId);
   }

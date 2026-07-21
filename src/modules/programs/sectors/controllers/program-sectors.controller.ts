@@ -5,8 +5,8 @@ import { CreateSectorDto } from '../dto/create-sector.dto';
 import { UpdateSectorDto } from '../dto/update-sector.dto';
 import { ProgramSector } from '../entities/sector.entity';
 import { FilterSectorsInterface } from '../interfaces/filter-sectors.interface';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('program-sectors')
 export class ProgramSectorsController {
@@ -19,13 +19,13 @@ export class ProgramSectorsController {
   }
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateSectorDto): Promise<ProgramSector> {
     return this.programSectorsService.create(dto);
   }
 
   @Get('paginated')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findPaginated(@Query() query: FilterSectorsInterface): Promise<[ProgramSector[], number]> {
     return this.programSectorsService.findPaginated(query);
   }
@@ -37,13 +37,13 @@ export class ProgramSectorsController {
   }
 
   @Patch('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('id') id: string, @Body() dto: UpdateSectorDto): Promise<ProgramSector> {
     return this.programSectorsService.update(id, dto);
   }
 
   @Delete('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.programSectorsService.remove(id);
   }

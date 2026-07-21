@@ -17,40 +17,40 @@ import { FilterUsersInterface } from '../interfaces/filter-users.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
-import { Public, Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Public, HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('staff')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   async findStaff(): Promise<User[]> {
     return this.usersService.findStaff();
   }
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateUserDto): Promise<User> {
     return this.usersService.create(dto);
   }
 
   @Get('search')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   search(@Query('term') term: string): Promise<User[]> {
     return this.usersService.search(term);
   }
 
   @Post('import-csv')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   @UseInterceptors(FileInterceptor('file', createCsvUploadOptions()))
   importCsv(@UploadedFile() file: Express.Multer.File): Promise<void> {
     return this.usersService.importCsv(file);
   }
 
   @Get()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findAll(@Query() query: FilterUsersInterface): Promise<[User[], number]> {
     return this.usersService.findAll(query);
   }
@@ -68,19 +68,19 @@ export class UsersController {
   }
 
   @Patch('id/:userId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('userId') userId: string, @Body() dto: UpdateUserDto): Promise<User> {
     return this.usersService.update(userId, dto);
   }
 
   @Delete('clear')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   clear(): Promise<number> {
     return this.usersService.clear();
   }
 
   @Delete('id/:userId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('userId') userId: string): Promise<void> {
     return this.usersService.remove(userId);
   }

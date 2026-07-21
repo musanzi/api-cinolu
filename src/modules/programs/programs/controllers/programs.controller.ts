@@ -5,15 +5,15 @@ import { FilterProgramsInterface } from '../interfaces/filter-programs.interface
 import { UpdateProgramDto } from '../dto/update-program.dto';
 import { Program } from '../entities/program.entity';
 import { ProgramsService } from '../services/programs.service';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('programs')
 export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateProgramDto): Promise<Program> {
     return this.programsService.create(dto);
   }
@@ -25,7 +25,7 @@ export class ProgramsController {
   }
 
   @Patch('id/:programId/publish')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   togglePublish(@Param('programId') programId: string): Promise<Program> {
     return this.programsService.togglePublish(programId);
   }
@@ -43,7 +43,7 @@ export class ProgramsController {
   }
 
   @Get('paginated')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   findPaginated(@Query() query: FilterProgramsInterface): Promise<[Program[], number]> {
     return this.programsService.findFiltered(query);
   }
@@ -55,19 +55,19 @@ export class ProgramsController {
   }
 
   @Patch('id/:programId/highlight')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   toggleHighlight(@Param('programId') programId: string): Promise<Program> {
     return this.programsService.highlight(programId);
   }
 
   @Patch('id/:programId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('programId') programId: string, @Body() dto: UpdateProgramDto): Promise<Program> {
     return this.programsService.update(programId, dto);
   }
 
   @Delete('id/:programId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('programId') programId: string): Promise<void> {
     return this.programsService.remove(programId);
   }

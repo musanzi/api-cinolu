@@ -8,7 +8,7 @@ import {
   SelectQueryBuilder
 } from 'typeorm';
 import { PaginationInterface } from './interfaces/pagination.interface';
-import { AbstractEntity } from './abstract.entity';
+import { AbstractEntity } from '@/shared/abstracts';
 
 export abstract class AbstractRepository<EntityType extends AbstractEntity> {
   protected readonly logger: Logger;

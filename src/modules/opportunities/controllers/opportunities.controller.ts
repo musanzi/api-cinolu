@@ -16,8 +16,8 @@ import { FilterOpportunitiesInterface } from '../interfaces/filter-opportunities
 import { UpdateOpportunityDto } from '../dto/update-opportunity.dto';
 import { Opportunity } from '../entities/opportunity.entity';
 import { OpportunitiesService } from '../services/opportunities.service';
-import { Roles } from '@/modules/auth/decorators';
-import { RoleEnum } from '@/modules/auth/enums';
+import { HasRoles } from '@/modules/auth/decorators';
+import { Roles } from '@/modules/auth/enums';
 import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -26,7 +26,7 @@ export class OpportunitiesController {
   constructor(private readonly opportunitiesService: OpportunitiesService) {}
 
   @Post()
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   create(@Body() dto: CreateOpportunityDto): Promise<Opportunity> {
     return this.opportunitiesService.create(dto);
   }
@@ -44,20 +44,20 @@ export class OpportunitiesController {
   }
 
   @Patch('id/:opportunityId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   update(@Param('opportunityId') opportunityId: string, @Body() dto: UpdateOpportunityDto): Promise<Opportunity> {
     return this.opportunitiesService.update(opportunityId, dto);
   }
 
   @Post('id/:opportunityId/cover')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   @UseInterceptors(FileInterceptor('cover', createDiskUploadOptions('./uploads/opportunities')))
   addCover(@Param('opportunityId') id: string, @UploadedFile() file: Express.Multer.File): Promise<Opportunity> {
     return this.opportunitiesService.addCover(id, file.filename);
   }
 
   @Delete('id/:opportunityId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('opportunityId') opportunityId: string): Promise<void> {
     return this.opportunitiesService.remove(opportunityId);
   }

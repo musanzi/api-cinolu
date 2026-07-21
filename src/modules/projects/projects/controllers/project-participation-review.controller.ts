@@ -3,16 +3,16 @@ import { ParticipationReviewDto } from '../dto/participation-review.dto';
 import { ProjectParticipationReview } from '../entities/project-participation-review.entity';
 import { ProjectParticipationReviewService } from '../services/project-participation-review.service';
 import { UpdateParticipationReviewDto } from '../dto/update-participation-review.dto';
-import { CurrentUser, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')
 export class ProjectParticipationReviewController {
   constructor(private readonly reviewService: ProjectParticipationReviewService) {}
 
   @Post('participations/:participationId/review')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   createReview(
     @Param('participationId') participationId: string,
     @CurrentUser() user: User,
@@ -22,7 +22,7 @@ export class ProjectParticipationReviewController {
   }
 
   @Patch('participations/:participationId/review/:reviewId')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   updateReview(
     @Param('participationId') participationId: string,
     @Param('reviewId') reviewId: string,

@@ -4,9 +4,9 @@ import { FilterProductsInterface } from '../interfaces/filter-products.interface
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../entities/product.entity';
 import { ProductsService } from '../services/products.service';
-import { CurrentUser, Public, Roles } from '@/modules/auth/decorators';
+import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/identity/users/entities/user.entity';
-import { RoleEnum } from '@/modules/auth/enums';
+import { Roles } from '@/modules/auth/enums';
 
 @Controller('products')
 export class ProductsController {
@@ -34,7 +34,7 @@ export class ProductsController {
   }
 
   @Delete('id/:id')
-  @Roles([RoleEnum.ADMIN, RoleEnum.STAFF])
+  @HasRoles([Roles.STAFF])
   remove(@Param('id') id: string): Promise<void> {
     return this.productsService.remove(id);
   }
