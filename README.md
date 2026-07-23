@@ -52,7 +52,7 @@ not through `localhost`.
 Build the images and start the development stack:
 
 ```bash
-docker compose -f compose.dev.yml up --build
+docker compose -f compose.dev.yml -p onestop-backend up --build
 ```
 
 This starts:
