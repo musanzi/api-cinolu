@@ -18,86 +18,96 @@ It powers authentication, identity management, programs, projects, events, oppor
 
 ## Requirements
 
-- Node.js 18+
-- pnpm
-- MySQL or MariaDB
+- [Docker](https://docs.docker.com/get-docker/) with Docker Compose
 
-## Installation
+Node.js, pnpm, and MariaDB do not need to be installed on the host. They run
+inside Docker containers.
+
+## Quick Start
 
 ```bash
-pnpm install
+cp .env.example .env
 ```
 
-## Environment
-
-Create a `.env` file in the project root. Use `.env.example` as the starting point.
+Update `.env` with the required values. These database values work with the
+MariaDB container provided by the development Compose file:
 
 ```env
 PORT=8000
 
-DB_HOST=
-DB_PORT=
-DB_USERNAME=
-DB_PASSWORD=
-DB_NAME=
+DB_HOST=db
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=change-me
+DB_NAME=onestop
 
-MAIL_HOST=
-MAIL_PORT=
-MAIL_USERNAME=
-MAIL_PASSWORD=
-
-SESSION_SECRET=
-SESSION_MAX_AGE=
-
-JWT_SECRET=
-
-GOOGLE_CLIENT_ID=
-GOOGLE_SECRET=
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/redirect
-FRONTEND_URI=http://localhost:4200
-
-SUPPORT_EMAIL=
+SESSION_SECRET=change-me
+SESSION_MAX_AGE=86400000
+JWT_SECRET=change-me
 ```
 
-Notes:
+Keep `DB_HOST=db`: containers reach MariaDB through its Compose service name,
+not through `localhost`.
+
+Build the images and start the development stack:
+
+```bash
+docker compose -f compose.dev.yml up --build
+```
+
+This starts:
+
+- API: `http://localhost:8000` (or the value configured in `PORT`)
+- MariaDB: `localhost:3306`
+- Adminer: `http://localhost:8080`
+
+The API source directory is mounted into the container and NestJS runs in watch
+mode, so source changes reload automatically.
+
+To start the stack in the background:
+
+```bash
+docker compose -f compose.dev.yml up --build -d
+docker compose -f compose.dev.yml logs -f api
+```
+
+## Environment
+
+All application configuration is read from the root `.env` file by Docker
+Compose and the API container. Start from `.env.example` and configure the
+database, mail, session, JWT, Google OAuth, frontend, and support-email values
+needed by your environment.
 
 - `PORT` defaults to `3000` when it is not provided.
+- `DB_HOST` must be `db` for the bundled MariaDB service.
 - `SESSION_SECRET` is required for session middleware.
 - `SESSION_MAX_AGE` is used as the session cookie lifetime in milliseconds.
 - `JWT_SECRET` is required because `JwtModule` uses `getOrThrow('JWT_SECRET')`.
-- Static uploads are served from the local `uploads/` directory at `/uploads`.
+- Static uploads are available at `/uploads`.
 
-## Running
-
-```bash
-pnpm start:dev
-```
-
-The API will listen on the configured `PORT`, commonly:
-
-```text
-http://localhost:8000
-```
-
-Other runtime commands:
+## Development Commands
 
 ```bash
-pnpm start         # Start the app
-pnpm start:debug   # Start in debug/watch mode
-pnpm build         # Build the application
-pnpm start:prod    # Run compiled output from dist/
-```
+# View the running services
+docker compose -f compose.dev.yml ps
 
-## Scripts
+# Follow API logs
+docker compose -f compose.dev.yml -p onestop-backend logs -f api
 
-```bash
-pnpm build         # Build the application
-pnpm format        # Format TypeScript source files
-pnpm lint          # Lint and auto-fix files
-pnpm start         # Start the application
-pnpm start:dev     # Start in watch mode
-pnpm start:debug   # Start in debug/watch mode
-pnpm start:prod    # Run dist/main
+# Open a shell in the API container
+docker compose -f compose.dev.yml -p onestop-backend exec api sh
+
+# Build the application
+docker compose -f compose.dev.yml -p onestop-backend exec api pnpm build
+
+# Format the source
+docker compose -f compose.dev.yml -p onestop-backend exec api pnpm format
+
+# Lint the source
+docker compose -f compose.dev.yml -p onestop-backend exec api pnpm lint
+
+# Stop and remove the containers
+docker compose -f compose.dev.yml -p onestop-backend down
 ```
 
 ## Database Migrations
@@ -111,60 +121,57 @@ src/modules/database/migrations/
 Generate a migration:
 
 ```bash
-pnpm db:migrate --name=your_migration_name
+docker compose -f compose.dev.yml -p onestop-backend exec api pnpm db:migrate --name=your_migration_name
 ```
 
 Run pending migrations:
 
 ```bash
-pnpm db:up
+docker compose -f compose.dev.yml -p onestop-backend exec api pnpm db:up
 ```
 
 Revert the last migration:
 
 ```bash
-pnpm db:down
+docker compose -f compose.dev.yml -p onestop-backend exec api pnpm db:down
 ```
 
 The migration scripts build the app first, then run the TypeORM CLI against `src/modules/database/orm.config.ts`.
 
-## Project Structure
+## Production
 
-```text
-src/
-├── app.module.ts
-├── main.ts
-├── modules/
-│   ├── auth/
-│   ├── config/
-│   ├── content/
-│   │   ├── blog/
-│   │   └── highlights/
-│   ├── database/
-│   ├── email/
-│   ├── events/
-│   ├── galleries/
-│   ├── identity/
-│   │   ├── roles/
-│   │   └── users/
-│   ├── mentors/
-│   ├── notifications/
-│   ├── opportunities/
-│   ├── programs/
-│   │   ├── categories/
-│   │   ├── programs/
-│   │   ├── sectors/
-│   │   └── subprograms/
-│   ├── projects/
-│   ├── stats/
-│   └── ventures/
-│       ├── products/
-│       └── ventures/
-└── shared/
-    ├── filters/
-    ├── helpers/
-    └── interceptors/
+The production image builds the NestJS application and installs production
+dependencies only. Start it with:
+
+```bash
+docker compose -f compose.prod.yml -p onestop-backend up --build -d
+docker compose -f compose.prod.yml -p onestop-backend logs -f api
 ```
+
+In production, MariaDB is not published to the host, and uploaded files and
+database data are stored in named Docker volumes.
+
+Stop the production stack without deleting its data:
+
+```bash
+docker compose -f compose.prod.yml -p onestop-backend down
+```
+
+To inspect the production services:
+
+```bash
+docker compose -f compose.prod.yml -p onestop-backend ps
+```
+
+## Data Persistence
+
+MariaDB data is stored in the `mariadb_data` named volume. Production uploads
+are stored in the `uploads_data` named volume. A normal `docker compose down`
+keeps these volumes.
+
+To remove containers and all persisted data for a Compose stack, add
+`--volumes` to the `down` command. This permanently deletes that stack's
+database data and, in production, uploaded files.
 
 ## Runtime Behavior
 
@@ -175,11 +182,3 @@ src/
 - Global guards apply role checks and authentication.
 - Responses pass through a global transform interceptor.
 - Request logging is handled by `nestjs-pino`.
-
-## License
-
-This project is licensed under the **MIT License**.
-
-## Author
-
-Wilfried M
