@@ -146,6 +146,15 @@ dependencies only. Start it with:
 ```bash
 docker compose -f compose.prod.yml -p onestop-backend up --build -d
 docker compose -f compose.prod.yml -p onestop-backend logs -f api
+
+# Backup db
+docker compose -f compose.prod.yml -p onestop-backend exec db mariadb-dump -u root -p"root" cinolu > ../backup.sql
+
+# Restore db from backup
+docker compose -f compose.dev.yml -p onestop-backend exec -T db mariadb -u root -p"root" cinolu < ../backup.sql
+
+# Copy uploaded images from container to disk
+docker compose -f compose.prod.yml -p onestop-backend exec cp api api:/app/uploads/. ../uploads
 ```
 
 In production, MariaDB is not published to the host, and uploaded files and
