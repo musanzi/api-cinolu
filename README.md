@@ -121,7 +121,7 @@ src/modules/database/migrations/
 Generate a migration:
 
 ```bash
-docker compose -f compose.dev.yml -p onestop-backend exec api pnpm db:migrate --name=your_migration_name
+docker compose -f compose.dev.yml -p onestop-backend exec api name=your_migration_name pnpm db:migrate
 ```
 
 Run pending migrations:
