@@ -67,8 +67,8 @@ mode, so source changes reload automatically.
 To start the stack in the background:
 
 ```bash
-docker compose -f compose.dev.yml up --build -d
-docker compose -f compose.dev.yml logs -f api
+docker compose -f compose.dev.yml -p onestop-backend up --build -d
+docker compose -f compose.dev.yml -p onestop-backend logs -f api
 ```
 
 ## Environment
