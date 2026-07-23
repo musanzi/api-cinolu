@@ -89,7 +89,7 @@ needed by your environment.
 
 ```bash
 # View the running services
-docker compose -f compose.dev.yml ps
+docker compose -f compose.dev.yml -p onestop-backend ps
 
 # Follow API logs
 docker compose -f compose.dev.yml -p onestop-backend logs -f api
