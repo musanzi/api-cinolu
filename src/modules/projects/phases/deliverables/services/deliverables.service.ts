@@ -4,12 +4,17 @@ import { Repository } from 'typeorm';
 import { DeliverableDto } from '../dto/deliverable.dto';
 import { Deliverable } from '../entities/deliverable.entity';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { DeliverableSubmission } from '../entities/submission.entity';
+import { DelivrableParams } from '../types/deliverables.types';
+import { promises as fs } from 'fs';
 
 @Injectable()
 export class DeliverablesService extends AbstractRepository<Deliverable> {
   constructor(
     @InjectRepository(Deliverable)
-    repository: Repository<Deliverable>
+    repository: Repository<Deliverable>,
+    @InjectRepository(DeliverableSubmission)
+    private readonly submissionRepository: Repository<DeliverableSubmission>
   ) {
     super(repository);
   }
@@ -40,6 +45,25 @@ export class DeliverablesService extends AbstractRepository<Deliverable> {
       await this.addNew(phaseId, dto);
     } catch {
       throw new BadRequestException('Synchronisation impossible');
+    }
+  }
+
+  async submitDeliverable(params: DelivrableParams, file: Express.Multer.File): Promise<DeliverableSubmission> {
+    try {
+      const { deliverableId, participationId } = params;
+      const existing = await this.findSubmission(deliverableId, participationId);
+      if (!existing) {
+        return await this.submissionRepository.save({
+          file: file.filename,
+          deliverable: { id: deliverableId },
+          participation: { id: participationId }
+        });
+      }
+      await fs.unlink(`./uploads/deliverables/${file.filename}`);
+      await this.submissionRepository.update(existing.id, { file: file.filename });
+      return await this.submissionRepository.findOneByOrFail({ id: existing.id });
+    } catch {
+      throw new BadRequestException('Soumission impossible');
     }
   }
 
@@ -94,5 +118,14 @@ export class DeliverablesService extends AbstractRepository<Deliverable> {
     const toCreate = dto.filter((d) => !d.id);
     if (!toCreate.length) return;
     await this.create(phaseId, toCreate);
+  }
+
+  private async findSubmission(deliverableId: string, participationId: string): Promise<DeliverableSubmission | null> {
+    return await this.submissionRepository.findOne({
+      where: {
+        deliverable: { id: deliverableId },
+        participation: { id: participationId }
+      }
+    });
   }
 }

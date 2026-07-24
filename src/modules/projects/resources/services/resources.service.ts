@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateResourceDto } from '../dto/create-resource.dto';
@@ -8,6 +8,7 @@ import { Resource } from '../entities/resource.entity';
 import { ProjectsService } from '../../../projects/projects/services/projects.service';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { promises as fs } from 'fs';
 
 @Injectable()
 export class ResourcesService extends AbstractRepository<Resource> {
@@ -61,6 +62,16 @@ export class ResourcesService extends AbstractRepository<Resource> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async updateFile(id: string, file: Express.Multer.File): Promise<Resource> {
+    try {
+      const resource = await this.findOne(id);
+      if (resource.file) await fs.unlink(`./uploads/resources/${resource.file}`);
+      return await this.setFile(id, file.filename);
+    } catch {
+      throw new BadRequestException('Mise à jour du fichier impossible');
+    }
   }
 
   private buildScopedQuery(

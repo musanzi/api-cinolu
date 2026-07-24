@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -8,15 +8,15 @@ import { RolesService } from '../../roles/services/roles.service';
 import { FilterUsersInterface } from '../interfaces/filter-users.interface';
 import { SignUpDto } from '@/modules/auth/dto/sign-up.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 import { randomBytes } from 'crypto';
 import { parseUsersCsv } from '@/modules/users/helpers/user-csv.helper';
 import { SignUpResult } from '../types/sign-up-result.type';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
-import { ProjectParticipationReview } from '@/modules/projects/projects/entities/project-participation-review.entity';
-import { ProjectParticipation } from '@/modules/projects/projects/entities/project-participation.entity';
-import { ProjectParticipationUpvote } from '@/modules/projects/projects/entities/participation-upvote.entity';
-import { DeliverableSubmission } from '@/modules/projects/phases/deliverables/entities/submission.entity';
-import { EventParticipation } from '@/modules/events/events/entities/event-participation.entity';
+import { MailerService } from '@nestjs-modules/mailer';
+import { format } from 'fast-csv';
+import { Response } from 'express';
+import { promises as fs } from 'fs';
 
 @Injectable()
 export class UsersService extends AbstractRepository<User> {
@@ -24,7 +24,8 @@ export class UsersService extends AbstractRepository<User> {
     @InjectRepository(User)
     repository: Repository<User>,
     private rolesService: RolesService,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private mailerService: MailerService
   ) {
     super(repository);
   }
@@ -114,6 +115,109 @@ export class UsersService extends AbstractRepository<User> {
       return await this.repository.findOne({ where: { referral_code } });
     } catch {
       throw new BadRequestException('Parrain introuvable');
+    }
+  }
+
+  async saveReferralCode(user: User): Promise<User> {
+    try {
+      await this.repository.update(user.id, {
+        referral_code: this.generateReferralCode()
+      });
+      return await this.findByEmail(user.email);
+    } catch {
+      throw new BadRequestException('Code de parrainage invalide');
+    }
+  }
+
+  async referredUsers(page: number, user: User): Promise<[User[], number]> {
+    try {
+      const take = 20;
+      const skip = (+page - 1) * take;
+      return await this.repository
+        .createQueryBuilder('u')
+        .loadRelationCountAndMap('u.referralsCount', 'u.referrals')
+        .where('u.referred_by.id = :id', { id: user.id })
+        .orderBy('u.created_at', 'DESC')
+        .skip(skip)
+        .take(take)
+        .getManyAndCount();
+    } catch {
+      throw new BadRequestException('Filleuls introuvables');
+    }
+  }
+
+  async findAmbassadors(): Promise<[User[], number]> {
+    const query = this.repository.createQueryBuilder('u').loadRelationCountAndMap('u.referralsCount', 'u.referrals');
+    const users = await query.getMany();
+    const filteredUsers = users.filter((user) => Number(user['referralsCount']) > 0);
+    return [filteredUsers, filteredUsers.length];
+  }
+
+  async findAmbassadorByEmail(email: string): Promise<User> {
+    try {
+      return await this.repository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.ventures', 'ventures')
+        .loadRelationCountAndMap('user.referralsCount', 'user.referrals')
+        .leftJoinAndSelect('ventures.gallery', 'gallery')
+        .leftJoinAndSelect('ventures.products', 'products')
+        .leftJoinAndSelect('products.gallery', 'productsGallery')
+        .where('user.email = :email', { email })
+        .getOneOrFail();
+    } catch {
+      throw new NotFoundException('Ambassadeur introuvable');
+    }
+  }
+
+  async exportCSV(queryParams: FilterUsersInterface, res: Response): Promise<void> {
+    try {
+      const { q } = queryParams;
+      const query = this.repository
+        .createQueryBuilder('user')
+        .select(['user.name', 'user.email', 'user.phone_number'])
+        .orderBy('user.updated_at', 'DESC');
+      if (q) {
+        query.where('user.name LIKE :q OR user.email LIKE :q', { q: `%${q}%` });
+      }
+      const users = await query.getMany();
+      const csvStream = format({ headers: ['Name', 'Email', 'Phone Number'] });
+      csvStream.pipe(res);
+      users.forEach((user) => {
+        csvStream.write({ Name: user.name, Email: user.email, 'Phone Number': user.phone_number });
+      });
+      csvStream.end();
+    } catch {
+      throw new BadRequestException('Export des utilisateurs impossible');
+    }
+  }
+
+  async uploadImage(currentUser: User, file: Express.Multer.File): Promise<User> {
+    try {
+      if (currentUser.profile) await fs.unlink(`./uploads/profiles/${currentUser.profile}`);
+      await this.update(currentUser.id, { profile: file.filename });
+      return this.findByEmail(currentUser.email);
+    } catch {
+      throw new BadRequestException("Ajout d'image impossible");
+    }
+  }
+
+  @OnEvent('user.referral-signup')
+  async sendReferralSignupEmail(payload: { referredBy: User; newUser: User }): Promise<void> {
+    try {
+      const { referredBy, newUser } = payload;
+      await this.mailerService.sendMail({
+        to: referredBy.email,
+        subject: 'Un nouvel utilisateur a rejoint CINOLU grâce à votre lien de parrainage',
+        text: [
+          `Bonjour ${referredBy.name},`,
+          '',
+          `${newUser.name} (${newUser.email}) a rejoint CINOLU grace a votre lien de parrainage.`,
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 
@@ -230,84 +334,6 @@ export class UsersService extends AbstractRepository<User> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
-  }
-
-  async clear(): Promise<number> {
-    try {
-      return await this.repository.manager.transaction(async (manager) => {
-        const users = await manager
-          .getRepository(User)
-          .createQueryBuilder('user')
-          .select(['user.id'])
-          .leftJoinAndSelect('user.roles', 'role')
-          .leftJoin('user.referrals', 'referral')
-          .leftJoin('user.ventures', 'venture')
-          .leftJoin('user.project_participation_upvotes', 'projectParticipationUpvote')
-          .leftJoin('user.managed_projects', 'managedProject')
-          .leftJoin('user.managed_events', 'managedEvent')
-          .leftJoin('user.articles', 'article')
-          .leftJoin('user.comments', 'comment')
-          .leftJoin('user.mentor_profile', 'mentorProfile')
-          .leftJoin('user.sent_notifications', 'notification')
-          .leftJoin(
-            ProjectParticipationReview,
-            'projectParticipationReview',
-            'projectParticipationReview.reviewer = user.id'
-          )
-          .where("(user.profile IS NULL OR TRIM(user.profile) = '')")
-          .andWhere("(user.google_image IS NULL OR TRIM(user.google_image) = '')")
-          .andWhere('referral.id IS NULL')
-          .andWhere('venture.id IS NULL')
-          .andWhere('projectParticipationUpvote.id IS NULL')
-          .andWhere('managedProject.id IS NULL')
-          .andWhere('managedEvent.id IS NULL')
-          .andWhere('article.id IS NULL')
-          .andWhere('comment.id IS NULL')
-          .andWhere('mentorProfile.id IS NULL')
-          .andWhere('notification.id IS NULL')
-          .andWhere('projectParticipationReview.id IS NULL')
-          .setLock('pessimistic_write')
-          .getMany();
-
-        if (!users.length) return 0;
-
-        const idsToDelete = users.map((user) => user.id);
-        await this.deleteParticipationRelationships(manager, idsToDelete);
-
-        for (const user of users) {
-          if (!user.roles.length) continue;
-          await manager
-            .createQueryBuilder()
-            .relation(User, 'roles')
-            .of(user.id)
-            .remove(user.roles.map((role) => role.id));
-        }
-
-        await manager.delete(User, idsToDelete);
-        return idsToDelete.length;
-      });
-    } catch {
-      throw new BadRequestException('Nettoyage impossible');
-    }
-  }
-
-  private async deleteParticipationRelationships(manager: EntityManager, userIds: string[]): Promise<void> {
-    const projectParticipations = await manager.getRepository(ProjectParticipation).find({
-      select: ['id'],
-      where: { user: { id: In(userIds) } },
-      withDeleted: true
-    });
-    const projectParticipationIds = projectParticipations.map((participation) => participation.id);
-
-    if (projectParticipationIds.length) {
-      const participationCriteria = { participation: { id: In(projectParticipationIds) } };
-      await manager.delete(DeliverableSubmission, participationCriteria);
-      await manager.delete(ProjectParticipationUpvote, participationCriteria);
-      await manager.delete(ProjectParticipationReview, participationCriteria);
-      await manager.delete(ProjectParticipation, projectParticipationIds);
-    }
-
-    await manager.delete(EventParticipation, { user: { id: In(userIds) } });
   }
 
   private mapUserRoles(user: User): User {

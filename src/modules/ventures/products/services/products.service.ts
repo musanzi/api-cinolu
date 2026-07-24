@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,12 +6,15 @@ import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
 import { FilterProductsInterface } from '../interfaces/filter-products.interface';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { Gallery } from '../../../galleries/entities/gallery.entity';
+import { GalleriesService } from '../../../galleries/services/galleries.service';
 
 @Injectable()
 export class ProductsService extends AbstractRepository<Product> {
   constructor(
     @InjectRepository(Product)
-    repository: Repository<Product>
+    repository: Repository<Product>,
+    private readonly galleriesService: GalleriesService
   ) {
     super(repository);
   }
@@ -49,5 +52,34 @@ export class ProductsService extends AbstractRepository<Product> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async addImage(id: string, file: Express.Multer.File): Promise<void> {
+    try {
+      await this.findOne(id);
+      const dto = {
+        image: file.filename,
+        product: { id }
+      };
+      await this.galleriesService.create(dto);
+    } catch {
+      throw new BadRequestException("Ajout d'image impossible");
+    }
+  }
+
+  async removeGallery(id: string): Promise<void> {
+    try {
+      await this.galleriesService.remove(id);
+    } catch {
+      throw new BadRequestException("Suppression de l'image impossible");
+    }
+  }
+
+  async findGallery(slug: string): Promise<Gallery[]> {
+    try {
+      return await this.galleriesService.findGallery('product', slug);
+    } catch {
+      throw new BadRequestException('Galerie introuvable');
+    }
   }
 }

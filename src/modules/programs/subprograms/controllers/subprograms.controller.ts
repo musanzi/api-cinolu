@@ -1,11 +1,13 @@
 import { Public } from '@/modules/auth/decorators/public.decorator';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CreateSubprogramDto } from '../dto/create-subprogram.dto';
 import { UpdateSubprogramDto } from '../dto/update-subprogram.dto';
 import { Subprogram } from '../entities/subprogram.entity';
 import { SubprogramsService } from '../services/subprograms.service';
 import { HasRoles } from '@/modules/auth/decorators';
 import { Roles } from '@/modules/auth/enums';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 
 @Controller('subprograms')
 export class SubprogramsController {
@@ -63,5 +65,12 @@ export class SubprogramsController {
   @HasRoles([Roles.STAFF])
   remove(@Param('subprogramId') subprogramId: string): Promise<void> {
     return this.subprogramsService.remove(subprogramId);
+  }
+
+  @Post('id/:subprogramId/logo')
+  @HasRoles([Roles.STAFF])
+  @UseInterceptors(FileInterceptor('logo', createDiskUploadOptions('./uploads/subprograms')))
+  addLogo(@Param('subprogramId') subprogramId: string, @UploadedFile() file: Express.Multer.File): Promise<Subprogram> {
+    return this.subprogramsService.addLogo(subprogramId, file);
   }
 }

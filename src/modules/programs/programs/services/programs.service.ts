@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Program } from '../entities/program.entity';
@@ -6,6 +6,7 @@ import { CreateProgramDto } from '../dto/create-program.dto';
 import { UpdateProgramDto } from '../dto/update-program.dto';
 import { FilterProgramsInterface } from '../interfaces/filter-programs.interface';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { promises as fs } from 'fs';
 
 @Injectable()
 export class ProgramsService extends AbstractRepository<Program> {
@@ -82,5 +83,17 @@ export class ProgramsService extends AbstractRepository<Program> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async addLogo(id: string, file: Express.Multer.File): Promise<Program> {
+    try {
+      const program = await this.findOne(id);
+      if (program.logo) {
+        await fs.unlink(`./uploads/programs/${program.logo}`).catch(() => undefined);
+      }
+      return await this.setLogo(id, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout du logo impossible');
+    }
   }
 }

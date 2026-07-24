@@ -5,15 +5,21 @@ import { Venture } from '../entities/venture.entity';
 import { CreateVentureDto } from '../dto/create-venture.dto';
 import { UpdateVentureDto } from '../dto/update-venture.dto';
 import { FilterVenturesInterface } from '../interfaces/filter-ventures.interface';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { promises as fs } from 'fs';
+import { Gallery } from '../../../galleries/entities/gallery.entity';
+import { GalleriesService } from '../../../galleries/services/galleries.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class VenturesService extends AbstractRepository<Venture> {
   constructor(
     @InjectRepository(Venture)
     repository: Repository<Venture>,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private readonly galleriesService: GalleriesService,
+    private readonly mailerService: MailerService
   ) {
     super(repository);
   }
@@ -103,5 +109,115 @@ export class VenturesService extends AbstractRepository<Venture> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async addImage(ventureId: string, file: Express.Multer.File): Promise<void> {
+    try {
+      await this.findOne(ventureId);
+      const galleryDto = {
+        image: file.filename,
+        venture: { id: ventureId }
+      };
+      await this.galleriesService.create(galleryDto);
+    } catch {
+      throw new BadRequestException("Ajout d'image impossible");
+    }
+  }
+
+  async removeImage(galleryId: string): Promise<void> {
+    try {
+      await this.galleriesService.remove(galleryId);
+    } catch {
+      throw new BadRequestException("Suppression de l'image impossible");
+    }
+  }
+
+  async findGallery(slug: string): Promise<Gallery[]> {
+    try {
+      return await this.galleriesService.findGallery('venture', slug);
+    } catch {
+      throw new BadRequestException('Galerie introuvable');
+    }
+  }
+
+  async addLogo(ventureId: string, file: Express.Multer.File): Promise<Venture> {
+    try {
+      const venture = await this.findOne(ventureId);
+      if (venture.logo) {
+        await fs.unlink(`./uploads/ventures/logos/${venture.logo}`).catch(() => undefined);
+      }
+      return await this.setLogo(ventureId, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout du logo impossible');
+    }
+  }
+
+  async addCover(ventureId: string, file: Express.Multer.File): Promise<Venture> {
+    try {
+      const venture = await this.findOne(ventureId);
+      if (venture.cover) {
+        await fs.unlink(`./uploads/ventures/covers/${venture.cover}`).catch(() => undefined);
+      }
+      return await this.setCover(ventureId, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout de couverture impossible');
+    }
+  }
+
+  @OnEvent('venture.created')
+  async sendBusinessCreatedEmail(venture: Venture): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: venture.owner.email,
+        subject: 'Entreprise créée avec succès',
+        text: [
+          `Bonjour ${venture.owner.name},`,
+          '',
+          `Votre entreprise "${venture.name}" a ete creee avec succes sur CINOLU.`,
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
+  @OnEvent('venture.approved')
+  async sendVentureApprovalEmail(venture: Venture): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: venture.owner.email,
+        subject: 'Votre entreprise a été approuvée!',
+        text: [
+          `Bonjour ${venture.owner.name},`,
+          '',
+          `Votre entreprise "${venture.name}" a ete approuvee.`,
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
+  @OnEvent('venture.rejected')
+  async sendVentureRejectionEmail(venture: Venture): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: venture.owner.email,
+        subject: 'Décision concernant votre entreprise',
+        text: [
+          `Bonjour ${venture.owner.name},`,
+          '',
+          `Decision concernant votre entreprise "${venture.name}": elle n'a pas ete approuvee pour le moment.`,
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
   }
 }

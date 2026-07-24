@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { CreateVentureDto } from '../dto/create-venture.dto';
 import { FilterVenturesInterface } from '../interfaces/filter-ventures.interface';
 import { UpdateVentureDto } from '../dto/update-venture.dto';
@@ -6,6 +17,9 @@ import { Venture } from '../entities/venture.entity';
 import { VenturesService } from '../services/ventures.service';
 import { CurrentUser, Public } from '@/modules/auth/decorators';
 import { User } from '@/modules/users/entities/user.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
+import { Gallery } from '../../../galleries/entities/gallery.entity';
 
 @Controller('ventures')
 export class VenturesController {
@@ -61,5 +75,34 @@ export class VenturesController {
   @Delete('id/:id')
   remove(@Param('id') id: string): Promise<void> {
     return this.venturesService.remove(id);
+  }
+
+  @Post('id/:ventureId/gallery')
+  @UseInterceptors(FileInterceptor('image', createDiskUploadOptions('./uploads/galleries')))
+  addImage(@Param('ventureId') ventureId: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+    return this.venturesService.addImage(ventureId, file);
+  }
+
+  @Delete('gallery/:galleryId')
+  removeGallery(@Param('galleryId') galleryId: string): Promise<void> {
+    return this.venturesService.removeImage(galleryId);
+  }
+
+  @Get('by-slug/:slug/gallery')
+  @Public()
+  findGallery(@Param('slug') slug: string): Promise<Gallery[]> {
+    return this.venturesService.findGallery(slug);
+  }
+
+  @Post('id/:ventureId/logo')
+  @UseInterceptors(FileInterceptor('logo', createDiskUploadOptions('./uploads/ventures/logos')))
+  addLogo(@Param('ventureId') ventureId: string, @UploadedFile() file: Express.Multer.File): Promise<Venture> {
+    return this.venturesService.addLogo(ventureId, file);
+  }
+
+  @Post('id/:ventureId/cover')
+  @UseInterceptors(FileInterceptor('cover', createDiskUploadOptions('./uploads/ventures/covers')))
+  addCover(@Param('ventureId') ventureId: string, @UploadedFile() file: Express.Multer.File): Promise<Venture> {
+    return this.venturesService.addCover(ventureId, file);
   }
 }

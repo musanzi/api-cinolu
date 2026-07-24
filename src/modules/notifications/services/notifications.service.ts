@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from '../entities/notification.entity';
@@ -7,12 +7,16 @@ import { UpdateNotificationDto } from '../dto/update-notification.dto';
 import { NotificationStatus } from '../types/notification-status.enum';
 import { FilterNotificationsInterface } from '../interfaces/filter-notifications.interface';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { NotificationAttachment } from '../entities/attachment.entity';
+import { promises as fs } from 'fs';
 
 @Injectable()
 export class NotificationsService extends AbstractRepository<Notification> {
   constructor(
     @InjectRepository(Notification)
-    repository: Repository<Notification>
+    repository: Repository<Notification>,
+    @InjectRepository(NotificationAttachment)
+    private readonly attachmentRepository: Repository<NotificationAttachment>
   ) {
     super(repository);
   }
@@ -55,5 +59,35 @@ export class NotificationsService extends AbstractRepository<Notification> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async addAttachments(id: string, files: Express.Multer.File[]): Promise<NotificationAttachment[]> {
+    try {
+      const notification = await this.findOne(id);
+      const attachments = files.map((file) => ({
+        filename: file.filename,
+        mimetype: file.mimetype,
+        notification: { id: notification.id }
+      }));
+      return await this.attachmentRepository.save(attachments);
+    } catch {
+      throw new BadRequestException('Ajout des pièces jointes impossible');
+    }
+  }
+
+  async findAttachment(id: string): Promise<NotificationAttachment> {
+    return await this.attachmentRepository.findOneByOrFail({ id });
+  }
+
+  async removeAttachment(id: string): Promise<void> {
+    try {
+      const attachment = await this.findAttachment(id);
+      if (attachment.filename) {
+        await fs.unlink(`./uploads/notifications/${attachment.filename}`).catch(() => undefined);
+      }
+      await this.attachmentRepository.delete(attachment);
+    } catch {
+      throw new BadRequestException('Suppression impossible');
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,12 +6,16 @@ import { Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 import { FilterArticlesInterface } from '../interfaces/filter-articles.interface';
+import { promises as fs } from 'fs';
+import { Gallery } from '@/modules/galleries/entities/gallery.entity';
+import { GalleriesService } from '@/modules/galleries/services/galleries.service';
 
 @Injectable()
 export class ArticlesService extends AbstractRepository<Article> {
   constructor(
     @InjectRepository(Article)
-    repository: Repository<Article>
+    repository: Repository<Article>,
+    private readonly galleriesService: GalleriesService
   ) {
     super(repository);
   }
@@ -93,5 +97,41 @@ export class ArticlesService extends AbstractRepository<Article> {
 
   async setImage(id: string, image: string): Promise<Article> {
     return await this.updateEntity(id, { image });
+  }
+
+  async addImage(id: string, file: Express.Multer.File): Promise<void> {
+    try {
+      await this.findOne(id);
+      const dto = { image: file.filename, article: { id } };
+      await this.galleriesService.create(dto);
+    } catch {
+      throw new BadRequestException("Ajout d'image impossible");
+    }
+  }
+
+  async removeGallery(id: string): Promise<void> {
+    try {
+      await this.galleriesService.remove(id);
+    } catch {
+      throw new BadRequestException("Suppression de l'image impossible");
+    }
+  }
+
+  async findGallery(slug: string): Promise<Gallery[]> {
+    try {
+      return await this.galleriesService.findGallery('article', slug);
+    } catch {
+      throw new BadRequestException('Galerie introuvable');
+    }
+  }
+
+  async addCover(id: string, file: Express.Multer.File): Promise<Article> {
+    try {
+      const article = await this.findOne(id);
+      if (article.image) await fs.unlink(`./uploads/articles/${article.image}`);
+      return await this.setImage(id, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout de couverture impossible');
+    }
   }
 }

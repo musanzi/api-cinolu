@@ -8,21 +8,26 @@ import { User } from '@/modules/users/entities/user.entity';
 import { FilterMentorsInterface } from '../interfaces/filter-mentors.interface';
 import { UsersService } from '@/modules/users/services/users.service';
 import { MentorStatus } from '../enums/mentor.enum';
-import { MentorExperiencesService } from './mentor-experiences.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Role } from '@/modules/roles/enums/roles.enum';
 import { CreateMentorDto } from '../dto/create-mentor.dto';
 import { UpdateMentorDto } from '../dto/update-mentor.dto';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { Experience } from '../entities/experience.entity';
+import { CreateExperienceDto } from '../dto/create-experience.dto';
+import { promises as fs } from 'fs';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class MentorsService extends AbstractRepository<MentorProfile> {
   constructor(
     @InjectRepository(MentorProfile)
     repository: Repository<MentorProfile>,
+    @InjectRepository(Experience)
+    private readonly experienceRepository: Repository<Experience>,
     private usersService: UsersService,
-    private experiencesService: MentorExperiencesService,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private readonly mailerService: MailerService
   ) {
     super(repository);
   }
@@ -40,7 +45,7 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
   async updateRequest(mentorId: string, dto: UpdateMentorRequestDto): Promise<MentorProfile> {
     try {
       if (dto.experiences) {
-        await this.experiencesService.saveExperiences(mentorId, dto.experiences);
+        await this.saveExperiences(mentorId, dto.experiences);
       }
       return await this.updateEntity(mentorId, {
         ...dto,
@@ -86,7 +91,7 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
   async updateMentor(mentorId: string, dto: UpdateMentorDto): Promise<MentorProfile> {
     try {
       const mentorProfile = await this.findOne(mentorId);
-      await this.experiencesService.saveExperiences(mentorId, dto.mentor.experiences);
+      await this.saveExperiences(mentorId, dto.mentor.experiences);
       await this.usersService.update(mentorProfile.owner.id, dto.user);
       await this.updateEntity(mentorId, {
         ...dto.mentor,
@@ -164,7 +169,7 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
   async update(id: string, dto: UpdateMentorRequestDto): Promise<MentorProfile> {
     try {
       if (dto.experiences) {
-        await this.experiencesService.saveExperiences(id, dto.experiences);
+        await this.saveExperiences(id, dto.experiences);
       }
       return await this.updateEntity(id, {
         ...dto,
@@ -183,6 +188,98 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
     return await this.updateEntity(id, { cv });
   }
 
+  async uploadCv(id: string, file: Express.Multer.File): Promise<MentorProfile> {
+    try {
+      const mentor = await this.findOne(id);
+      if (mentor.cv) {
+        await fs.unlink(`./uploads/mentors/cvs/${mentor.cv}`).catch(() => undefined);
+      }
+      return await this.addCv(id, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout du CV impossible');
+    }
+  }
+
+  async saveExperiences(mentorProfileId: string, dto: CreateExperienceDto[]): Promise<Experience[]> {
+    try {
+      const existingExperiences = await this.getExistingExperiences(mentorProfileId);
+      const existingExperiencesMap = this.createExperienceMap(existingExperiences);
+      const processedIds = new Set<string>();
+      const result: Experience[] = [];
+      for (const experienceDto of dto) {
+        if (this.isExistingExperience(experienceDto, existingExperiencesMap)) {
+          const updated = await this.updateExperience(experienceDto, existingExperiencesMap);
+          result.push(updated);
+          processedIds.add(experienceDto.id!);
+        } else {
+          const newExperience = await this.createExperience(experienceDto, mentorProfileId);
+          result.push(newExperience);
+        }
+      }
+      await this.deleteRemovedExperiences(existingExperiences, processedIds);
+      return result;
+    } catch {
+      throw new BadRequestException('Sauvegarde des expériences impossible');
+    }
+  }
+
+  @OnEvent('mentor.approved')
+  async sendMentorApprovalEmail(mentorProfile: MentorProfile): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: mentorProfile.owner.email,
+        subject: 'Votre profil de mentor a été approuvé!',
+        text: [
+          `Bonjour ${mentorProfile.owner.name},`,
+          '',
+          'Votre profil de mentor a ete approuve.',
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
+  @OnEvent('mentor.rejected')
+  async sendMentorRejectionEmail(mentorProfile: MentorProfile): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: mentorProfile.owner.email,
+        subject: 'Décision concernant votre profil de mentor',
+        text: [
+          `Bonjour ${mentorProfile.owner.name},`,
+          '',
+          "Votre profil de mentor n'a pas ete approuve pour le moment.",
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
+  @OnEvent('mentor.application')
+  async sendMentorApplicationEmail(mentorProfile: MentorProfile): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: mentorProfile.owner.email,
+        subject: 'Candidature de mentor reçue',
+        text: [
+          `Bonjour ${mentorProfile.owner.name},`,
+          '',
+          'Votre candidature de mentor a bien ete recue et sera examinee.',
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
   private async createProfile(userId: string, dto: MentorRequestDto, status: MentorStatus): Promise<MentorProfile> {
     try {
       const mentorProfile = await this.createEntity({
@@ -192,11 +289,49 @@ export class MentorsService extends AbstractRepository<MentorProfile> {
         expertises: dto.expertises ? dto.expertises.map((id) => ({ id })) : []
       });
       if (dto.experiences?.length) {
-        await this.experiencesService.saveExperiences(mentorProfile.id, dto.experiences);
+        await this.saveExperiences(mentorProfile.id, dto.experiences);
       }
       return await this.findOne(mentorProfile.id);
     } catch {
       throw new BadRequestException('Création du profil impossible');
+    }
+  }
+
+  private async getExistingExperiences(mentorProfileId: string): Promise<Experience[]> {
+    return await this.experienceRepository.find({
+      where: { mentor_profile: { id: mentorProfileId } }
+    });
+  }
+
+  private createExperienceMap(experiences: Experience[]): Map<string, Experience> {
+    return new Map(experiences.map((experience) => [experience.id, experience]));
+  }
+
+  private isExistingExperience(dto: CreateExperienceDto, existingMap: Map<string, Experience>): boolean {
+    return !!dto.id && existingMap.has(dto.id);
+  }
+
+  private async updateExperience(dto: CreateExperienceDto, existingMap: Map<string, Experience>): Promise<Experience> {
+    const existing = existingMap.get(dto.id!);
+    await this.experienceRepository.update(dto.id!, { ...existing, ...dto });
+    return await this.experienceRepository.findOneByOrFail({ id: dto.id! });
+  }
+
+  private async createExperience(dto: CreateExperienceDto, mentorProfileId: string): Promise<Experience> {
+    return await this.experienceRepository.save({
+      ...dto,
+      start_date: new Date(dto.start_date),
+      end_date: new Date(dto.end_date),
+      mentor_profile: { id: mentorProfileId }
+    });
+  }
+
+  private async deleteRemovedExperiences(existingExperiences: Experience[], processedIds: Set<string>): Promise<void> {
+    const idsToDelete = existingExperiences
+      .filter((experience) => !processedIds.has(experience.id))
+      .map((experience) => experience.id);
+    if (idsToDelete.length > 0) {
+      await this.experienceRepository.delete(idsToDelete);
     }
   }
 }

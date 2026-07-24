@@ -1,12 +1,27 @@
 import { Public } from '@/modules/auth/decorators/public.decorator';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { FilterEventsInterface } from '../interfaces/filter-events.interface';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventsService } from '../services/events.service';
-import { HasRoles } from '@/modules/auth/decorators';
+import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
 import { Roles } from '@/modules/auth/enums';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
+import { Gallery } from '../../../galleries/entities/gallery.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Controller('events')
 export class EventsController {
@@ -70,5 +85,36 @@ export class EventsController {
   @HasRoles([Roles.STAFF])
   remove(@Param('eventId') eventId: string): Promise<void> {
     return this.eventsService.remove(eventId);
+  }
+
+  @Post('id/:eventId/gallery')
+  @HasRoles([Roles.STAFF])
+  @UseInterceptors(FileInterceptor('image', createDiskUploadOptions('./uploads/galleries')))
+  addImage(@Param('eventId') eventId: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+    return this.eventsService.addImage(eventId, file);
+  }
+
+  @Delete('gallery/:galleryId')
+  @HasRoles([Roles.STAFF])
+  removeGallery(@Param('galleryId') galleryId: string): Promise<void> {
+    return this.eventsService.removeGallery(galleryId);
+  }
+
+  @Get('by-slug/:slug/gallery')
+  @Public()
+  findGallery(@Param('slug') slug: string): Promise<Gallery[]> {
+    return this.eventsService.findGallery(slug);
+  }
+
+  @Post('id/:eventId/cover')
+  @HasRoles([Roles.STAFF])
+  @UseInterceptors(FileInterceptor('cover', createDiskUploadOptions('./uploads/events')))
+  addCover(@Param('eventId') eventId: string, @UploadedFile() file: Express.Multer.File): Promise<Event> {
+    return this.eventsService.addCover(eventId, file);
+  }
+
+  @Post('id/:eventId/participate')
+  participate(@Param('eventId') eventId: string, @CurrentUser() user: User): Promise<Event> {
+    return this.eventsService.participate(eventId, user.id);
   }
 }

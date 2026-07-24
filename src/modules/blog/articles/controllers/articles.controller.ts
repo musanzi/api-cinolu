@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import { Article } from '../entities/article.entity';
@@ -9,6 +20,9 @@ import { Public } from '@/modules/auth/decorators/public.decorator';
 import { HasRoles } from '@/modules/auth/decorators';
 import { Roles } from '@/modules/auth/enums';
 import { FilterArticlesInterface } from '../interfaces/filter-articles.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
+import { Gallery } from '@/modules/galleries/entities/gallery.entity';
 
 @Controller('articles')
 export class ArticlesController {
@@ -72,5 +86,28 @@ export class ArticlesController {
   @HasRoles([Roles.STAFF])
   remove(@Param('articleId') articleId: string): Promise<void> {
     return this.articlesService.remove(articleId);
+  }
+
+  @Post('id/:articleId/gallery')
+  @UseInterceptors(FileInterceptor('image', createDiskUploadOptions('./uploads/galleries')))
+  addImage(@Param('articleId') articleId: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+    return this.articlesService.addImage(articleId, file);
+  }
+
+  @Delete('gallery/:galleryId')
+  removeGallery(@Param('galleryId') galleryId: string): Promise<void> {
+    return this.articlesService.removeGallery(galleryId);
+  }
+
+  @Get('by-slug/:slug/gallery')
+  @Public()
+  findGallery(@Param('slug') slug: string): Promise<Gallery[]> {
+    return this.articlesService.findGallery(slug);
+  }
+
+  @Post('id/:articleId/cover')
+  @UseInterceptors(FileInterceptor('article', createDiskUploadOptions('./uploads/articles')))
+  addCover(@Param('articleId') articleId: string, @UploadedFile() file: Express.Multer.File): Promise<Article> {
+    return this.articlesService.addCover(articleId, file);
   }
 }

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@/modules/users/entities/user.entity';
 import { UsersService } from '@/modules/users/services/users.service';
@@ -14,6 +14,7 @@ import { compare } from 'bcryptjs';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly mailerService: MailerService
   ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -130,6 +132,65 @@ export class AuthService {
       this.eventEmitter.emit('contact.support', dto);
     } catch {
       throw new BadRequestException('Envoi du message impossible');
+    }
+  }
+
+  @OnEvent('user.welcome')
+  async sendWelcomeEmail(user: User): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Bienvenue sur CINOLU',
+        text: [`Bonjour ${user.name},`, '', 'Bienvenue sur CINOLU.', '', "L'equipe CINOLU"].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
+  @OnEvent('user.reset-password')
+  async resetEmail(payload: { user: User; link: string }): Promise<void> {
+    try {
+      const { user, link } = payload;
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Réinitialisation du mot de passe',
+        text: [
+          `Bonjour ${user.name},`,
+          '',
+          'Vous avez demande la reinitialisation de votre mot de passe.',
+          `Lien: ${link}`,
+          '',
+          "Si vous n'etes pas a l'origine de cette demande, ignorez cet email.",
+          '',
+          "L'equipe CINOLU"
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
+    }
+  }
+
+  @OnEvent('contact.support')
+  async contactSupport(dto: ContactSupportDto): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: process.env.SUPPORT_EMAIL,
+        subject: `One Stop Contact from ${dto.name}`,
+        text: [
+          'New support contact request',
+          '',
+          `Name: ${dto.name}`,
+          `Email: ${dto.email}`,
+          `Country: ${dto.country}`,
+          `Phone: ${dto.phone_number}`,
+          '',
+          'Message:',
+          dto.message
+        ].join('\n')
+      });
+    } catch {
+      throw new BadRequestException("Envoi d'email impossible");
     }
   }
 }

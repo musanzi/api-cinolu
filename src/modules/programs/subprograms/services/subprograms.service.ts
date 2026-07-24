@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subprogram } from '../entities/subprogram.entity';
 import { CreateSubprogramDto } from '../dto/create-subprogram.dto';
 import { UpdateSubprogramDto } from '../dto/update-subprogram.dto';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { promises as fs } from 'fs';
 
 @Injectable()
 export class SubprogramsService extends AbstractRepository<Subprogram> {
@@ -62,5 +63,17 @@ export class SubprogramsService extends AbstractRepository<Subprogram> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async addLogo(id: string, file: Express.Multer.File): Promise<Subprogram> {
+    try {
+      const subprogram = await this.findOne(id);
+      if (subprogram.logo) {
+        await fs.unlink(`./uploads/subprograms/${subprogram.logo}`).catch(() => undefined);
+      }
+      return await this.setLogo(id, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout du logo impossible');
+    }
   }
 }

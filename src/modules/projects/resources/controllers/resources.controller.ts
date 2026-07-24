@@ -60,4 +60,11 @@ export class ResourcesController {
   remove(@Param('id') id: string): Promise<void> {
     return this.resourcesService.remove(id);
   }
+
+  @Patch('file/:id')
+  @HasRoles([Roles.STAFF])
+  @UseInterceptors(FileInterceptor('file', createDiskUploadOptions('./uploads/resources')))
+  updateFile(@Param('id') id: string, @UploadedFile() file: Express.Multer.File): Promise<Resource> {
+    return this.resourcesService.updateFile(id, file);
+  }
 }

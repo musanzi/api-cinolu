@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { CreateMentorDto } from '../dto/create-mentor.dto';
 import { FilterMentorsInterface } from '../interfaces/filter-mentors.interface';
 import { MentorRequestDto } from '../dto/mentor-request.dto';
@@ -9,6 +20,8 @@ import { MentorsService } from '../services/mentors.service';
 import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
 import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 
 @Controller('mentors')
 export class MentorsController {
@@ -79,5 +92,11 @@ export class MentorsController {
   @HasRoles([Roles.STAFF])
   remove(@Param('mentorId') mentorId: string): Promise<void> {
     return this.mentorsService.remove(mentorId);
+  }
+
+  @Post('id/:mentorId/cv')
+  @UseInterceptors(FileInterceptor('cv', createDiskUploadOptions('./uploads/mentors/cvs')))
+  addCv(@Param('mentorId') mentorId: string, @UploadedFile() file: Express.Multer.File): Promise<MentorProfile> {
+    return this.mentorsService.uploadCv(mentorId, file);
   }
 }

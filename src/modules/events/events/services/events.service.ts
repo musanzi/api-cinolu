@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from '../entities/event.entity';
@@ -6,10 +6,20 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { FilterEventsInterface } from '../interfaces/filter-events.interface';
 import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
+import { EventParticipation } from '../entities/event-participation.entity';
+import { promises as fs } from 'fs';
+import { Gallery } from '../../../galleries/entities/gallery.entity';
+import { GalleriesService } from '../../../galleries/services/galleries.service';
 
 @Injectable()
 export class EventsService extends AbstractRepository<Event> {
-  constructor(@InjectRepository(Event) repository: Repository<Event>) {
+  constructor(
+    @InjectRepository(Event)
+    repository: Repository<Event>,
+    @InjectRepository(EventParticipation)
+    private readonly participationRepository: Repository<EventParticipation>,
+    private readonly galleriesService: GalleriesService
+  ) {
     super(repository);
   }
 
@@ -99,5 +109,58 @@ export class EventsService extends AbstractRepository<Event> {
 
   async remove(id: string): Promise<void> {
     await this.deleteEntity(id);
+  }
+
+  async addImage(eventId: string, file: Express.Multer.File): Promise<void> {
+    try {
+      await this.findOne(eventId);
+      const galleryDto = { image: file.filename, event: { id: eventId } };
+      await this.galleriesService.create(galleryDto);
+    } catch {
+      throw new BadRequestException("Ajout d'image impossible");
+    }
+  }
+
+  async removeGallery(galleryId: string): Promise<void> {
+    try {
+      await this.galleriesService.remove(galleryId);
+    } catch {
+      throw new BadRequestException("Suppression de l'image impossible");
+    }
+  }
+
+  async findGallery(slug: string): Promise<Gallery[]> {
+    try {
+      return await this.galleriesService.findGallery('event', slug);
+    } catch {
+      throw new BadRequestException('Galerie introuvable');
+    }
+  }
+
+  async addCover(eventId: string, file: Express.Multer.File): Promise<Event> {
+    try {
+      const event = await this.findOne(eventId);
+      if (event.cover) {
+        await fs.unlink(`./uploads/events/${event.cover}`).catch(() => undefined);
+      }
+      return await this.setCover(eventId, file.filename);
+    } catch {
+      throw new BadRequestException('Ajout de couverture impossible');
+    }
+  }
+
+  async participate(eventId: string, userId: string): Promise<Event> {
+    const existing = await this.participationRepository.findOne({
+      where: { event: { id: eventId }, user: { id: userId } }
+    });
+    if (existing) {
+      throw new BadRequestException('Participation déjà enregistrée');
+    }
+    await this.findOne(eventId);
+    await this.participationRepository.save({
+      user: { id: userId },
+      event: { id: eventId }
+    });
+    return this.findOne(eventId);
   }
 }

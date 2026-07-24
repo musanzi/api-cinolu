@@ -7,18 +7,21 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createCsvUploadOptions } from '@/shared/helpers/csv-upload.helper';
+import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { FilterUsersInterface } from '../interfaces/filter-users.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
-import { Public, HasRoles } from '@/modules/auth/decorators';
+import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
 import { Roles } from '@/modules/auth/enums';
+import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -61,6 +64,40 @@ export class UsersController {
     return this.usersService.findEntrepreneurs();
   }
 
+  @Post('referral-code/generate')
+  generateReferralLink(@CurrentUser() user: User): Promise<User> {
+    return this.usersService.saveReferralCode(user);
+  }
+
+  @Get('ambassadors')
+  @Public()
+  findAmbassadors(): Promise<[User[], number]> {
+    return this.usersService.findAmbassadors();
+  }
+
+  @Get('ambassadors/:email')
+  @Public()
+  findAmbassadorByEmail(@Param('email') email: string): Promise<User> {
+    return this.usersService.findAmbassadorByEmail(email);
+  }
+
+  @Get('me/referred-users')
+  findReferredUsers(@Query('page') page: number, @CurrentUser() user: User): Promise<[User[], number]> {
+    return this.usersService.referredUsers(page, user);
+  }
+
+  @Get('export/users.csv')
+  @HasRoles([Roles.STAFF])
+  async exportCSV(@Query() query: FilterUsersInterface, @Res() res: Response): Promise<void> {
+    await this.usersService.exportCSV(query, res);
+  }
+
+  @Post('me/profile-image')
+  @UseInterceptors(FileInterceptor('profile', createDiskUploadOptions('./uploads/profiles')))
+  uploadImage(@CurrentUser() user: User, @UploadedFile() file: Express.Multer.File): Promise<User> {
+    return this.usersService.uploadImage(user, file);
+  }
+
   @Get('by-email/:email')
   @Public()
   findOneByEmail(@Param('email') email: string): Promise<User> {
@@ -71,12 +108,6 @@ export class UsersController {
   @HasRoles([Roles.STAFF])
   update(@Param('userId') userId: string, @Body() dto: UpdateUserDto): Promise<User> {
     return this.usersService.update(userId, dto);
-  }
-
-  @Delete('clear')
-  @HasRoles([Roles.STAFF])
-  clear(): Promise<number> {
-    return this.usersService.clear();
   }
 
   @Delete('id/:userId')

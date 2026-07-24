@@ -2,12 +2,12 @@ import { Controller, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createDiskUploadOptions } from '@/shared/helpers/upload.helper';
 import { DeliverableSubmission } from '../entities/submission.entity';
-import { SubmissionsService } from '../services/submissions.service';
+import { DeliverablesService } from '../services/deliverables.service';
 import { DelivrableParams } from '../types/deliverables.types';
 
 @Controller('deliverables')
-export class SubmissionsController {
-  constructor(private readonly submissionsService: SubmissionsService) {}
+export class DeliverablesController {
+  constructor(private readonly deliverablesService: DeliverablesService) {}
 
   @Post('id/:deliverableId/participations/:participationId/submissions')
   @UseInterceptors(FileInterceptor('file', createDiskUploadOptions('./uploads/deliverables')))
@@ -15,6 +15,6 @@ export class SubmissionsController {
     @Param() params: DelivrableParams,
     @UploadedFile() file: Express.Multer.File
   ): Promise<DeliverableSubmission> {
-    return this.submissionsService.submitDeliverable(params, file);
+    return this.deliverablesService.submitDeliverable(params, file);
   }
 }
