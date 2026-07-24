@@ -5,7 +5,7 @@ import { NotificationsController } from './controllers/notifications.controller'
 import { NotificationsService } from './services/notifications.service';
 import { Notification } from './entities/notification.entity';
 import { NotificationAttachment } from './entities/attachment.entity';
-import { UsersModule } from '../identity/users/users.module';
+import { UsersModule } from '@/modules/users/users.module';
 import { NotificationAttachmentsService } from './services/notification-attachments.service';
 
 @Module({

@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany, ManyToMany, JoinTable, OneToOne, JoinColumn 
 import { Experience } from './experience.entity';
 import { Expertise } from '../../../mentors/expertises/entities/expertise.entity';
 import { AbstractEntity } from '@/shared/abstracts';
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { MentorStatus, MentorType } from '../enums/mentor.enum';
 import { Phase } from '../../../projects/phases/entities/phase.entity';
 

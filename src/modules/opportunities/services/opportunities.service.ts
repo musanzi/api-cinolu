@@ -5,7 +5,7 @@ import { CreateOpportunityDto } from '../dto/create-opportunity.dto';
 import { FilterOpportunitiesInterface } from '../interfaces/filter-opportunities.interface';
 import { UpdateOpportunityDto } from '../dto/update-opportunity.dto';
 import { Opportunity } from '../entities/opportunity.entity';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 import { promises as fs } from 'fs';
 
 @Injectable()

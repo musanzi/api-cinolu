@@ -5,7 +5,7 @@ import { Program } from '../entities/program.entity';
 import { CreateProgramDto } from '../dto/create-program.dto';
 import { UpdateProgramDto } from '../dto/update-program.dto';
 import { FilterProgramsInterface } from '../interfaces/filter-programs.interface';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class ProgramsService extends AbstractRepository<Program> {

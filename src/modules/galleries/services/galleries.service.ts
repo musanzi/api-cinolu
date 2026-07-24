@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { promises as fs } from 'fs';
 import { Gallery } from '../entities/gallery.entity';
 import { AddImageDto } from '../dto/add-image.dto';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class GalleriesService extends AbstractRepository<Gallery> {

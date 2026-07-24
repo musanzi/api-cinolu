@@ -2,9 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { TransformInterceptor } from '@/shared/interceptors/transform.interceptor';
-import { BlogModule, HighlightsModule } from './modules/content';
 import { EventCategoriesModule, EventsModule } from './modules/events';
-import { RolesModule, UsersModule } from './modules/identity';
 import { ExpertisesModule, MentorsModule } from './modules/mentors';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
@@ -13,24 +11,30 @@ import { PhasesModule, ProjectCategoriesModule, ProjectsModule, ResourcesModule 
 import { StatsModule } from './modules/stats/stats.module';
 import { ProductsModule, VenturesModule } from './modules/ventures';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ConfigModule } from './modules/config/config.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { EmailModule } from './modules/email/email.module';
 import { GalleriesModule } from './modules/galleries/galleries.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { BlogModule } from './modules/blog/blog.module';
+import { HighlightsModule } from './modules/highlights/highlights.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60000, limit: 50 }]
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true
     }),
     LoggerModule.forRoot({
       pinoHttp: {

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeliverableDto } from '../dto/deliverable.dto';
 import { Deliverable } from '../entities/deliverable.entity';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class DeliverablesService extends AbstractRepository<Deliverable> {

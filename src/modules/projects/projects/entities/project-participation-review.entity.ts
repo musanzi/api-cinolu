@@ -1,6 +1,6 @@
 import { AbstractEntity } from '@/shared/abstracts';
 import { Phase } from '../../../projects/phases/entities/phase.entity';
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { ProjectParticipation } from './project-participation.entity';
 

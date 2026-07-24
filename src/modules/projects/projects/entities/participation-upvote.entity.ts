@@ -1,6 +1,6 @@
 import { Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { AbstractEntity } from '@/shared/abstracts';
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { ProjectParticipation } from '../../../projects/projects/entities/project-participation.entity';
 
 @Entity()

@@ -7,7 +7,7 @@ import { ParticipateProjectDto } from '../dto/participate.dto';
 import { ProjectParticipation } from '../entities/project-participation.entity';
 import { ProjectParticipationService } from '../services/project-participations.service';
 import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')

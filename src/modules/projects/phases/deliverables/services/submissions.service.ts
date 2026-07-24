@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 import { Repository } from 'typeorm';
 import { DeliverableSubmission } from '../entities/submission.entity';
 import { DelivrableParams } from '../types/deliverables.types';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class SubmissionsService extends AbstractRepository<DeliverableSubmission> {

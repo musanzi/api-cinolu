@@ -7,7 +7,7 @@ import { UpdateMentorRequestDto } from '../dto/update-mentor-request.dto';
 import { MentorProfile } from '../entities/mentor.entity';
 import { MentorsService } from '../services/mentors.service';
 import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('mentors')

@@ -5,7 +5,7 @@ import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { FilterEventsInterface } from '../interfaces/filter-events.interface';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class EventsService extends AbstractRepository<Event> {

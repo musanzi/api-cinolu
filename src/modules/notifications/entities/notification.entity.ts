@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractEntity } from '@/shared/abstracts';
-import { User } from '../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { NotificationAttachment } from './attachment.entity';
 import { Project } from '../../projects/projects/entities/project.entity';
 import { Phase } from '../../projects/phases/entities/phase.entity';

@@ -6,7 +6,7 @@ import { ProjectParticipationReviewController } from './controllers/project-part
 import { ProjectsController } from './controllers/projects.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsModule } from '../../notifications/notifications.module';
-import { UsersModule } from '../../identity/users/users.module';
+import { UsersModule } from '@/modules/users/users.module';
 import { VenturesModule } from '../../ventures/ventures/ventures.module';
 import { Project } from './entities/project.entity';
 import { ProjectParticipation } from './entities/project-participation.entity';

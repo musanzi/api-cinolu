@@ -5,7 +5,7 @@ import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../entities/product.entity';
 import { ProductsService } from '../services/products.service';
 import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('products')

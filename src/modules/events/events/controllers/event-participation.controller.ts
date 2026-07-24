@@ -2,7 +2,7 @@ import { Controller, Param, Post } from '@nestjs/common';
 import { Event } from '../entities/event.entity';
 import { EventParticipationService } from '../services/event-participation.service';
 import { CurrentUser } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Controller('events')
 export class EventParticipationController {

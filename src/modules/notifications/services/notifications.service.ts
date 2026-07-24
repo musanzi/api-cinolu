@@ -6,7 +6,7 @@ import { CreateNotificationDto } from '../dto/create-notification.dto';
 import { UpdateNotificationDto } from '../dto/update-notification.dto';
 import { NotificationStatus } from '../types/notification-status.enum';
 import { FilterNotificationsInterface } from '../interfaces/filter-notifications.interface';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class NotificationsService extends AbstractRepository<Notification> {

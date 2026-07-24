@@ -4,16 +4,16 @@ import { UpdateMentorRequestDto } from '../dto/update-mentor-request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MentorProfile } from '../entities/mentor.entity';
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { FilterMentorsInterface } from '../interfaces/filter-mentors.interface';
-import { UsersService } from '../../../identity/users/services/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { MentorStatus } from '../enums/mentor.enum';
 import { MentorExperiencesService } from './mentor-experiences.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Role } from '../../../identity/roles/enums/roles.enum';
+import { Role } from '@/modules/roles/enums/roles.enum';
 import { CreateMentorDto } from '../dto/create-mentor.dto';
 import { UpdateMentorDto } from '../dto/update-mentor.dto';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class MentorsService extends AbstractRepository<MentorProfile> {

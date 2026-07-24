@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
 import { MentorRequestDto } from './mentor-request.dto';
-import { UpdateUserDto } from '../../../identity/users/dto/update-user.dto';
+import { UpdateUserDto } from '@/modules/users/dto/update-user.dto';
 
 class UpdateMentorProfileDto extends PartialType(MentorRequestDto) {}
 

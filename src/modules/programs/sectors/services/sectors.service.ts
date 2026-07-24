@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProgramSector } from '../entities/sector.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 import { FilterSectorsInterface } from '../interfaces/filter-sectors.interface';
 
 @Injectable()

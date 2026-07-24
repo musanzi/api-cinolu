@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Phase } from '../entities/phase.entity';
 import { DeliverablesService } from '../deliverables/services/deliverables.service';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class PhasesService extends AbstractRepository<Phase> {

@@ -4,7 +4,7 @@ import { ProjectParticipationReview } from '../entities/project-participation-re
 import { ProjectParticipationReviewService } from '../services/project-participation-review.service';
 import { UpdateParticipationReviewDto } from '../dto/update-participation-review.dto';
 import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')

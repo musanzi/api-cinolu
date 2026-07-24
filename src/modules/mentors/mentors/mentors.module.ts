@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MentorProfile } from './entities/mentor.entity';
 import { Experience } from './entities/experience.entity';
 import { ExpertisesModule } from '../../mentors/expertises/expertises.module';
-import { UsersModule } from '../../identity/users/users.module';
+import { UsersModule } from '@/modules/users/users.module';
 import { MentorExperiencesService } from './services/mentor-experiences.service';
 import { MentorsEmailService } from './services/mentors-email.service';
 import { MentorMediaService } from './services/mentor-media.service';

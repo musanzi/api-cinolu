@@ -6,7 +6,7 @@ import { CreateVentureDto } from '../dto/create-venture.dto';
 import { UpdateVentureDto } from '../dto/update-venture.dto';
 import { FilterVenturesInterface } from '../interfaces/filter-ventures.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class VenturesService extends AbstractRepository<Venture> {

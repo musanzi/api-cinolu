@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Subprogram } from '../entities/subprogram.entity';
 import { CreateSubprogramDto } from '../dto/create-subprogram.dto';
 import { UpdateSubprogramDto } from '../dto/update-subprogram.dto';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class SubprogramsService extends AbstractRepository<Subprogram> {

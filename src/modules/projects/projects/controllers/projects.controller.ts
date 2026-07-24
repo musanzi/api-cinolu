@@ -5,7 +5,7 @@ import { UpdateProjectDto } from '../dto/update-project.dto';
 import { Project } from '../entities/project.entity';
 import { ProjectsService } from '../services/projects.service';
 import { CurrentUser, Public, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')

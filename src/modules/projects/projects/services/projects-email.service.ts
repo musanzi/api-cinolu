@@ -4,7 +4,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { htmlToText } from 'html-to-text';
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Notification } from '../../../notifications/entities/notification.entity';
 import { Project } from '../entities/project.entity';
 import { Phase } from '../../../projects/phases/entities/phase.entity';

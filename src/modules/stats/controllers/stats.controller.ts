@@ -3,7 +3,7 @@ import { StatsService } from '../services/stats.service';
 import { IUSerStats } from '../types/user-stats.type';
 import { IAdminStatsGeneral, IAdminStatsByYear } from '../types/admin-stats.type';
 import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('stats')

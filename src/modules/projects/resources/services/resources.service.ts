@@ -7,7 +7,7 @@ import { UpdateResourceDto } from '../dto/update-resource.dto';
 import { Resource } from '../entities/resource.entity';
 import { ProjectsService } from '../../../projects/projects/services/projects.service';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class ResourcesService extends AbstractRepository<Resource> {

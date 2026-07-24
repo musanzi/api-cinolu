@@ -3,14 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { ProjectParticipation } from '../entities/project-participation.entity';
 import { ProjectParticipationUpvote } from '../entities/participation-upvote.entity';
-import { UsersService } from '../../../identity/users/services/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { VenturesService } from '../../../ventures/ventures/services/ventures.service';
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { ParticipateProjectDto } from '../dto/participate.dto';
 import { ProjectsService } from './projects.service';
 import { MoveParticipantsDto } from '../dto/move-participants.dto';
 import { PhasesService } from '../../../projects/phases/services/phases.service';
-import { parseUsersCsv } from '@/modules/identity/users/helpers/user-csv.helper';
+import { parseUsersCsv } from '@/modules/users/helpers/user-csv.helper';
 import { FilterParticipationsInterface } from '../interfaces/filter-participations.interface';
 import { ProjectParticipationReviewService } from './project-participation-review.service';
 

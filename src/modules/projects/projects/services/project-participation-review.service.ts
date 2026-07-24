@@ -9,7 +9,7 @@ import { ProjectParticipationService } from './project-participations.service';
 import { ParticipationReviewDto } from '../dto/participation-review.dto';
 import { Phase } from '../../../projects/phases/entities/phase.entity';
 import { UpdateParticipationReviewDto } from '../dto/update-participation-review.dto';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class ProjectParticipationReviewService extends AbstractRepository<ProjectParticipationReview> {

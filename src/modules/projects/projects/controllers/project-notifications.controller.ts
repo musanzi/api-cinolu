@@ -3,7 +3,7 @@ import { CreateNotificationDto } from '../../../notifications/dto/create-notific
 import { Notification } from '../../../notifications/entities/notification.entity';
 import { ProjectNotificationService } from '../services/project-notifications.service';
 import { CurrentUser, HasRoles } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Roles } from '@/modules/auth/enums';
 
 @Controller('projects')

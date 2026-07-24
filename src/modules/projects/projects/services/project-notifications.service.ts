@@ -6,7 +6,7 @@ import { CreateNotificationDto } from '../../../notifications/dto/create-notific
 import { ProjectsService } from './projects.service';
 import { ProjectParticipationService } from './project-participations.service';
 import { MentorsService } from '../../../mentors/mentors/services/mentors.service';
-import { UsersService } from '../../../identity/users/services/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 
 @Injectable()
 export class ProjectNotificationService {

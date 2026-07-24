@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { promises as fs } from 'fs';
 import { NotificationAttachment } from '../entities/attachment.entity';
 import { NotificationsService } from './notifications.service';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class NotificationAttachmentsService extends AbstractRepository<NotificationAttachment> {

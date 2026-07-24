@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Venture } from '../../ventures/ventures/entities/venture.entity';
 import { IUSerStats } from '../types/user-stats.type';
 import {

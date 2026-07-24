@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateExperienceDto } from '../dto/create-experience.dto';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class MentorExperiencesService extends AbstractRepository<Experience> {

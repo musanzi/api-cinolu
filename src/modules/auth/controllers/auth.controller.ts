@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { User } from '../../identity/users/entities/user.entity';
-import { UpdateUserDto } from '../../identity/users/dto/update-user.dto';
+import { User } from '@/modules/users/entities/user.entity';
+import { UpdateUserDto } from '@/modules/users/dto/update-user.dto';
 import { ContactSupportDto } from '../dto/contact-support.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { AuthService } from '../services/auth.service';

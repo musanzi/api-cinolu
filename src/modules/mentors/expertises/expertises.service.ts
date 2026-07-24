@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Expertise } from './entities/expertise.entity';
 import { FilterExpertisesInterface } from './interfaces/filter-expertises.interface';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class ExpertisesService extends AbstractRepository<Expertise> {

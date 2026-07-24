@@ -5,7 +5,7 @@ import { Project } from '../entities/project.entity';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { UpdateProjectDto } from '../dto/update-project.dto';
 import { FilterProjectsInterface } from '../interfaces/filter-projects.interface';
-import { AbstractRepository } from '@/modules/database/abstract.repository';
+import { AbstractRepository } from '@/shared/abstracts/abstract.repository';
 
 @Injectable()
 export class ProjectsService extends AbstractRepository<Project> {

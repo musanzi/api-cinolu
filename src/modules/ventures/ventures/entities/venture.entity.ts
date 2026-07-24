@@ -1,4 +1,4 @@
-import { User } from '../../../identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { AbstractEntity } from '@/shared/abstracts';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Product } from '../../../ventures/products/entities/product.entity';

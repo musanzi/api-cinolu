@@ -5,7 +5,7 @@ import { UpdateVentureDto } from '../dto/update-venture.dto';
 import { Venture } from '../entities/venture.entity';
 import { VenturesService } from '../services/ventures.service';
 import { CurrentUser, Public } from '@/modules/auth/decorators';
-import { User } from '@/modules/identity/users/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Controller('ventures')
 export class VenturesController {
