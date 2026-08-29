@@ -4,7 +4,8 @@ import { ValidationPipe } from '@nestjs/common';
 import session from 'express-session';
 import passport from 'passport';
 import { Logger } from 'nestjs-pino';
-import MySQLStore from 'express-mysql-session';
+import { RedisStore } from 'connect-redis';
+import { createClient } from 'redis';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -19,19 +20,22 @@ async function bootstrap(): Promise<void> {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   });
-  const MysqlSessionStore = MySQLStore(session);
-  const sessionStore = new MysqlSessionStore({
-    host: process.env.DB_HOST,
-    port: +process.env.DB_PORT,
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+  const redisClient = createClient({
+    url: process.env.REDIS_URL
   });
+  redisClient.on('error', (error) => {
+    console.error('Redis client error', error);
+  });
+  await redisClient.connect();
   app.use(
     session({
-      store: sessionStore,
+      store: new RedisStore({
+        client: redisClient,
+        prefix: 'sess:'
+      }),
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET,
+      resave: false,
       cookie: {
         maxAge: +process.env.SESSION_MAX_AGE,
         httpOnly: true

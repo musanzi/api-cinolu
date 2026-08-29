@@ -49,7 +49,7 @@ importers:
         version: 6.5.0(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)
       '@nestjs/typeorm':
         specifier: ^11.0.0
-        version: 11.0.3(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.30(mysql2@3.22.6(@types/node@24.13.2))(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3)))
+        version: 11.0.3(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.30(mysql2@3.22.6(@types/node@24.13.2))(redis@6.2.1)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3)))
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -59,15 +59,15 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.4
+      connect-redis:
+        specifier: ^10.0.0
+        version: 10.0.0(express-session@1.19.0)(redis@6.2.1)
       dotenv:
         specifier: ^17.2.3
         version: 17.4.2
       express:
         specifier: ^5.1.0
         version: 5.2.1
-      express-mysql-session:
-        specifier: ^3.0.3
-        version: 3.0.3
       express-session:
         specifier: ^1.19.0
         version: 1.19.0
@@ -80,12 +80,12 @@ importers:
       husky:
         specifier: ^9.1.7
         version: 9.1.7
+      mariadb:
+        specifier: ^3.5.3
+        version: 3.5.3
       multer:
         specifier: 2.0.2
         version: 2.0.2
-      mysql2:
-        specifier: ^3.22.4
-        version: 3.22.6(@types/node@24.13.2)
       nestjs-pino:
         specifier: ^4.6.1
         version: 4.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2)
@@ -110,6 +110,9 @@ importers:
       pino-pretty:
         specifier: ^13.1.3
         version: 13.1.3
+      redis:
+        specifier: ^6.1.0
+        version: 6.2.1
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -121,7 +124,7 @@ importers:
         version: 1.6.9
       typeorm:
         specifier: ^0.3.27
-        version: 0.3.30(mysql2@3.22.6(@types/node@24.13.2))(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3))
+        version: 0.3.30(mysql2@3.22.6(@types/node@24.13.2))(redis@6.2.1)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3))
       uuid:
         specifier: ^13.0.0
         version: 13.0.2
@@ -153,9 +156,6 @@ importers:
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.6
-      '@types/express-mysql-session':
-        specifier: ^3.0.8
-        version: 3.0.8
       '@types/express-session':
         specifier: ^1.19.0
         version: 1.19.0
@@ -888,6 +888,42 @@ packages:
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
+  '@redis/bloom@6.2.1':
+    resolution: {integrity: sha512-huQgNLaCIZfQ9SeLn4q9124uOUd8HbZDYHwwUzNcRgHqCHiHKl2dDxMqJCeWh8cMqZAoWuHR8XnWbDMIf+o7ag==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
+  '@redis/client@6.2.1':
+    resolution: {integrity: sha512-LzxBY7SIBvvJiyCgcaJZZakE3fJrZZ++i24+EDW9fKpCl68D35uJcKFpZZwCfOoG9WZTbyZlMzMeM0gtOAMU9Q==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@node-rs/xxhash': ^1.1.0
+      '@opentelemetry/api': '>=1 <2'
+    peerDependenciesMeta:
+      '@node-rs/xxhash':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+
+  '@redis/json@6.2.1':
+    resolution: {integrity: sha512-AFIUJ8Gj0DaaSBHYuSt8+O0oYWM+50OK1c0OmodB7XERIA8+BbyV3O4v76f9iccWasd1/7qjfZTpuzexUaZtrQ==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
+  '@redis/search@6.2.1':
+    resolution: {integrity: sha512-2vfOAOyYFE7UUw3sBBlkqqruBtOUS4HRY5MtW4hp83llrwvtrTE4r22CEqXddlV+54zkLxBE4nmsIJ/dpezQrQ==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
+  '@redis/time-series@6.2.1':
+    resolution: {integrity: sha512-kiYniph04dJOole+L359B6C9E+jYS2uDP7hca6Onj0xF38ZIpyxARO0Iq0W4ZRn1e8Q6vqW00QFZVSMRA/2Ijw==}
+    engines: {node: '>= 20.0.0'}
+    peerDependencies:
+      '@redis/client': ^6.2.1
+
   '@scarf/scarf@1.4.0':
     resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
 
@@ -951,9 +987,6 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
-  '@types/express-mysql-session@3.0.8':
-    resolution: {integrity: sha512-ljtWFQZHQDIzr/FfQYa/twmdm871uJOMJz7a6hPRBaeBpw49pCBxUYfb56N3troI8i8uHsKjYJ1lpZhSlYl25w==}
-
   '@types/express-serve-static-core@5.1.1':
     resolution: {integrity: sha512-v4zIMr/cX7/d2BpAEX3KNKL/JrT1s43s96lLvvdTmza1oEvDudCqK9aF/djc/SWgy8Yh0h30TZx5VpzqFCxk5A==}
 
@@ -962,6 +995,9 @@ packages:
 
   '@types/express@5.0.6':
     resolution: {integrity: sha512-sKYVuV7Sv9fbPIt/442koC7+IIwK5olP1KWeD88e/idgoJqDm3JV/YUiPwkoKK92ylff2MGxSz1CSjsXelx0YA==}
+
+  '@types/geojson@7946.0.16':
+    resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
 
   '@types/html-to-text@9.0.4':
     resolution: {integrity: sha512-pUY3cKH/Nm2yYrEmDlPR1mR7yszjGx4DrwPjQ702C4/D5CwHuZTgZdIdwPkRbcuhs7BAh2L5rg3CL5cbRiGTCQ==}
@@ -1463,6 +1499,10 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
 
+  cluster-key-slot@1.1.2:
+    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
+    engines: {node: '>=0.10.0'}
+
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
     engines: {node: '>=7.0.0'}
@@ -1513,6 +1553,13 @@ packages:
 
   config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
+
+  connect-redis@10.0.0:
+    resolution: {integrity: sha512-x6EotIY20pvocamMtcOsgxFzYufAMfipE+rjWa0cZMeSx+3K0yoHi4Nv4sfMlgF+Z5KnUbMFxyCx9pDZP39p0Q==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      express-session: '>=1'
+      redis: '>=5'
 
   consola@3.4.2:
     resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
@@ -1656,15 +1703,6 @@ packages:
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
-  debug@4.3.4:
-    resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
-    engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
     peerDependenciesMeta:
@@ -1942,6 +1980,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -2001,9 +2040,6 @@ packages:
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
     engines: {node: '>=10'}
-
-  express-mysql-session@3.0.3:
-    resolution: {integrity: sha512-sEYrzFrOs3er+Ie/uk1dt93qz4AQ9SU1mpJJ0HPs0MJ4t4hE9AcDRNq0sZQUwy2F/SbXusBt1E5+FY6KzSqXNg==}
 
   express-session@1.19.0:
     resolution: {integrity: sha512-0csaMkGq+vaiZTmSMMGkfdCOabYv192VbytFypcvI0MANrp+4i/7yEkJ0sbAEhycQjntaKGzYfjfXQyVb7BHMA==}
@@ -2584,10 +2620,6 @@ packages:
     resolution: {integrity: sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A==}
     engines: {node: 20 || >=22}
 
-  lru-cache@8.0.5:
-    resolution: {integrity: sha512-MhWWlVnuab1RG5/zMRRcVGXZLCXrZTgfwMikgzCegsPnG62yDQo5JnqKkrK4jO5iKqDAZGItAqN5CtKBCBWRUA==}
-    engines: {node: '>=16.14'}
-
   lru.min@1.1.4:
     resolution: {integrity: sha512-DqC6n3QQ77zdFpCMASA1a3Jlb64Hv2N2DciFGkO/4L9+q/IpIAuRlKOvCXabtRW6cQf8usbmM6BE/TOPysCdIA==}
     engines: {bun: '>=1.0.0', deno: '>=1.30.0', node: '>=8.0.0'}
@@ -2600,6 +2632,10 @@ packages:
 
   make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
+
+  mariadb@3.5.3:
+    resolution: {integrity: sha512-i053Kc0MgdUv/hu9mCyq67TYfPXFj3/MV8I7ZW5wvJNixIyXC0VztMPUjIVj/449nQo+BsxFD4Fdk/sA/uqKPQ==}
+    engines: {node: '>= 20.0.0'}
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -2782,9 +2818,6 @@ packages:
   ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
-  ms@2.1.2:
-    resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
-
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
@@ -2800,19 +2833,11 @@ packages:
     resolution: {integrity: sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  mysql2@3.10.2:
-    resolution: {integrity: sha512-KCXPEvAkO0RcHPr362O5N8tFY2fXvbjfkPvRY/wGumh4EOemo9Hm5FjQZqv/pCmrnuxGu5OxnSENG0gTXqKMgQ==}
-    engines: {node: '>= 8.0'}
-
   mysql2@3.22.6:
     resolution: {integrity: sha512-fPKmeDGUzvFP7bMD5SASlJ5zIgvCC4hbanTmhbUlEmhyrY1hR4Hi3xLOWgTd3luYjLVifx6uGvMNJ2m/LlqEpg==}
     engines: {node: '>= 8.0'}
     peerDependencies:
       '@types/node': '>= 8'
-
-  mysql2@3.9.8:
-    resolution: {integrity: sha512-+5JKNjPuks1FNMoy9TYpl77f+5frbTklz7eb3XDwbpsERRLEeXiW2PDEkakYF50UuKU2qwfGnyXpKYvukv8mGA==}
-    engines: {node: '>= 8.0'}
 
   named-placeholders@1.1.6:
     resolution: {integrity: sha512-Tz09sEL2EEuv5fFowm419c1+a/jSMiBjI9gHxVLrVdbUkkNUUfjsVYs9pVZu5oCon/kmRh9TfLEObFtkVxmY0w==}
@@ -3390,6 +3415,10 @@ packages:
   real-require@1.0.0:
     resolution: {integrity: sha512-P4nbQYQfePJxRSmY+v/KINxVucm4NF3p3s7pJveMTtom52FR4YGltUQLB8idDXwDDWW+eYrWDFbuzUnjoWHF7g==}
 
+  redis@6.2.1:
+    resolution: {integrity: sha512-Z9VHtgYs48PiQC77X9O2Er8Hj4T+5BtFjT91/vi5Is1D04N72cA946ZslM1ImJw8ZctFBZWAVjM7S5wJNeHMpg==}
+    engines: {node: '>= 20.0.0'}
+
   reflect-metadata@0.2.2:
     resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
 
@@ -3471,9 +3500,6 @@ packages:
   send@1.2.1:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
-
-  seq-queue@0.0.5:
-    resolution: {integrity: sha512-hr3Wtp/GZIc/6DAGPDcV4/9WoZhjrkXsi5B/07QgX8tsdc6ilr7BFM6PM6rbdAX1kFSDYeZGLipIZZKyQP0O5Q==}
 
   serve-static@2.2.1:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
@@ -3562,10 +3588,6 @@ packages:
   sql-highlight@6.1.0:
     resolution: {integrity: sha512-ed7OK4e9ywpE7pgRMkMQmZDPKSVdm0oX5IEtZiKnFucSF0zu6c80GZBe38UqHuVhTWJ9xsKgSMjCG2bml86KvA==}
     engines: {node: '>=14'}
-
-  sqlstring@2.3.3:
-    resolution: {integrity: sha512-qC9iz2FlN7DQl3+wjwn3802RTyjCx7sDvfQEXchwa6CWOx07/WVfh91gBmQ9fahw8snwGEWU3xGzOt4tFyHLxg==}
-    engines: {node: '>= 0.6'}
 
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
@@ -4801,13 +4823,13 @@ snapshots:
       '@nestjs/core': 11.1.27(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
 
-  '@nestjs/typeorm@11.0.3(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.30(mysql2@3.22.6(@types/node@24.13.2))(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3)))':
+  '@nestjs/typeorm@11.0.3(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.30(mysql2@3.22.6(@types/node@24.13.2))(redis@6.2.1)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3)))':
     dependencies:
       '@nestjs/common': 11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.27(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
       rxjs: 7.8.2
-      typeorm: 0.3.30(mysql2@3.22.6(@types/node@24.13.2))(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3))
+      typeorm: 0.3.30(mysql2@3.22.6(@types/node@24.13.2))(redis@6.2.1)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3))
 
   '@one-ini/wasm@0.1.1':
     optional: true
@@ -4818,6 +4840,26 @@ snapshots:
     optional: true
 
   '@pkgr/core@0.3.6': {}
+
+  '@redis/bloom@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
+  '@redis/client@6.2.1':
+    dependencies:
+      cluster-key-slot: 1.1.2
+
+  '@redis/json@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
+  '@redis/search@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
+
+  '@redis/time-series@6.2.1(@redis/client@6.2.1)':
+    dependencies:
+      '@redis/client': 6.2.1
 
   '@scarf/scarf@1.4.0': {}
 
@@ -4886,11 +4928,6 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
-  '@types/express-mysql-session@3.0.8':
-    dependencies:
-      '@types/express-session': 1.19.0
-      mysql2: 3.9.8
-
   '@types/express-serve-static-core@5.1.1':
     dependencies:
       '@types/node': 24.13.2
@@ -4907,6 +4944,8 @@ snapshots:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 5.1.1
       '@types/serve-static': 2.2.0
+
+  '@types/geojson@7946.0.16': {}
 
   '@types/html-to-text@9.0.4': {}
 
@@ -5291,7 +5330,8 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-ssl-profiles@1.1.2: {}
+  aws-ssl-profiles@1.1.2:
+    optional: true
 
   babel-walk@3.0.0-canary-5:
     dependencies:
@@ -5493,6 +5533,8 @@ snapshots:
 
   clone@1.0.4: {}
 
+  cluster-key-slot@1.1.2: {}
+
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -5539,6 +5581,11 @@ snapshots:
       ini: 1.3.8
       proto-list: 1.2.4
     optional: true
+
+  connect-redis@10.0.0(express-session@1.19.0)(redis@6.2.1):
+    dependencies:
+      express-session: 1.19.0
+      redis: 6.2.1
 
   consola@3.4.2: {}
 
@@ -5711,10 +5758,6 @@ snapshots:
   debug@2.6.9:
     dependencies:
       ms: 2.0.0
-
-  debug@4.3.4:
-    dependencies:
-      ms: 2.1.2
 
   debug@4.4.3:
     dependencies:
@@ -6030,13 +6073,6 @@ snapshots:
       strip-final-newline: 2.0.0
     optional: true
 
-  express-mysql-session@3.0.3:
-    dependencies:
-      debug: 4.3.4
-      mysql2: 3.10.2
-    transitivePeerDependencies:
-      - supports-color
-
   express-session@1.19.0:
     dependencies:
       cookie: 0.7.2
@@ -6198,6 +6234,7 @@ snapshots:
   generate-function@2.3.1:
     dependencies:
       is-property: 1.0.2
+    optional: true
 
   get-caller-file@2.0.5: {}
 
@@ -6387,6 +6424,7 @@ snapshots:
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
+    optional: true
 
   iconv-lite@0.7.3:
     dependencies:
@@ -6452,7 +6490,8 @@ snapshots:
 
   is-promise@4.0.0: {}
 
-  is-property@1.0.2: {}
+  is-property@1.0.2:
+    optional: true
 
   is-regex@1.2.1:
     dependencies:
@@ -6669,15 +6708,15 @@ snapshots:
       chalk: 4.1.2
       is-unicode-supported: 0.1.0
 
-  long@5.3.2: {}
+  long@5.3.2:
+    optional: true
 
   lru-cache@10.4.3: {}
 
   lru-cache@11.5.1: {}
 
-  lru-cache@8.0.5: {}
-
-  lru.min@1.1.4: {}
+  lru.min@1.1.4:
+    optional: true
 
   magic-string@0.30.17:
     dependencies:
@@ -6698,6 +6737,14 @@ snapshots:
     optional: true
 
   make-error@1.3.6: {}
+
+  mariadb@3.5.3:
+    dependencies:
+      '@types/geojson': 7946.0.16
+      '@types/node': 24.13.2
+      denque: 2.1.0
+      iconv-lite: 0.7.3
+      lru-cache: 11.5.1
 
   math-intrinsics@1.1.0: {}
 
@@ -7255,8 +7302,6 @@ snapshots:
 
   ms@2.0.0: {}
 
-  ms@2.1.2: {}
-
   ms@2.1.3: {}
 
   multer@2.0.2:
@@ -7278,17 +7323,6 @@ snapshots:
 
   mute-stream@2.0.0: {}
 
-  mysql2@3.10.2:
-    dependencies:
-      denque: 2.1.0
-      generate-function: 2.3.1
-      iconv-lite: 0.6.3
-      long: 5.3.2
-      lru-cache: 8.0.5
-      named-placeholders: 1.1.6
-      seq-queue: 0.0.5
-      sqlstring: 2.3.3
-
   mysql2@3.22.6(@types/node@24.13.2):
     dependencies:
       '@types/node': 24.13.2
@@ -7300,21 +7334,12 @@ snapshots:
       lru.min: 1.1.4
       named-placeholders: 1.1.6
       sql-escaper: 1.4.0
-
-  mysql2@3.9.8:
-    dependencies:
-      denque: 2.1.0
-      generate-function: 2.3.1
-      iconv-lite: 0.6.3
-      long: 5.3.2
-      lru-cache: 8.0.5
-      named-placeholders: 1.1.6
-      seq-queue: 0.0.5
-      sqlstring: 2.3.3
+    optional: true
 
   named-placeholders@1.1.6:
     dependencies:
       lru.min: 1.1.4
+    optional: true
 
   nanoid@3.3.15:
     optional: true
@@ -7982,6 +8007,17 @@ snapshots:
 
   real-require@1.0.0: {}
 
+  redis@6.2.1:
+    dependencies:
+      '@redis/bloom': 6.2.1(@redis/client@6.2.1)
+      '@redis/client': 6.2.1
+      '@redis/json': 6.2.1(@redis/client@6.2.1)
+      '@redis/search': 6.2.1(@redis/client@6.2.1)
+      '@redis/time-series': 6.2.1(@redis/client@6.2.1)
+    transitivePeerDependencies:
+      - '@node-rs/xxhash'
+      - '@opentelemetry/api'
+
   reflect-metadata@0.2.2: {}
 
   require-directory@2.1.1: {}
@@ -8079,8 +8115,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  seq-queue@0.0.5: {}
-
   serve-static@2.2.1:
     dependencies:
       encodeurl: 2.0.0
@@ -8170,11 +8204,10 @@ snapshots:
 
   split2@4.2.0: {}
 
-  sql-escaper@1.4.0: {}
+  sql-escaper@1.4.0:
+    optional: true
 
   sql-highlight@6.1.0: {}
-
-  sqlstring@2.3.3: {}
 
   statuses@2.0.2: {}
 
@@ -8394,7 +8427,7 @@ snapshots:
 
   typedarray@0.0.6: {}
 
-  typeorm@0.3.30(mysql2@3.22.6(@types/node@24.13.2))(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3)):
+  typeorm@0.3.30(mysql2@3.22.6(@types/node@24.13.2))(redis@6.2.1)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3)):
     dependencies:
       '@sqltools/formatter': 1.2.5
       ansis: 4.3.1
@@ -8413,6 +8446,7 @@ snapshots:
       yargs: 17.7.3
     optionalDependencies:
       mysql2: 3.22.6(@types/node@24.13.2)
+      redis: 6.2.1
       ts-node: 10.9.2(@types/node@24.13.2)(typescript@5.9.3)
     transitivePeerDependencies:
       - babel-plugin-macros

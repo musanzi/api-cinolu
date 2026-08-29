@@ -34,6 +34,20 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fikiri-network
+
   adminer:
     image: adminer:latest
     restart: unless-stopped
