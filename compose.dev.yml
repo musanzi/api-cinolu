@@ -65,6 +65,7 @@ services:
 
 volumes:
   mariadb_data:
+  redis_data:
 
 networks:
   onestop-network:
