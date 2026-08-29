@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   ci:
-    name: Test and build
+    name: Lint and Format
     runs-on: ubuntu-latest
 
     steps:
