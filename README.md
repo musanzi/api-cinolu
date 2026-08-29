@@ -154,7 +154,10 @@ docker compose -f compose.prod.yml -p onestop-backend exec db mariadb-dump -u ro
 docker compose -f compose.dev.yml -p onestop-backend exec -T db mariadb -u root -p"root" cinolu < ../backup.sql
 
 # Copy uploaded images from container to disk
-docker compose -f compose.prod.yml -p onestop-backend exec cp api api:/app/uploads/. ../uploads
+docker compose -f compose.prod.yml -p onestop-backend exec cp api:/app/uploads/. ../uploads
+
+# Copy uploaded images from disk to container
+docker compose -f compose.prod.yml -p onestop-backend cp ../uploads/. api:/app/uploads/
 ```
 
 In production, MariaDB is not published to the host, and uploaded files and
