@@ -14,6 +14,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - onestop-network
 
   redis:
     image: redis:8-alpine
@@ -27,7 +29,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - fikiri-network
+      - onestop-network
 
   db:
     container_name: onestop-db
@@ -45,7 +47,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - onestop-network
 
 volumes:
   mariadb_data:
   uploads_data:
+
+networks:
+  onestop-network:
+    driver: bridge
