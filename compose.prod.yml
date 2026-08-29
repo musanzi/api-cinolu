@@ -17,20 +17,6 @@ services:
     networks:
       - onestop-network
 
-  redis:
-    image: redis:8-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - onestop-network
-
   db:
     container_name: onestop-db
     image: mariadb:12
@@ -44,6 +30,20 @@ services:
       - mariadb_data:/var/lib/mysql
     healthcheck:
       test: ['CMD-SHELL', 'mariadb-admin ping -u root -p"$$MARIADB_ROOT_PASSWORD" --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - onestop-network
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
